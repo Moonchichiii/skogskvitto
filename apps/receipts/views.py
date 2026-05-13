@@ -3,14 +3,15 @@ from datetime import date
 from decimal import Decimal
 
 from asgiref.sync import sync_to_async
-from django.http import FileResponse, HttpRequest, HttpResponse, HttpResponseForbidden
+from django.http import FileResponse, HttpRequest, HttpResponseForbidden
+from django.http.response import HttpResponseBase
 from django.shortcuts import redirect, render
 
-from receipts.exports import build_excel
-from receipts.models import Receipt
+from apps.receipts.exports import build_excel
+from apps.receipts.models import Receipt
 
 
-async def dashboard(request: HttpRequest) -> HttpResponse:
+async def dashboard(request: HttpRequest) -> HttpResponseBase:
     if not request.user.is_authenticated:
         return redirect("/")
 
@@ -33,7 +34,7 @@ async def dashboard(request: HttpRequest) -> HttpResponse:
     )
 
 
-async def export_excel(request: HttpRequest) -> HttpResponse:
+async def export_excel(request: HttpRequest) -> HttpResponseBase:
     if not request.user.is_authenticated:
         return HttpResponseForbidden()
 

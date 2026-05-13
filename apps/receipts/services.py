@@ -1,11 +1,13 @@
+from __future__ import annotations
+
 import base64
 import json
 import logging
-from datetime import date
+from datetime import date as date_type
 from decimal import Decimal
 from io import BytesIO
 from pathlib import Path
-from typing import Any
+from typing import Any, cast
 
 import httpx
 from decouple import config
@@ -13,7 +15,6 @@ from django.core.files.base import ContentFile
 from django.core.files.uploadedfile import UploadedFile
 from PIL import Image
 from pydantic import BaseModel, Field, ValidationError
-
 
 OPENAI_API_KEY = config("OPENAI_API_KEY", default="")
 OPENAI_MODEL = config("OPENAI_MODEL", default="gpt-4.1-mini")
@@ -24,7 +25,7 @@ class ReceiptScanResult(BaseModel):
     vendor: str = Field(default="")
     total_amount: Decimal | None = Field(default=None)
     vat_amount: Decimal | None = Field(default=None)
-    date: date | None = Field(default=None)
+    date: date_type | None = Field(default=None)
     category: str = Field(default="")
 
 
@@ -37,9 +38,12 @@ EXTENSION_TO_MIME = {ext: mime for mime, (_, ext) in SUPPORTED_IMAGE_MIME_TYPES.
 Image.MAX_IMAGE_PIXELS = 20_000_000
 
 
-def strip_exif_and_prepare_image(uploaded_file: UploadedFile, detected_mime: str) -> ContentFile:
-    image = Image.open(uploaded_file)
+def strip_exif_and_prepare_image(
+    uploaded_file: UploadedFile, detected_mime: str
+) -> ContentFile[bytes]:
+    opened_image = Image.open(uploaded_file)
     image_format, extension = SUPPORTED_IMAGE_MIME_TYPES[detected_mime]
+    image = cast(Image.Image, opened_image)
     if image_format == "JPEG":
         image = image.convert("RGB")
 
@@ -54,7 +58,11 @@ def _extract_json_payload(content: str) -> dict[str, Any]:
     if cleaned.startswith("```") and cleaned.endswith("```"):
         lines = cleaned.splitlines()
         cleaned = "\n".join(lines[1:-1]).strip()
-    return json.loads(cleaned)
+    payload = json.loads(cleaned)
+    if not isinstance(payload, dict):
+        msg = "OpenAI response payload must be a JSON object."
+        raise TypeError(msg)
+    return cast(dict[str, Any], payload)
 
 
 async def process_receipt_image(file_path: Path) -> ReceiptScanResult:

@@ -55,5 +55,12 @@ plugins = ["mypy_django_plugin.main"]
 module = ["decouple"]
 ignore_missing_imports = true
 
+[[tool.mypy.overrides]]
+module = ["openpyxl", "openpyxl.*"]
+ignore_missing_imports = true
+
 [tool.django-stubs]
 django_settings_module = "config.settings"
+
+[tool.hatch.build.targets.wheel]
+packages = ["config", "apps"]

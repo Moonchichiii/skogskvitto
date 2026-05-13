@@ -5,15 +5,15 @@ from tempfile import NamedTemporaryFile
 
 import magic
 from asgiref.sync import sync_to_async
+from django.core.signing import BadSignature, Signer
 from django.http import HttpRequest, HttpResponse
 from django.http.response import HttpResponseForbidden
-from django.core.signing import BadSignature, Signer
 from django.template.loader import render_to_string
 from ninja import File, Form, Router
 from ninja.files import UploadedFile
 
-from receipts.models import Receipt
-from receipts.services import (
+from apps.receipts.models import Receipt
+from apps.receipts.services import (
     SUPPORTED_IMAGE_MIME_TYPES,
     process_receipt_image,
     strip_exif_and_prepare_image,
@@ -57,7 +57,14 @@ def _detect_image_mime(upload: UploadedFile) -> str:
 
 
 @router.post("/scan")
-async def scan_receipt(request: HttpRequest, image: UploadedFile = File(...)) -> HttpResponse:
+async def scan_receipt(request: HttpRequest, image: File[UploadedFile]) -> HttpResponse:
+    if image.size is None:
+        return await sync_to_async(_render_fragment)(
+            "receipts/partials/scan_error.html",
+            {"error": "Kunde inte läsa filstorleken för uppladdningen."},
+            400,
+        )
+
     if image.size > MAX_UPLOAD_SIZE_BYTES:
         return await sync_to_async(_render_fragment)(
             "receipts/partials/scan_error.html",
@@ -77,7 +84,7 @@ async def scan_receipt(request: HttpRequest, image: UploadedFile = File(...)) ->
     owner = request.user if request.user.is_authenticated else None
     receipt = await Receipt.objects.acreate(owner=owner, image=cleaned_file)
 
-    extension = Path(receipt.image.name).suffix or ".jpg"
+    extension = Path(receipt.image.name or "").suffix or ".jpg"
     tmp_path: Path | None = None
     try:
         with NamedTemporaryFile(suffix=extension, delete=False) as tmp:
@@ -108,13 +115,13 @@ async def scan_receipt(request: HttpRequest, image: UploadedFile = File(...)) ->
 
 @router.post("/save")
 async def save_receipt(
-    _request: HttpRequest,
-    signed_receipt: str = Form(...),
-    vendor: str = Form(""),
-    total_amount: str = Form(""),
-    vat_amount: str = Form(""),
-    date: str = Form(""),
-    category: str = Form(""),
+    request: HttpRequest,
+    signed_receipt: Form[str],
+    vendor: Form[str] = "",
+    total_amount: Form[str] = "",
+    vat_amount: Form[str] = "",
+    date: Form[str] = "",
+    category: Form[str] = "",
 ) -> HttpResponse:
     try:
         receipt_id = int(RECEIPT_SIGNER.unsign(signed_receipt))
