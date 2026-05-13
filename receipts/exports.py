@@ -10,7 +10,8 @@ from receipts.models import Receipt
 
 def build_excel(receipts: list[Receipt]) -> io.BytesIO:
     wb = Workbook()
-    ws = wb.active  # type: ignore[assignment]
+    ws = wb.active
+    assert ws is not None
     ws.title = "Kvitton"
 
     headers = ["Datum", "Företag", "Kategori", "Netto", "Moms", "Total"]
@@ -26,10 +27,11 @@ def build_excel(receipts: list[Receipt]) -> io.BytesIO:
         total = receipt.total_amount or Decimal(0)
         vat = receipt.vat_amount or Decimal(0)
         net = total - vat
+        has_amount = receipt.total_amount is not None or receipt.vat_amount is not None
         ws.cell(row=row_idx, column=1, value=str(receipt.date) if receipt.date else "")
         ws.cell(row=row_idx, column=2, value=receipt.vendor or "")
         ws.cell(row=row_idx, column=3, value=receipt.category or "")
-        ws.cell(row=row_idx, column=4, value=float(net))
+        ws.cell(row=row_idx, column=4, value=float(net) if has_amount else "")
         ws.cell(row=row_idx, column=5, value=float(vat) if receipt.vat_amount else "")
         ws.cell(row=row_idx, column=6, value=float(total) if receipt.total_amount else "")
 
