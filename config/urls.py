@@ -31,6 +31,11 @@ urlpatterns = [
         TemplateView.as_view(template_name="core/terms_of_service.html"),
         name="terms_of_service",
     ),
+    path(
+        "cookies/",
+        TemplateView.as_view(template_name="core/cookies.html"),
+        name="cookies",
+    ),
     path("receipts/export/excel/", cast(Any, export_excel), name="export_excel"),
     path("billing/checkout/", cast(Any, start_checkout), name="start_checkout"),
     path("billing/success/", cast(Any, billing_success), name="billing_success"),

@@ -1,0 +1,88 @@
+{% extends "core/base.html" %}
+
+{% block content %}
+<section class="mx-auto max-w-3xl space-y-4">
+  <header class="rounded-2xl border border-gray-200 bg-white p-5 shadow-sm sm:p-6">
+    <h1 class="text-2xl font-bold tracking-tight text-emerald-800 sm:text-3xl">Cookies</h1>
+    <p class="mt-2 text-sm text-gray-600">
+      Hur SkogsKvitto använder cookies och lokal lagring.
+    </p>
+  </header>
+
+  <article class="space-y-3 rounded-2xl border border-gray-200 bg-white p-5 shadow-sm sm:p-6">
+    <h2 class="text-lg font-semibold text-gray-900">Vad är cookies?</h2>
+    <p class="text-sm text-gray-700">
+      Cookies är små textfiler som sparas i din webbläsare. De används för att hålla dig inloggad
+      och skydda din session mot angrepp.
+    </p>
+  </article>
+
+  <article class="space-y-3 rounded-2xl border border-gray-200 bg-white p-5 shadow-sm sm:p-6">
+    <h2 class="text-lg font-semibold text-gray-900">Cookies vi använder</h2>
+    <p class="text-sm text-gray-700">
+      SkogsKvitto använder enbart nödvändiga cookies. Vi använder inga spårnings-,
+      analys- eller marknadsföringscookies.
+    </p>
+    <div class="overflow-x-auto">
+      <table class="w-full text-sm text-gray-700 border-collapse">
+        <thead>
+          <tr class="border-b border-gray-200">
+            <th class="py-2 pr-4 text-left font-semibold text-gray-900">Cookie</th>
+            <th class="py-2 pr-4 text-left font-semibold text-gray-900">Syfte</th>
+            <th class="py-2 text-left font-semibold text-gray-900">Varaktighet</th>
+          </tr>
+        </thead>
+        <tbody class="divide-y divide-gray-100">
+          <tr>
+            <td class="py-2 pr-4 font-mono text-xs">sessionid</td>
+            <td class="py-2 pr-4">Håller dig inloggad</td>
+            <td class="py-2">Webbläsarsession / 2 veckor</td>
+          </tr>
+          <tr>
+            <td class="py-2 pr-4 font-mono text-xs">csrftoken</td>
+            <td class="py-2 pr-4">Skyddar mot CSRF-attacker</td>
+            <td class="py-2">1 år</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </article>
+
+  <article class="space-y-3 rounded-2xl border border-gray-200 bg-white p-5 shadow-sm sm:p-6">
+    <h2 class="text-lg font-semibold text-gray-900">Lokal lagring</h2>
+    <p class="text-sm text-gray-700">
+      Vi sparar ditt cookie-samtycke i webbläsarens <em>localStorage</em> (nyckeln
+      <code class="font-mono text-xs">cookie_consent</code>). Detta är inte en cookie och skickas
+      aldrig till servern – det används enbart för att inte visa cookie-bannern igen.
+    </p>
+  </article>
+
+  <article class="space-y-3 rounded-2xl border border-gray-200 bg-white p-5 shadow-sm sm:p-6">
+    <h2 class="text-lg font-semibold text-gray-900">Tredjepartscookies</h2>
+    <p class="text-sm text-gray-700">
+      Vi sätter inga tredjepartscookies. Vi använder inte Google Analytics, Meta Pixel eller
+      liknande spårningsverktyg.
+    </p>
+  </article>
+
+  <article class="space-y-3 rounded-2xl border border-gray-200 bg-white p-5 shadow-sm sm:p-6">
+    <h2 class="text-lg font-semibold text-gray-900">Hantera cookies</h2>
+    <p class="text-sm text-gray-700">
+      Du kan när som helst rensa cookies och localStorage i din webbläsares inställningar.
+      Om du raderar <code class="font-mono text-xs">sessionid</code> loggas du ut.
+    </p>
+    <p class="text-sm text-gray-700">
+      Eftersom vi enbart använder nödvändiga cookies krävs inget aktivt samtycke för att
+      tjänsten ska fungera.
+    </p>
+  </article>
+
+  <article class="space-y-3 rounded-2xl border border-gray-200 bg-white p-5 shadow-sm sm:p-6">
+    <h2 class="text-lg font-semibold text-gray-900">Frågor</h2>
+    <p class="text-sm text-gray-700">
+      Kontakta oss via <strong>{{ privacy_contact }}</strong> om du har frågor om
+      vår cookieanvändning.
+    </p>
+  </article>
+</section>
+{% endblock %}

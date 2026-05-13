@@ -13,45 +13,16 @@
 >
   <p class="mb-1 text-sm font-semibold text-gray-900">Vi använder cookies</p>
   <p class="mb-4 text-sm text-gray-600 leading-relaxed">
-    <strong>Nödvändiga cookies</strong> krävs alltid för inloggning och säkerhet.
-    <strong>Analys- och marknadsföringscookies</strong> används bara om du godkänner det.
+    SkogsKvitto använder enbart <strong>nödvändiga cookies</strong> för inloggning, CSRF-skydd och sessionshantering.
+    Vi använder inga spårnings- eller marknadsföringscookies.
+    <a href="{% url 'cookies' %}" class="underline hover:text-emerald-700">Läs mer om cookies</a>.
   </p>
-
-  <div class="flex flex-wrap gap-2">
+  <div class="flex gap-2">
     <button
-      @click="accept('all')"
-      class="flex-1 rounded-xl bg-emerald-700 px-4 py-2.5 text-sm font-semibold text-white transition-colors hover:bg-emerald-800 focus:outline-none focus:ring-2 focus:ring-emerald-700 focus:ring-offset-2"
+      @click="accept()"
+      class="rounded-xl bg-emerald-700 px-5 py-2.5 text-sm font-semibold text-white transition-colors hover:bg-emerald-800 focus:outline-none focus:ring-2 focus:ring-emerald-700 focus:ring-offset-2"
     >
-      Acceptera alla
-    </button>
-    <button
-      @click="accept('necessary')"
-      class="flex-1 rounded-xl border border-gray-300 bg-white px-4 py-2.5 text-sm font-semibold text-gray-700 transition-colors hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-emerald-700 focus:ring-offset-2"
-    >
-      Endast nödvändiga
-    </button>
-    <button
-      @click="showDetails = !showDetails"
-      class="w-full rounded-xl border border-gray-200 px-4 py-2 text-xs text-gray-500 transition-colors hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-emerald-700 focus:ring-offset-2 sm:w-auto"
-    >
-      Hantera val
-    </button>
-  </div>
-
-  <div x-show="showDetails" x-transition class="mt-4 space-y-3 border-t border-gray-100 pt-4">
-    <label for="consent-necessary" class="flex items-center gap-3 text-sm text-gray-700">
-      <input id="consent-necessary" type="checkbox" checked disabled class="h-4 w-4 rounded accent-emerald-700">
-      <span><strong>Nödvändiga</strong> – alltid aktiva (inloggning, CSRF-skydd)</span>
-    </label>
-    <label for="consent-analytics" class="flex items-center gap-3 text-sm text-gray-700 cursor-pointer">
-      <input id="consent-analytics" type="checkbox" x-model="analytics" class="h-4 w-4 rounded accent-emerald-700">
-      <span><strong>Analys &amp; marknadsföring</strong> – hjälper oss förbättra tjänsten</span>
-    </label>
-    <button
-      @click="acceptCustom()"
-      class="mt-1 rounded-xl bg-emerald-700 px-4 py-2 text-sm font-semibold text-white transition-colors hover:bg-emerald-800 focus:outline-none focus:ring-2 focus:ring-emerald-700 focus:ring-offset-2"
-    >
-      Spara mina val
+      Förstått
     </button>
   </div>
 </div>
@@ -61,19 +32,11 @@
     function getConsent() {
       try { return localStorage.getItem('cookie_consent'); } catch (_) { return null; }
     }
-    function saveConsent(level) {
-      try { localStorage.setItem('cookie_consent', level); } catch (_) { /* private mode */ }
-    }
     return {
       visible: !getConsent(),
-      showDetails: false,
-      analytics: false,
-      accept(level) {
-        saveConsent(level);
+      accept() {
+        try { localStorage.setItem('cookie_consent', 'necessary'); } catch (_) { /* private mode */ }
         this.visible = false;
-      },
-      acceptCustom() {
-        this.accept(this.analytics ? 'all' : 'necessary');
       },
     };
   }
