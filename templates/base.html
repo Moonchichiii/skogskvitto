@@ -13,6 +13,9 @@
   <header class="bg-emerald-800 text-white">
     <nav class="mx-auto flex w-full max-w-5xl items-center justify-between px-4 py-4">
       <a href="/" class="text-lg font-semibold tracking-tight">SkogsKvitto</a>
+      {% if user.is_authenticated %}
+      <a href="/dashboard/" class="text-sm font-medium text-emerald-200 hover:text-white">Dashboard</a>
+      {% endif %}
     </nav>
   </header>
   <main id="content" hx-target="this" class="mx-auto w-full max-w-5xl p-4 sm:p-6">

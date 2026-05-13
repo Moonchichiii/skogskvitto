@@ -4,12 +4,15 @@ from ninja import NinjaAPI
 
 from core.views import index
 from receipts.api import router as receipts_router
+from receipts.views import dashboard, export_excel
 
 api = NinjaAPI()
 api.add_router("receipts/", receipts_router)
 
 urlpatterns = [
     path("", index, name="index"),
+    path("dashboard/", dashboard, name="dashboard"),
+    path("receipts/export/excel/", export_excel, name="export_excel"),
     path("admin/", admin.site.urls),
     path("api/", api.urls),
 ]

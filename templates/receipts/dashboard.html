@@ -1,0 +1,58 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="space-y-6">
+
+  <div class="grid grid-cols-2 gap-4">
+    <div class="rounded-2xl bg-white p-4 shadow-sm">
+      <p class="text-xs font-medium uppercase tracking-wide text-gray-500">Total utlägg {{ year }}</p>
+      <p class="mt-2 text-2xl font-semibold text-emerald-700">{{ total_year|floatformat:2 }} kr</p>
+    </div>
+    <div class="rounded-2xl bg-white p-4 shadow-sm">
+      <p class="text-xs font-medium uppercase tracking-wide text-gray-500">Momsavdrag {{ year }}</p>
+      <p class="mt-2 text-2xl font-semibold text-emerald-700">{{ vat_year|floatformat:2 }} kr</p>
+    </div>
+  </div>
+
+  <a
+    href="/receipts/export/excel/"
+    class="block w-full rounded-xl bg-emerald-700 px-4 py-4 text-center text-base font-semibold text-white"
+  >
+    Exportera till Excel
+  </a>
+
+  <div class="overflow-hidden rounded-2xl bg-white shadow-sm">
+    <table class="w-full text-sm">
+      <thead class="border-b border-gray-100 bg-gray-50">
+        <tr>
+          <th class="px-4 py-3 text-left font-medium text-gray-500">Datum</th>
+          <th class="px-4 py-3 text-left font-medium text-gray-500">Butik</th>
+          <th class="px-4 py-3 text-right font-medium text-gray-500">Total</th>
+          <th class="px-4 py-3 text-right font-medium text-gray-500">Moms</th>
+        </tr>
+      </thead>
+      <tbody class="divide-y divide-gray-100">
+        {% for receipt in receipts %}
+        <tr>
+          <td class="px-4 py-3 text-gray-600">{{ receipt.date|date:"Y-m-d"|default:"–" }}</td>
+          <td class="px-4 py-3 text-gray-900">{{ receipt.vendor|default:"Okänd" }}</td>
+          <td class="px-4 py-3 text-right font-medium text-emerald-700">
+            {% if receipt.total_amount %}{{ receipt.total_amount|floatformat:2 }} kr{% else %}–{% endif %}
+          </td>
+          <td class="px-4 py-3 text-right text-gray-600">
+            {% if receipt.vat_amount %}{{ receipt.vat_amount|floatformat:2 }} kr{% else %}–{% endif %}
+          </td>
+        </tr>
+        {% empty %}
+        <tr>
+          <td colspan="4" class="px-4 py-10 text-center text-gray-400">
+            Inga kvitton ännu. Börja scanna!
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+
+</div>
+{% endblock %}
