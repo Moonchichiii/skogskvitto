@@ -5,4 +5,4 @@ from django.views.decorators.http import require_GET
 
 @require_GET
 def index(request: HttpRequest) -> HttpResponse:
-    return render(request, "base.html")
+    return render(request, "core/index.html")

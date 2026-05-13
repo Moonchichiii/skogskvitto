@@ -80,8 +80,10 @@ USE_TZ = True
 
 STATIC_URL = "static/"
 STATIC_ROOT = BASE_DIR / "staticfiles"
-MEDIA_URL = "media/"
-MEDIA_ROOT = BASE_DIR / "media"
+MEDIA_URL = "/_private-media/"
+MEDIA_ROOT = BASE_DIR / "private_media"
+FILE_UPLOAD_PERMISSIONS = 0o640
+FILE_UPLOAD_DIRECTORY_PERMISSIONS = 0o750
 
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 

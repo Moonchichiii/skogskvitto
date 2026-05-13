@@ -1,0 +1,34 @@
+<div class="rounded-2xl bg-white p-4 shadow-sm sm:p-6">
+  <h2 class="mb-4 text-lg font-semibold text-gray-900">Verifiera kvittodata</h2>
+  <form
+    hx-post="/api/receipts/save"
+    hx-target="this"
+    hx-swap="outerHTML"
+    class="space-y-3"
+  >
+    <input type="hidden" name="signed_receipt" value="{{ signed_receipt }}">
+    <label class="block">
+      <span class="mb-1 block text-sm font-medium text-gray-700">Butik</span>
+      <input id="vendor" name="vendor" type="text" value="{{ receipt.vendor }}" class="w-full rounded-xl bg-gray-100 px-4 py-3 text-base text-gray-900">
+    </label>
+    <label class="block">
+      <span class="mb-1 block text-sm font-medium text-gray-700">Totalbelopp</span>
+      <input id="total_amount" name="total_amount" type="text" value="{{ receipt.total_amount|default_if_none:'' }}" class="w-full rounded-xl bg-gray-100 px-4 py-3 text-base text-gray-900">
+    </label>
+    <label class="block">
+      <span class="mb-1 block text-sm font-medium text-gray-700">Moms</span>
+      <input id="vat_amount" name="vat_amount" type="text" value="{{ receipt.vat_amount|default_if_none:'' }}" class="w-full rounded-xl bg-gray-100 px-4 py-3 text-base text-gray-900">
+    </label>
+    <label class="block">
+      <span class="mb-1 block text-sm font-medium text-gray-700">Datum</span>
+      <input id="date" name="date" type="date" value="{{ receipt.date|date:'Y-m-d' }}" class="w-full rounded-xl bg-gray-100 px-4 py-3 text-base text-gray-900">
+    </label>
+    <label class="block">
+      <span class="mb-1 block text-sm font-medium text-gray-700">Kategori</span>
+      <input id="category" name="category" type="text" value="{{ receipt.category }}" class="w-full rounded-xl bg-gray-100 px-4 py-3 text-base text-gray-900">
+    </label>
+    <button type="submit" class="w-full rounded-xl bg-emerald-700 px-4 py-4 text-base font-semibold text-white">
+      Spara kvitto
+    </button>
+  </form>
+</div>
