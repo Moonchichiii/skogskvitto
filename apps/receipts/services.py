@@ -14,7 +14,6 @@ from django.core.files.uploadedfile import UploadedFile
 from PIL import Image
 from pydantic import BaseModel, Field, ValidationError
 
-
 OPENAI_API_KEY = config("OPENAI_API_KEY", default="")
 OPENAI_MODEL = config("OPENAI_MODEL", default="gpt-4.1-mini")
 logger = logging.getLogger(__name__)

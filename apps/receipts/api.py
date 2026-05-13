@@ -5,9 +5,9 @@ from tempfile import NamedTemporaryFile
 
 import magic
 from asgiref.sync import sync_to_async
+from django.core.signing import BadSignature, Signer
 from django.http import HttpRequest, HttpResponse
 from django.http.response import HttpResponseForbidden
-from django.core.signing import BadSignature, Signer
 from django.template.loader import render_to_string
 from ninja import File, Form, Router
 from ninja.files import UploadedFile
