@@ -31,6 +31,7 @@ SUPPORTED_IMAGE_MIME_TYPES = {
     "image/png": ("PNG", ".png"),
     "image/webp": ("WEBP", ".webp"),
 }
+EXTENSION_TO_MIME = {ext: mime for mime, (_, ext) in SUPPORTED_IMAGE_MIME_TYPES.items()}
 
 
 def strip_exif_and_prepare_image(uploaded_file: UploadedFile, detected_mime: str) -> ContentFile:
@@ -61,7 +62,8 @@ async def process_receipt_image(file_path: Path) -> ReceiptScanResult:
 
     image_bytes = file_path.read_bytes()
     encoded = base64.b64encode(image_bytes).decode("ascii")
-    data_uri = f"data:image/jpeg;base64,{encoded}"
+    mime_type = EXTENSION_TO_MIME.get(file_path.suffix.lower(), "image/jpeg")
+    data_uri = f"data:{mime_type};base64,{encoded}"
 
     instruction = (
         "Extract receipt data and return strict JSON with keys: "
