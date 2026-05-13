@@ -1,4 +1,5 @@
 import io
+import unicodedata
 from collections import defaultdict
 from decimal import Decimal
 
@@ -19,6 +20,11 @@ NUMBER_FORMAT = "#,##0.00"
 
 def _decimal(value: Decimal | None) -> Decimal:
     return value if value is not None else ZERO
+
+
+def _normalize_text(value: str) -> str:
+    normalized = unicodedata.normalize("NFKD", value)
+    return normalized.encode("ascii", "ignore").decode("ascii").lower()
 
 
 def _setup_sheet(ws: Worksheet, headers: list[str], widths: list[int]) -> None:
@@ -96,7 +102,7 @@ def _write_inkomster_skog_sheet(wb: Workbook, receipts: list[Receipt]) -> None:
         if amount == ZERO:
             continue
 
-        category = (receipt.category or "").strip().lower()
+        category = _normalize_text((receipt.category or "").strip())
         if "slutavverk" in category:
             inkomster["Slutavverkning"] += amount
         elif "gallring" in category:
@@ -132,18 +138,13 @@ def _write_korjournal_sheet(wb: Workbook, receipts: list[Receipt]) -> None:
         if not receipt.date:
             continue
 
-        category = (receipt.category or "").strip().lower()
-        normalized_category = category.replace("ö", "o")
+        normalized_category = _normalize_text((receipt.category or "").strip())
         if "korjournal" not in normalized_category:
             continue
 
         month_key = receipt.date.strftime("%Y-%m")
         month_data = monthly[month_key]
         month_data["trips"] = int(month_data["trips"]) + 1
-        # TODO: Körjournal bör få ett dedikerat kilometerfält i modellen.
-        month_data["kilometers"] = _decimal(month_data["kilometers"]) + _decimal(
-            receipt.total_amount
-        )
 
     total_trips = 0
     total_kilometers = ZERO
