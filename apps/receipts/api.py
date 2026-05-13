@@ -2,6 +2,7 @@ from datetime import date as date_cls
 from decimal import Decimal, InvalidOperation
 from pathlib import Path
 from tempfile import NamedTemporaryFile
+from typing import cast
 
 import magic
 from asgiref.sync import sync_to_async
@@ -12,7 +13,8 @@ from django.template.loader import render_to_string
 from ninja import File, Form, Router
 from ninja.files import UploadedFile
 
-from apps.receipts.billing import user_has_reached_free_limit
+from apps.core.models import User
+from apps.receipts.billing import can_use_ai_scan
 from apps.receipts.models import Receipt
 from apps.receipts.services import (
     SUPPORTED_IMAGE_MIME_TYPES,
@@ -68,8 +70,9 @@ async def scan_receipt(request: HttpRequest, image: File[UploadedFile]) -> HttpR
     authentication_error = _require_authenticated_user(request)
     if authentication_error is not None:
         return authentication_error
+    user = cast(User, request.user)
 
-    if await user_has_reached_free_limit(request.user):
+    if not await can_use_ai_scan(user):
         return await sync_to_async(_render_fragment)("receipts/partials/paywall.html", {})
 
     if image.size is None:
@@ -95,7 +98,7 @@ async def scan_receipt(request: HttpRequest, image: File[UploadedFile]) -> HttpR
         )
 
     cleaned_file = await sync_to_async(strip_exif_and_prepare_image)(image, detected_mime)
-    receipt = await Receipt.objects.acreate(owner=request.user, image=cleaned_file)
+    receipt = await Receipt.objects.acreate(owner=user, image=cleaned_file)
 
     extension = Path(receipt.image.name or "").suffix or ".jpg"
     tmp_path: Path | None = None
@@ -139,6 +142,7 @@ async def save_receipt(
     authentication_error = _require_authenticated_user(request)
     if authentication_error is not None:
         return authentication_error
+    user = cast(User, request.user)
 
     try:
         receipt_id = int(RECEIPT_SIGNER.unsign(signed_receipt))
@@ -149,7 +153,7 @@ async def save_receipt(
         receipt = await Receipt.objects.aget(pk=receipt_id)
     except Receipt.DoesNotExist:
         return HttpResponseForbidden("Kvitto saknas eller är inte tillgängligt.")
-    if receipt.owner_id != request.user.id:
+    if receipt.owner_id != user.id:
         return HttpResponseForbidden("Du saknar behörighet för detta kvitto.")
 
     receipt.vendor = vendor.strip()

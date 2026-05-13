@@ -17,7 +17,10 @@ def pytest_configure() -> None:
         INSTALLED_APPS=[
             "django.contrib.contenttypes",
             "django.contrib.auth",
+            "apps.core.apps.CoreConfig",
+            "apps.receipts.apps.ReceiptsConfig",
         ],
+        AUTH_USER_MODEL="core.User",
         TEMPLATES=[
             {
                 "BACKEND": "django.template.backends.django.DjangoTemplates",
