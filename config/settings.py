@@ -1,3 +1,4 @@
+import os
 from pathlib import Path
 
 from decouple import Csv, config
@@ -130,6 +131,30 @@ MEDIA_URL = "/_private-media/"
 MEDIA_ROOT = BASE_DIR / "private_media"
 FILE_UPLOAD_PERMISSIONS = 0o640
 FILE_UPLOAD_DIRECTORY_PERMISSIONS = 0o750
+
+CLOUDINARY_URL = config("CLOUDINARY_URL", default="")
+CLOUDINARY_CLOUD_NAME = config("CLOUDINARY_CLOUD_NAME", default="")
+CLOUDINARY_API_KEY = config("CLOUDINARY_API_KEY", default="")
+CLOUDINARY_API_SECRET = config("CLOUDINARY_API_SECRET", default="")
+CI = config("CI", default=False, cast=bool)
+USE_CLOUDINARY_MEDIA = bool(CLOUDINARY_URL or CLOUDINARY_CLOUD_NAME)
+
+if USE_CLOUDINARY_MEDIA:
+    INSTALLED_APPS.extend(["cloudinary_storage", "cloudinary"])
+    STORAGES = {
+        "default": {"BACKEND": "cloudinary_storage.storage.MediaCloudinaryStorage"},
+        "staticfiles": {"BACKEND": "django.contrib.staticfiles.storage.StaticFilesStorage"},
+    }
+    if CLOUDINARY_URL:
+        os.environ.setdefault("CLOUDINARY_URL", CLOUDINARY_URL)
+    CLOUDINARY_STORAGE = {
+        "CLOUD_NAME": CLOUDINARY_CLOUD_NAME,
+        "API_KEY": CLOUDINARY_API_KEY,
+        "API_SECRET": CLOUDINARY_API_SECRET,
+        "SECURE": True,
+    }
+elif not DEBUG and not CI:
+    raise ValueError("Cloudinary måste vara konfigurerat i produktion för media-filstorage.")
 
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 

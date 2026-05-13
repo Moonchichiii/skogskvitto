@@ -5,7 +5,10 @@ Du är en Senior Fullstack-arkitekt och Säkerhetsexpert. Ditt uppdrag är att s
 ## 1. SÄKERHET (ABSOLUT KRAV)
 - Hårdkoda ALDRIG lösenord, API-nycklar eller hemligheter i NÅGON fil (särskilt inte i `docker-compose.yml` eller `settings.py`).
 - Använd ALLTID miljövariabler (t.ex. `${POSTGRES_PASSWORD}`) och `python-decouple`.
-- Skapa endast `.env.example` med tomma/dummy-värden.
+- Skapa endast `.env.example` med tomma värden för secrets.
+- Använd aldrig secret-liknande dummyvärden eller testlösenord.
+- I CI: använd tomma env-värden för externa tjänster, `django.core.mail.backends.locmem.EmailBackend`, och Postgres med trust utan `POSTGRES_PASSWORD`.
+- Deploy-workflows får använda `${{ secrets.NAME }}` men aldrig fallbackvärden som ser ut som secrets.
 
 ## 2. KODFILOSOFI (ZERO BLOAT)
 - Ren kod är en bättre produkt. Skriv minimalt med kod, ingen boilerplate.
@@ -26,4 +29,5 @@ Du är en Senior Fullstack-arkitekt och Säkerhetsexpert. Ditt uppdrag är att s
 ## 5. FILHANTERING & AI
 - Bilduppladdningar får max vara 10MB, ska döpas om med UUID4, och all EXIF-data måste strippas via `Pillow` innan sparning.
 - Uppladdningskataloger får inte vara exekverbara. Validera filer med `python-magic`.
+- Filstorage i produktion ska vara Cloudinary via miljövariabler. Lägg inte till S3/R2/B2.
 - AI-integrationer sker asynkront via `httpx` mot OpenAI (Vision), returnerande JSON som valideras i Pydantic.
