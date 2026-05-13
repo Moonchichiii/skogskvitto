@@ -133,13 +133,15 @@ def _write_korjournal_sheet(wb: Workbook, receipts: list[Receipt]) -> None:
             continue
 
         category = (receipt.category or "").strip().lower()
-        if "körjournal" not in category and "korjournal" not in category:
+        normalized_category = category.replace("ö", "o")
+        if "korjournal" not in normalized_category:
             continue
 
         month_key = receipt.date.strftime("%Y-%m")
-        monthly[month_key]["trips"] = int(monthly[month_key]["trips"]) + 1
-        # Körjournal saknar eget kilometerfält i modellen, därför används total_amount här.
-        monthly[month_key]["kilometers"] = _decimal(monthly[month_key]["kilometers"]) + _decimal(
+        month_data = monthly[month_key]
+        month_data["trips"] = int(month_data["trips"]) + 1
+        # TODO: Körjournal bör få ett dedikerat kilometerfält i modellen.
+        month_data["kilometers"] = _decimal(month_data["kilometers"]) + _decimal(
             receipt.total_amount
         )
 
