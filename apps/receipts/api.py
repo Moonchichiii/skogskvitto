@@ -56,8 +56,18 @@ def _detect_image_mime(upload: UploadedFile) -> str:
     return str(magic.from_buffer(head, mime=True))
 
 
+def _require_authenticated_user(request: HttpRequest) -> HttpResponse | None:
+    if request.user.is_authenticated:
+        return None
+    return HttpResponseForbidden("Inloggning krävs.")
+
+
 @router.post("/scan")
 async def scan_receipt(request: HttpRequest, image: File[UploadedFile]) -> HttpResponse:
+    authentication_error = _require_authenticated_user(request)
+    if authentication_error is not None:
+        return authentication_error
+
     if image.size is None:
         return await sync_to_async(_render_fragment)(
             "receipts/partials/scan_error.html",
@@ -81,8 +91,7 @@ async def scan_receipt(request: HttpRequest, image: File[UploadedFile]) -> HttpR
         )
 
     cleaned_file = await sync_to_async(strip_exif_and_prepare_image)(image, detected_mime)
-    owner = request.user if request.user.is_authenticated else None
-    receipt = await Receipt.objects.acreate(owner=owner, image=cleaned_file)
+    receipt = await Receipt.objects.acreate(owner=request.user, image=cleaned_file)
 
     extension = Path(receipt.image.name or "").suffix or ".jpg"
     tmp_path: Path | None = None
@@ -123,12 +132,22 @@ async def save_receipt(
     date: Form[str] = "",
     category: Form[str] = "",
 ) -> HttpResponse:
+    authentication_error = _require_authenticated_user(request)
+    if authentication_error is not None:
+        return authentication_error
+
     try:
         receipt_id = int(RECEIPT_SIGNER.unsign(signed_receipt))
     except (BadSignature, ValueError):
         return HttpResponseForbidden("Ogiltig kvittosession.")
 
-    receipt = await Receipt.objects.aget(pk=receipt_id)
+    try:
+        receipt = await Receipt.objects.aget(pk=receipt_id)
+    except Receipt.DoesNotExist:
+        return HttpResponseForbidden("Kvitto saknas eller är inte tillgängligt.")
+    if receipt.owner_id != request.user.id:
+        return HttpResponseForbidden("Du saknar behörighet för detta kvitto.")
+
     receipt.vendor = vendor.strip()
     receipt.total_amount = _parse_decimal(total_amount)
     receipt.vat_amount = _parse_decimal(vat_amount)

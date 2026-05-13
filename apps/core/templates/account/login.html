@@ -1,0 +1,18 @@
+{% extends "core/base.html" %}
+{% load socialaccount %}
+
+{% block content %}
+<section class="mx-auto w-full max-w-md rounded-2xl bg-white p-6 shadow-sm sm:p-8">
+  <div class="space-y-2 text-center">
+    <h1 class="text-2xl font-semibold text-gray-900">Logga in</h1>
+    <p class="text-sm text-gray-600">Fortsätt med ditt Google-konto för att öppna SkogsKvitto.</p>
+  </div>
+
+  <a
+    href="{% provider_login_url 'google' process='login' %}"
+    class="mt-6 flex w-full items-center justify-center rounded-2xl bg-emerald-700 px-4 py-4 text-base font-semibold text-white transition hover:bg-emerald-800"
+  >
+    Fortsätt med Google
+  </a>
+</section>
+{% endblock %}

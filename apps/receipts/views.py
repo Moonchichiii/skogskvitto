@@ -1,20 +1,33 @@
 import io
+from collections.abc import Awaitable, Callable
 from datetime import date
 from decimal import Decimal
+from functools import wraps
 
 from asgiref.sync import sync_to_async
-from django.http import FileResponse, HttpRequest, HttpResponseForbidden
+from django.contrib.auth.views import redirect_to_login
+from django.http import FileResponse, HttpRequest
 from django.http.response import HttpResponseBase
-from django.shortcuts import redirect, render
+from django.shortcuts import render
 
 from apps.receipts.exports import build_excel
 from apps.receipts.models import Receipt
 
+type AsyncView = Callable[[HttpRequest], Awaitable[HttpResponseBase]]
 
+
+def login_required_async(view: AsyncView) -> AsyncView:
+    @wraps(view)
+    async def wrapped(request: HttpRequest) -> HttpResponseBase:
+        if not request.user.is_authenticated:
+            return redirect_to_login(request.get_full_path())
+        return await view(request)
+
+    return wrapped
+
+
+@login_required_async
 async def dashboard(request: HttpRequest) -> HttpResponseBase:
-    if not request.user.is_authenticated:
-        return redirect("/")
-
     year = date.today().year
     receipts = [
         r
@@ -34,10 +47,8 @@ async def dashboard(request: HttpRequest) -> HttpResponseBase:
     )
 
 
+@login_required_async
 async def export_excel(request: HttpRequest) -> HttpResponseBase:
-    if not request.user.is_authenticated:
-        return HttpResponseForbidden()
-
     receipts = [
         r
         async for r in Receipt.objects.filter(owner=request.user).order_by(
