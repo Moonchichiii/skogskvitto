@@ -1,0 +1,51 @@
+<section class="rounded-2xl bg-white p-4 shadow-sm sm:p-6" x-data="{ preview: '' }">
+  <h1 class="mb-2 text-xl font-semibold text-gray-900">Skanna kvitto</h1>
+  <p class="mb-4 text-sm text-gray-600">Ta en bild eller välj en fil så tolkar AI:n kvittot direkt.</p>
+
+  <form
+    hx-post="/api/receipts/scan"
+    hx-encoding="multipart/form-data"
+    hx-target="#scan-result"
+    hx-swap="innerHTML"
+    class="space-y-4"
+  >
+    {% csrf_token %}
+    <input
+      id="receipt-image-input"
+      name="image"
+      type="file"
+      accept="image/jpeg,image/png,image/webp"
+      capture="environment"
+      class="hidden"
+      x-ref="fileInput"
+      @change="const file = $event.target.files[0]; preview = file ? URL.createObjectURL(file) : ''"
+      required
+    >
+
+    <button
+      type="button"
+      class="w-full rounded-xl bg-emerald-800 px-4 py-4 text-base font-semibold text-white"
+      @click="$refs.fileInput.click()"
+    >
+      Välj eller fotografera kvitto
+    </button>
+
+    <template x-if="preview">
+      <img :src="preview" alt="Förhandsvisning av kvitto" class="w-full rounded-xl border border-gray-200 object-cover">
+    </template>
+
+    <button
+      type="submit"
+      class="w-full rounded-xl bg-emerald-700 px-4 py-4 text-base font-semibold text-white"
+    >
+      Scanna med AI
+    </button>
+
+    <div class="htmx-indicator inline-flex items-center gap-2 text-sm text-emerald-700">
+      <span class="inline-block h-4 w-4 animate-spin rounded-full border-2 border-emerald-700 border-t-transparent"></span>
+      <span>AI analyserar kvittot...</span>
+    </div>
+  </form>
+</section>
+
+<section id="scan-result" class="mt-4"></section>
