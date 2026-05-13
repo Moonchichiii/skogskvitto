@@ -12,7 +12,7 @@ from django.template.loader import render_to_string
 from ninja import File, Form, Router
 from ninja.files import UploadedFile
 
-from apps.receipts.billing import user_has_reached_free_limit
+from apps.receipts.billing import can_use_ai_scan
 from apps.receipts.models import Receipt
 from apps.receipts.services import (
     SUPPORTED_IMAGE_MIME_TYPES,
@@ -69,7 +69,7 @@ async def scan_receipt(request: HttpRequest, image: File[UploadedFile]) -> HttpR
     if authentication_error is not None:
         return authentication_error
 
-    if await user_has_reached_free_limit(request.user):
+    if not await can_use_ai_scan(request.user):
         return await sync_to_async(_render_fragment)("receipts/partials/paywall.html", {})
 
     if image.size is None:

@@ -8,12 +8,17 @@ import httpx
 from asgiref.sync import sync_to_async
 from django.contrib.auth.views import redirect_to_login
 from django.http import FileResponse, HttpRequest, HttpResponseBadRequest, HttpResponseRedirect
+from django.http.response import HttpResponseForbidden
 from django.http.response import HttpResponseBase
 from django.shortcuts import redirect, render
 from django.urls import reverse
 from django.utils import timezone
 
 from apps.receipts.billing import (
+    can_export_excel,
+    can_use_korjournal,
+    get_user_plan,
+    is_premium_user,
     plan_to_price_id,
     stripe_request,
     stripe_is_configured,
@@ -49,7 +54,7 @@ async def dashboard(request: HttpRequest) -> HttpResponseBase:
     total_year = sum((r.total_amount or Decimal(0) for r in year_receipts), Decimal(0))
     vat_year = sum((r.vat_amount or Decimal(0) for r in year_receipts), Decimal(0))
 
-    has_active_subscription = await user_has_active_subscription(request.user)
+    has_premium_access = await is_premium_user(request.user)
 
     return render(
         request,
@@ -59,13 +64,18 @@ async def dashboard(request: HttpRequest) -> HttpResponseBase:
             "total_year": total_year,
             "vat_year": vat_year,
             "year": year,
-            "has_active_subscription": has_active_subscription,
+            "has_active_subscription": has_premium_access,
+            "user_plan": await get_user_plan(request.user),
+            "can_use_korjournal": await can_use_korjournal(request.user),
         },
     )
 
 
 @login_required_async
 async def export_excel(request: HttpRequest) -> HttpResponseBase:
+    if not await can_export_excel(request.user):
+        return HttpResponseForbidden("Export till Excel kräver Premium eller pilotåtkomst.")
+
     receipts = [
         r
         async for r in Receipt.objects.filter(owner=request.user).order_by(
@@ -91,7 +101,7 @@ async def start_checkout(request: HttpRequest) -> HttpResponseBase:
             "STRIPE_PRICE_MONTHLY_ID och STRIPE_PRICE_YEARLY_ID."
         )
 
-    if await user_has_active_subscription(request.user):
+    if await is_premium_user(request.user):
         return redirect("dashboard")
 
     plan = request.GET.get("plan", "yearly")
