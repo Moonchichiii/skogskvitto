@@ -3,7 +3,7 @@ from __future__ import annotations
 import base64
 import json
 import logging
-from datetime import date as date_cls
+from datetime import date as date_type
 from decimal import Decimal
 from io import BytesIO
 from pathlib import Path
@@ -25,7 +25,7 @@ class ReceiptScanResult(BaseModel):
     vendor: str = Field(default="")
     total_amount: Decimal | None = Field(default=None)
     vat_amount: Decimal | None = Field(default=None)
-    date: date_cls | None = Field(default=None)
+    date: date_type | None = Field(default=None)
     category: str = Field(default="")
 
 

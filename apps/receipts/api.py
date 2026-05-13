@@ -58,8 +58,14 @@ def _detect_image_mime(upload: UploadedFile) -> str:
 
 @router.post("/scan")
 async def scan_receipt(request: HttpRequest, image: File[UploadedFile]) -> HttpResponse:
-    image_size = image.size or 0
-    if image_size > MAX_UPLOAD_SIZE_BYTES:
+    if image.size is None:
+        return await sync_to_async(_render_fragment)(
+            "receipts/partials/scan_error.html",
+            {"error": "Kunde inte läsa filstorleken för uppladdningen."},
+            400,
+        )
+
+    if image.size > MAX_UPLOAD_SIZE_BYTES:
         return await sync_to_async(_render_fragment)(
             "receipts/partials/scan_error.html",
             {"error": "Bilden är för stor. Max 10MB."},
@@ -117,7 +123,6 @@ async def save_receipt(
     date: Form[str] = "",
     category: Form[str] = "",
 ) -> HttpResponse:
-    del request
     try:
         receipt_id = int(RECEIPT_SIGNER.unsign(signed_receipt))
     except (BadSignature, ValueError):
