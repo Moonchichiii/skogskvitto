@@ -5,6 +5,7 @@ from decimal import Decimal
 from openpyxl import Workbook
 from openpyxl.styles import Font
 from openpyxl.utils import get_column_letter
+from openpyxl.worksheet.worksheet import Worksheet
 
 from apps.receipts.models import Receipt
 
@@ -20,7 +21,7 @@ def _decimal(value: Decimal | None) -> Decimal:
     return value if value is not None else ZERO
 
 
-def _setup_sheet(ws: object, headers: list[str], widths: list[int]) -> None:
+def _setup_sheet(ws: Worksheet, headers: list[str], widths: list[int]) -> None:
     for col, header in enumerate(headers, start=1):
         cell = ws.cell(row=1, column=col, value=header)
         cell.font = Font(bold=True)
@@ -53,7 +54,7 @@ def _write_kvitton_sheet(wb: Workbook, receipts: list[Receipt]) -> None:
         inkop = _decimal(receipt.total_amount)
         moms = _decimal(receipt.vat_amount)
         netto = inkop - moms
-        oresutjamning = inkop - netto - moms
+        oresutjamning = ZERO
 
         ws.cell(row=row, column=1, value=inkop)
         ws.cell(row=row, column=2, value=netto)
@@ -137,6 +138,7 @@ def _write_korjournal_sheet(wb: Workbook, receipts: list[Receipt]) -> None:
 
         month_key = receipt.date.strftime("%Y-%m")
         monthly[month_key]["trips"] = int(monthly[month_key]["trips"]) + 1
+        # Körjournal saknar eget kilometerfält i modellen, därför används total_amount här.
         monthly[month_key]["kilometers"] = _decimal(monthly[month_key]["kilometers"]) + _decimal(
             receipt.total_amount
         )
