@@ -67,7 +67,7 @@ DATABASES = {
         "ENGINE": "django.db.backends.postgresql",
         "NAME": config("POSTGRES_DB"),
         "USER": config("POSTGRES_USER"),
-        "PASSWORD": config("POSTGRES_PASSWORD"),
+        "PASSWORD": config("POSTGRES_PASSWORD", default=""),
         "HOST": config("POSTGRES_HOST", default="db"),
         "PORT": config("POSTGRES_PORT", default=5432, cast=int),
         "CONN_MAX_AGE": config("POSTGRES_CONN_MAX_AGE", default=60, cast=int),
@@ -111,12 +111,12 @@ SOCIALACCOUNT_PROVIDERS = {
 }
 
 EMAIL_BACKEND = "django.core.mail.backends.smtp.EmailBackend"
-EMAIL_HOST = config("EMAIL_HOST", default="smtp.resend.com")
-EMAIL_PORT = config("EMAIL_PORT", default=587, cast=int)
+EMAIL_HOST = config("EMAIL_HOST", default="localhost")
+EMAIL_PORT = config("EMAIL_PORT", default=1025, cast=int)
 EMAIL_HOST_USER = config("EMAIL_HOST_USER", default="")
 EMAIL_HOST_PASSWORD = config("EMAIL_HOST_PASSWORD", default="")
-EMAIL_USE_TLS = config("EMAIL_USE_TLS", default=True, cast=bool)
-DEFAULT_FROM_EMAIL = config("DEFAULT_FROM_EMAIL", default="noreply@example.com")
+EMAIL_USE_TLS = config("EMAIL_USE_TLS", default=False, cast=bool)
+DEFAULT_FROM_EMAIL = config("DEFAULT_FROM_EMAIL", default="noreply@example.test")
 SERVER_EMAIL = DEFAULT_FROM_EMAIL
 
 LANGUAGE_CODE = "sv-se"
