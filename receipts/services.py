@@ -48,11 +48,9 @@ def strip_exif_and_prepare_image(uploaded_file: UploadedFile, detected_mime: str
 
 def _extract_json_payload(content: str) -> dict[str, Any]:
     cleaned = content.strip()
-    if cleaned.startswith("```"):
-        cleaned = cleaned.strip("`")
-        _, _, cleaned = cleaned.partition("\n")
-        if cleaned.endswith("```"):
-            cleaned = cleaned[:-3].strip()
+    if cleaned.startswith("```") and cleaned.endswith("```"):
+        lines = cleaned.splitlines()
+        cleaned = "\n".join(lines[1:-1]).strip()
     return json.loads(cleaned)
 
 

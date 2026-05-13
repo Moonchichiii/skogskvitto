@@ -105,7 +105,7 @@ async def scan_receipt(request: HttpRequest, image: UploadedFile = File(...)) ->
 
 @router.post("/save/{receipt_id}")
 async def save_receipt(
-    request: HttpRequest,
+    _request: HttpRequest,
     receipt_id: int,
     vendor: str = Form(""),
     total_amount: str = Form(""),
@@ -113,7 +113,6 @@ async def save_receipt(
     date: str = Form(""),
     category: str = Form(""),
 ) -> HttpResponse:
-    del request
     receipt = await Receipt.objects.aget(pk=receipt_id)
     receipt.vendor = vendor.strip()
     receipt.total_amount = _parse_decimal(total_amount)
