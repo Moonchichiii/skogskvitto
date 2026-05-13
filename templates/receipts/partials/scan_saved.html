@@ -1,3 +1,8 @@
-<div class="rounded-2xl border border-emerald-200 bg-emerald-50 p-4 text-sm text-emerald-800">
-  Kvitto sparat: {{ receipt.vendor|default:"Okänd butik" }}.
+<div class="space-y-3">
+  <div class="rounded-2xl border border-emerald-200 bg-emerald-50 p-4 text-sm text-emerald-800">
+    Kvitto sparat: {{ receipt.vendor|default:"Okänd butik" }}.
+  </div>
+  <a href="/dashboard/" class="block w-full rounded-xl bg-emerald-700 px-4 py-4 text-center text-base font-semibold text-white">
+    Gå till dashboard
+  </a>
 </div>
