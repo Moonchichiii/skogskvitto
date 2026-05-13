@@ -57,8 +57,9 @@ def _detect_image_mime(upload: UploadedFile) -> str:
 
 
 @router.post("/scan")
-async def scan_receipt(request: HttpRequest, image: UploadedFile = File(...)) -> HttpResponse:
-    if image.size > MAX_UPLOAD_SIZE_BYTES:
+async def scan_receipt(request: HttpRequest, image: File[UploadedFile]) -> HttpResponse:
+    image_size = image.size or 0
+    if image_size > MAX_UPLOAD_SIZE_BYTES:
         return await sync_to_async(_render_fragment)(
             "receipts/partials/scan_error.html",
             {"error": "Bilden är för stor. Max 10MB."},
@@ -77,7 +78,7 @@ async def scan_receipt(request: HttpRequest, image: UploadedFile = File(...)) ->
     owner = request.user if request.user.is_authenticated else None
     receipt = await Receipt.objects.acreate(owner=owner, image=cleaned_file)
 
-    extension = Path(receipt.image.name).suffix or ".jpg"
+    extension = Path(receipt.image.name or "").suffix or ".jpg"
     tmp_path: Path | None = None
     try:
         with NamedTemporaryFile(suffix=extension, delete=False) as tmp:
@@ -108,14 +109,15 @@ async def scan_receipt(request: HttpRequest, image: UploadedFile = File(...)) ->
 
 @router.post("/save")
 async def save_receipt(
-    _request: HttpRequest,
-    signed_receipt: str = Form(...),
-    vendor: str = Form(""),
-    total_amount: str = Form(""),
-    vat_amount: str = Form(""),
-    date: str = Form(""),
-    category: str = Form(""),
+    request: HttpRequest,
+    signed_receipt: Form[str],
+    vendor: Form[str] = "",
+    total_amount: Form[str] = "",
+    vat_amount: Form[str] = "",
+    date: Form[str] = "",
+    category: Form[str] = "",
 ) -> HttpResponse:
+    del request
     try:
         receipt_id = int(RECEIPT_SIGNER.unsign(signed_receipt))
     except (BadSignature, ValueError):
