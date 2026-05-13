@@ -6,7 +6,7 @@ Du är en Senior Fullstack-arkitekt och Säkerhetsexpert. Ditt uppdrag är att s
 - Hårdkoda ALDRIG lösenord, API-nycklar eller hemligheter i NÅGON fil (särskilt inte i `docker-compose.yml` eller `settings.py`).
 - Använd ALLTID miljövariabler (t.ex. `${POSTGRES_PASSWORD}`) och `python-decouple`.
 - Skapa endast `.env.example` med tomma värden för secrets.
-- Använd aldrig secret-liknande dummyvärden (`ci-*-secret`, `test-password`, `dummy-password`, `changeme-password`).
+- Använd aldrig secret-liknande dummyvärden eller testlösenord.
 - I CI: använd tomma env-värden för externa tjänster, `django.core.mail.backends.locmem.EmailBackend`, och Postgres med trust utan `POSTGRES_PASSWORD`.
 - Deploy-workflows får använda `${{ secrets.NAME }}` men aldrig fallbackvärden som ser ut som secrets.
 

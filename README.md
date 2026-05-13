@@ -73,7 +73,7 @@ FLY_API_TOKEN: ${{ secrets.FLY_API_TOKEN }}
 Förbjudet:
 
 ```yaml
-FLY_API_TOKEN: ci-fly-secret
+FLY_API_TOKEN: "<hårdkodat fallbackvärde>"
 ```
 
 Följande secrets ska sättas i Fly.io (inte hårdkodas i repo):
