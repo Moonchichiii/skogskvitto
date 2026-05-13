@@ -1,6 +1,7 @@
 import io
 import unicodedata
 from collections import defaultdict
+from dataclasses import dataclass
 from decimal import Decimal
 
 from openpyxl import Workbook
@@ -16,6 +17,12 @@ KORJOURNAL_RATE_PER_MIL = Decimal("25")
 KM_PER_MIL = Decimal("10")
 CURRENCY_FORMAT = '#,##0.00 "kr"'
 NUMBER_FORMAT = "#,##0.00"
+
+
+@dataclass
+class MonthlyDrive:
+    trips: int = 0
+    kilometers: Decimal = ZERO
 
 
 def _decimal(value: Decimal | None) -> Decimal:
@@ -131,9 +138,7 @@ def _write_korjournal_sheet(wb: Workbook, receipts: list[Receipt]) -> None:
     headers = ["Månad", "Antal resor", "Kilometer totalt", "Ersättning (25 kr/mil)"]
     _setup_sheet(ws, headers, [14, 14, 18, 22])
 
-    monthly: dict[str, dict[str, Decimal | int]] = defaultdict(
-        lambda: {"trips": 0, "kilometers": ZERO}
-    )
+    monthly: defaultdict[str, MonthlyDrive] = defaultdict(MonthlyDrive)
 
     for receipt in receipts:
         if not receipt.date:
@@ -145,8 +150,9 @@ def _write_korjournal_sheet(wb: Workbook, receipts: list[Receipt]) -> None:
 
         month_key = receipt.date.strftime("%Y-%m")
         month_data = monthly[month_key]
-        month_data["trips"] = int(month_data["trips"]) + 1
-        # TODO: Kilometer bör hämtas från dedikerat fält när det finns i datamodellen.
+        month_data.trips += 1
+        # TODO: Körjournal bör få dedikerat kilometerfält i modellen i stället för total_amount.
+        month_data.kilometers += _decimal(receipt.total_amount)
 
     total_trips = 0
     total_kilometers = ZERO
@@ -154,8 +160,9 @@ def _write_korjournal_sheet(wb: Workbook, receipts: list[Receipt]) -> None:
 
     row = 2
     for month in sorted(monthly.keys()):
-        trips = int(monthly[month]["trips"])
-        kilometers = _decimal(monthly[month]["kilometers"])
+        month_data = monthly[month]
+        trips = month_data.trips
+        kilometers = month_data.kilometers
         ersattning = (kilometers / KM_PER_MIL) * KORJOURNAL_RATE_PER_MIL
 
         ws.cell(row=row, column=1, value=month)
