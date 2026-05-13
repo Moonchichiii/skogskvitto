@@ -17,7 +17,7 @@ jobs:
         env:
           POSTGRES_DB: skogskvitto
           POSTGRES_USER: skogskvitto
-          POSTGRES_HOST_AUTH_METHOD: trust
+          POSTGRES_PASSWORD: skogskvitto
         ports:
           - 5432:5432
         options: >-
@@ -36,6 +36,7 @@ jobs:
       DATABASE_URL: postgres://skogskvitto@127.0.0.1:5432/skogskvitto
       POSTGRES_DB: skogskvitto
       POSTGRES_USER: skogskvitto
+      POSTGRES_PASSWORD: skogskvitto
       POSTGRES_HOST: 127.0.0.1
       POSTGRES_PORT: "5432"
 
