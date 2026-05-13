@@ -39,12 +39,12 @@
   </div>
 
   <div x-show="showDetails" x-transition class="mt-4 space-y-3 border-t border-gray-100 pt-4">
-    <label class="flex items-center gap-3 text-sm text-gray-700">
-      <input type="checkbox" checked disabled class="h-4 w-4 rounded accent-emerald-700">
+    <label for="consent-necessary" class="flex items-center gap-3 text-sm text-gray-700">
+      <input id="consent-necessary" type="checkbox" checked disabled class="h-4 w-4 rounded accent-emerald-700">
       <span><strong>Nödvändiga</strong> – alltid aktiva (inloggning, CSRF-skydd)</span>
     </label>
-    <label class="flex items-center gap-3 text-sm text-gray-700 cursor-pointer">
-      <input type="checkbox" x-model="analytics" class="h-4 w-4 rounded accent-emerald-700">
+    <label for="consent-analytics" class="flex items-center gap-3 text-sm text-gray-700 cursor-pointer">
+      <input id="consent-analytics" type="checkbox" x-model="analytics" class="h-4 w-4 rounded accent-emerald-700">
       <span><strong>Analys &amp; marknadsföring</strong> – hjälper oss förbättra tjänsten</span>
     </label>
     <button
@@ -58,12 +58,18 @@
 
 <script>
   function cookieBanner() {
+    function getConsent() {
+      try { return localStorage.getItem('cookie_consent'); } catch (_) { return null; }
+    }
+    function saveConsent(level) {
+      try { localStorage.setItem('cookie_consent', level); } catch (_) { /* private mode */ }
+    }
     return {
-      visible: !localStorage.getItem('cookie_consent'),
+      visible: !getConsent(),
       showDetails: false,
       analytics: false,
       accept(level) {
-        localStorage.setItem('cookie_consent', level);
+        saveConsent(level);
         this.visible = false;
       },
       acceptCustom() {
