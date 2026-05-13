@@ -61,7 +61,11 @@ class UserSubscription(models.Model):
     stripe_customer_id = models.CharField(max_length=255, blank=True)
     stripe_subscription_id = models.CharField(max_length=255, unique=True)
     status = models.CharField(max_length=32, choices=STATUS_CHOICES)
-    plan_interval = models.CharField(max_length=16, choices=INTERVAL_CHOICES, default=INTERVAL_MONTH)
+    plan_interval = models.CharField(
+        max_length=16,
+        choices=INTERVAL_CHOICES,
+        default=INTERVAL_MONTH,
+    )
     current_period_end = models.DateTimeField(null=True, blank=True)
     updated_at = models.DateTimeField(auto_now=True)
     created_at = models.DateTimeField(auto_now_add=True)

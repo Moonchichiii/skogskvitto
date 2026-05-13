@@ -1,28 +1,28 @@
 import io
 from collections.abc import Awaitable, Callable
-from datetime import date
+from datetime import date, datetime
 from decimal import Decimal
 from functools import wraps
+from typing import cast
 
 import httpx
 from asgiref.sync import sync_to_async
 from django.contrib.auth.views import redirect_to_login
 from django.http import FileResponse, HttpRequest, HttpResponseBadRequest, HttpResponseRedirect
-from django.http.response import HttpResponseForbidden
-from django.http.response import HttpResponseBase
+from django.http.response import HttpResponseBase, HttpResponseForbidden
 from django.shortcuts import redirect, render
 from django.urls import reverse
 from django.utils import timezone
 
+from apps.core.models import User
 from apps.receipts.billing import (
     can_export_excel,
     can_use_korjournal,
     get_user_plan,
     is_premium_user,
     plan_to_price_id,
-    stripe_request,
     stripe_is_configured,
-    user_has_active_subscription,
+    stripe_request,
 )
 from apps.receipts.exports import build_excel
 from apps.receipts.models import Receipt, UserSubscription
@@ -42,10 +42,11 @@ def login_required_async(view: AsyncView) -> AsyncView:
 
 @login_required_async
 async def dashboard(request: HttpRequest) -> HttpResponseBase:
+    user = cast(User, request.user)
     year = date.today().year
     receipts = [
         r
-        async for r in Receipt.objects.filter(owner=request.user).order_by(
+        async for r in Receipt.objects.filter(owner=user).order_by(
             "-date", "-created_at"
         )
     ]
@@ -54,7 +55,7 @@ async def dashboard(request: HttpRequest) -> HttpResponseBase:
     total_year = sum((r.total_amount or Decimal(0) for r in year_receipts), Decimal(0))
     vat_year = sum((r.vat_amount or Decimal(0) for r in year_receipts), Decimal(0))
 
-    has_premium_access = await is_premium_user(request.user)
+    has_premium_access = await is_premium_user(user)
 
     return render(
         request,
@@ -65,20 +66,21 @@ async def dashboard(request: HttpRequest) -> HttpResponseBase:
             "vat_year": vat_year,
             "year": year,
             "has_active_subscription": has_premium_access,
-            "user_plan": await get_user_plan(request.user),
-            "can_use_korjournal": await can_use_korjournal(request.user),
+            "user_plan": await get_user_plan(user),
+            "can_use_korjournal": await can_use_korjournal(user),
         },
     )
 
 
 @login_required_async
 async def export_excel(request: HttpRequest) -> HttpResponseBase:
-    if not await can_export_excel(request.user):
+    user = cast(User, request.user)
+    if not await can_export_excel(user):
         return HttpResponseForbidden("Export till Excel kräver Premium eller pilotåtkomst.")
 
     receipts = [
         r
-        async for r in Receipt.objects.filter(owner=request.user).order_by(
+        async for r in Receipt.objects.filter(owner=user).order_by(
             "-date", "-created_at"
         )
     ]
@@ -95,13 +97,14 @@ async def export_excel(request: HttpRequest) -> HttpResponseBase:
 
 @login_required_async
 async def start_checkout(request: HttpRequest) -> HttpResponseBase:
+    user = cast(User, request.user)
     if not stripe_is_configured():
         return HttpResponseBadRequest(
             "Stripe-konfiguration saknas. Kontrollera STRIPE_SECRET_KEY, "
             "STRIPE_PRICE_MONTHLY_ID och STRIPE_PRICE_YEARLY_ID."
         )
 
-    if await is_premium_user(request.user):
+    if await is_premium_user(user):
         return redirect("dashboard")
 
     plan = request.GET.get("plan", "yearly")
@@ -127,8 +130,8 @@ async def start_checkout(request: HttpRequest) -> HttpResponseBase:
                 "success_url": success_url,
                 "cancel_url": cancel_url,
                 "allow_promotion_codes": "true",
-                "client_reference_id": str(request.user.id),
-                "customer_email": request.user.email,
+                "client_reference_id": str(user.id),
+                "customer_email": user.email,
             },
         )
     except httpx.HTTPError:
@@ -143,6 +146,7 @@ async def start_checkout(request: HttpRequest) -> HttpResponseBase:
 
 @login_required_async
 async def billing_success(request: HttpRequest) -> HttpResponseBase:
+    user = cast(User, request.user)
     if not stripe_is_configured():
         return HttpResponseBadRequest(
             "Stripe-konfiguration saknas. Kontrollera STRIPE_SECRET_KEY, "
@@ -168,7 +172,7 @@ async def billing_success(request: HttpRequest) -> HttpResponseBase:
     if checkout_session.get("status") != "complete":
         return HttpResponseBadRequest("Betalningen är inte slutförd.")
 
-    if str(checkout_session.get("client_reference_id", "")) != str(request.user.id):
+    if str(checkout_session.get("client_reference_id", "")) != str(user.id):
         return HttpResponseBadRequest("Checkout-session tillhör inte aktuell användare.")
 
     subscription = checkout_session.get("subscription")
@@ -187,7 +191,7 @@ async def billing_success(request: HttpRequest) -> HttpResponseBase:
     current_period_end_raw = subscription.get("current_period_end")
     current_period_end = None
     if isinstance(current_period_end_raw, int):
-        current_period_end = timezone.datetime.fromtimestamp(
+        current_period_end = datetime.fromtimestamp(
             current_period_end_raw,
             tz=timezone.get_current_timezone(),
         )
@@ -208,7 +212,7 @@ async def billing_success(request: HttpRequest) -> HttpResponseBase:
                             interval = UserSubscription.INTERVAL_YEAR
 
     user_subscription, created = await UserSubscription.objects.aget_or_create(
-        user=request.user,
+        user=user,
         defaults={
             "stripe_subscription_id": subscription_id,
             "stripe_customer_id": customer_id,

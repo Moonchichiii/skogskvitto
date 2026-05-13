@@ -2,20 +2,19 @@ from __future__ import annotations
 
 import httpx
 from decouple import config
-from django.contrib.auth.models import AnonymousUser
-from django.contrib.auth.models import AbstractBaseUser
+from django.contrib.auth.models import AbstractBaseUser, AnonymousUser
 from django.db.models import Q
 from django.utils import timezone
 
 from apps.receipts.models import Receipt, UserSubscription
 
 # Max antal gratis kvitton innan nästa skapande kräver prenumeration.
-FREE_RECEIPT_LIMIT = config("FREEMIUM_RECEIPT_LIMIT", default=5, cast=int)
+FREE_RECEIPT_LIMIT: int = config("FREEMIUM_RECEIPT_LIMIT", default=5, cast=int)
 STRIPE_API_BASE = "https://api.stripe.com/v1"
 STRIPE_REQUEST_TIMEOUT = 30.0
-STRIPE_SECRET_KEY = config("STRIPE_SECRET_KEY", default="")
-STRIPE_PRICE_MONTHLY_ID = config("STRIPE_PRICE_MONTHLY_ID", default="")
-STRIPE_PRICE_YEARLY_ID = config("STRIPE_PRICE_YEARLY_ID", default="")
+STRIPE_SECRET_KEY: str = config("STRIPE_SECRET_KEY", default="", cast=str)
+STRIPE_PRICE_MONTHLY_ID: str = config("STRIPE_PRICE_MONTHLY_ID", default="", cast=str)
+STRIPE_PRICE_YEARLY_ID: str = config("STRIPE_PRICE_YEARLY_ID", default="", cast=str)
 
 ACTIVE_SUBSCRIPTION_STATUSES = {
     UserSubscription.STATUS_ACTIVE,
@@ -35,7 +34,7 @@ async def stripe_request(
     endpoint: str,
     *,
     data: dict[str, str] | None = None,
-    params: list[tuple[str, str]] | None = None,
+    params: list[tuple[str, str | int | float | None]] | None = None,
 ) -> dict[str, object]:
     if not STRIPE_SECRET_KEY:
         msg = "Stripe secret key is missing."
@@ -59,7 +58,7 @@ async def stripe_request(
 
 
 def plan_to_price_id(plan: str) -> str | None:
-    mapping = {
+    mapping: dict[str, str] = {
         "monthly": STRIPE_PRICE_MONTHLY_ID,
         "yearly": STRIPE_PRICE_YEARLY_ID,
     }
