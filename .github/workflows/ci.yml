@@ -1,0 +1,80 @@
+name: CI
+
+on:
+  pull_request:
+  push:
+    branches:
+      - main
+
+permissions:
+  contents: read
+
+jobs:
+  quality:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    services:
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_DB: skogskvitto
+          POSTGRES_USER: skogskvitto
+          POSTGRES_PASSWORD: skogskvitto
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U skogskvitto -d skogskvitto"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 10
+    env:
+      DJANGO_SECRET_KEY: ci-secret-key
+      DJANGO_DEBUG: "0"
+      DJANGO_ALLOWED_HOSTS: localhost,127.0.0.1
+      DJANGO_CSRF_TRUSTED_ORIGINS: http://localhost:8000
+      DJANGO_SECURE_SSL_REDIRECT: "0"
+      DJANGO_SECURE_HSTS_SECONDS: "0"
+      POSTGRES_DB: skogskvitto
+      POSTGRES_USER: skogskvitto
+      POSTGRES_PASSWORD: skogskvitto
+      POSTGRES_HOST: 127.0.0.1
+      POSTGRES_PORT: "5432"
+      GOOGLE_OAUTH_CLIENT_ID: ci-google-client-id
+      GOOGLE_OAUTH_CLIENT_SECRET: ci-google-client-secret
+      STRIPE_SECRET_KEY: ci-stripe-secret
+      STRIPE_PRICE_MONTHLY_ID: price_ci_monthly
+      STRIPE_PRICE_YEARLY_ID: price_ci_yearly
+      FREEMIUM_RECEIPT_LIMIT: "10"
+      OPENAI_API_KEY: ""
+      OPENAI_MODEL: gpt-4.1-mini
+      PRIVACY_CONTACT: privacy@example.com
+      EMAIL_HOST: smtp.resend.com
+      EMAIL_PORT: "587"
+      EMAIL_HOST_USER: resend
+      EMAIL_HOST_PASSWORD: ""
+      DEFAULT_FROM_EMAIL: noreply@example.com
+      EMAIL_USE_TLS: "1"
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v6.0.2
+
+      - name: Setup uv
+        uses: astral-sh/setup-uv@v8.1.0
+
+      - name: Sync dependencies
+        run: uv sync --dev
+
+      - name: Django system check
+        run: uv run python manage.py check
+
+      - name: Verify migrations are up to date
+        run: uv run python manage.py makemigrations --check --dry-run
+
+      - name: Ruff
+        run: uv run ruff check .
+
+      - name: Mypy
+        run: uv run mypy .
+
+      - name: Pytest
+        run: uv run pytest
