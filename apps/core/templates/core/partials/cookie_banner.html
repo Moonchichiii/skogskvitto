@@ -1,0 +1,74 @@
+<div
+  x-data="cookieBanner()"
+  x-show="visible"
+  x-transition:enter="transition ease-out duration-300"
+  x-transition:enter-start="opacity-0 translate-y-4"
+  x-transition:enter-end="opacity-100 translate-y-0"
+  x-transition:leave="transition ease-in duration-200"
+  x-transition:leave-start="opacity-100 translate-y-0"
+  x-transition:leave-end="opacity-0 translate-y-4"
+  class="fixed bottom-4 left-4 right-4 z-50 mx-auto max-w-2xl rounded-2xl bg-white p-5 shadow-lg sm:bottom-6 sm:left-6 sm:right-6"
+  role="dialog"
+  aria-label="Cookie-samtycke"
+>
+  <p class="mb-1 text-sm font-semibold text-gray-900">Vi använder cookies</p>
+  <p class="mb-4 text-sm text-gray-600 leading-relaxed">
+    <strong>Nödvändiga cookies</strong> krävs alltid för inloggning och säkerhet.
+    <strong>Analys- och marknadsföringscookies</strong> används bara om du godkänner det.
+  </p>
+
+  <div class="flex flex-wrap gap-2">
+    <button
+      @click="accept('all')"
+      class="flex-1 rounded-xl bg-emerald-700 px-4 py-2.5 text-sm font-semibold text-white transition-colors hover:bg-emerald-800 focus:outline-none focus:ring-2 focus:ring-emerald-700 focus:ring-offset-2"
+    >
+      Acceptera alla
+    </button>
+    <button
+      @click="accept('necessary')"
+      class="flex-1 rounded-xl border border-gray-300 bg-white px-4 py-2.5 text-sm font-semibold text-gray-700 transition-colors hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-emerald-700 focus:ring-offset-2"
+    >
+      Endast nödvändiga
+    </button>
+    <button
+      @click="showDetails = !showDetails"
+      class="w-full rounded-xl border border-gray-200 px-4 py-2 text-xs text-gray-500 transition-colors hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-emerald-700 focus:ring-offset-2 sm:w-auto"
+    >
+      Hantera val
+    </button>
+  </div>
+
+  <div x-show="showDetails" x-transition class="mt-4 space-y-3 border-t border-gray-100 pt-4">
+    <label class="flex items-center gap-3 text-sm text-gray-700">
+      <input type="checkbox" checked disabled class="h-4 w-4 rounded accent-emerald-700">
+      <span><strong>Nödvändiga</strong> – alltid aktiva (inloggning, CSRF-skydd)</span>
+    </label>
+    <label class="flex items-center gap-3 text-sm text-gray-700 cursor-pointer">
+      <input type="checkbox" x-model="analytics" class="h-4 w-4 rounded accent-emerald-700">
+      <span><strong>Analys &amp; marknadsföring</strong> – hjälper oss förbättra tjänsten</span>
+    </label>
+    <button
+      @click="acceptCustom()"
+      class="mt-1 rounded-xl bg-emerald-700 px-4 py-2 text-sm font-semibold text-white transition-colors hover:bg-emerald-800 focus:outline-none focus:ring-2 focus:ring-emerald-700 focus:ring-offset-2"
+    >
+      Spara mina val
+    </button>
+  </div>
+</div>
+
+<script>
+  function cookieBanner() {
+    return {
+      visible: !localStorage.getItem('cookie_consent'),
+      showDetails: false,
+      analytics: false,
+      accept(level) {
+        localStorage.setItem('cookie_consent', level);
+        this.visible = false;
+      },
+      acceptCustom() {
+        this.accept(this.analytics ? 'all' : 'necessary');
+      },
+    };
+  }
+</script>
