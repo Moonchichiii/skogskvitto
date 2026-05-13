@@ -1,0 +1,88 @@
+{% extends "core/base.html" %}
+
+{% block content %}
+<section class="mx-auto max-w-3xl space-y-4">
+  <header class="rounded-2xl border border-gray-200 bg-white p-5 shadow-sm sm:p-6">
+    <h1 class="text-2xl font-bold tracking-tight text-emerald-800 sm:text-3xl">Integritetspolicy</h1>
+    <p class="mt-2 text-sm text-gray-600">
+      Vi vill göra det enkelt för svenska skogsägare att samla underlag utan att tumma på integriteten.
+    </p>
+  </header>
+
+  <article class="space-y-4 rounded-2xl border border-gray-200 bg-white p-5 shadow-sm sm:p-6">
+    <h2 class="text-lg font-semibold text-gray-900">Vilken data kan sparas</h2>
+    <p class="text-sm text-gray-700">SkogsKvitto kan spara:</p>
+    <ul class="space-y-1 text-sm text-gray-700">
+      <li>• konto och e-postadress</li>
+      <li>• kvittobilder och fakturor</li>
+      <li>• belopp, moms, datum och leverantör</li>
+      <li>• körjournal</li>
+      <li>• skogsinkomster</li>
+      <li>• Excel-exporter och andra ekonomiska underlag</li>
+    </ul>
+  </article>
+
+  <article class="space-y-3 rounded-2xl border border-gray-200 bg-white p-5 shadow-sm sm:p-6">
+    <h2 class="text-lg font-semibold text-gray-900">Dataminimering och filtrering</h2>
+    <p class="text-sm text-gray-700">
+      Vi minimerar känslig data och sparar bara det som behövs för dokumentation, uppföljning och export.
+    </p>
+    <p class="text-sm text-gray-700">
+      Innan data eventuellt skickas till AI/OpenAI tvättas den lokalt eller server-side för att minska risken för onödiga personuppgifter.
+    </p>
+    <p class="text-sm text-gray-700">
+      Personnummer, adresser och andra onödiga identifierare ska filtreras bort eller maskas innan AI-anrop.
+    </p>
+  </article>
+
+  <article class="space-y-3 rounded-2xl border border-gray-200 bg-white p-5 shadow-sm sm:p-6">
+    <h2 class="text-lg font-semibold text-gray-900">Hur AI används</h2>
+    <p class="text-sm text-gray-700">
+      AI används som hjälp för strukturering och tolkning av underlag. Resultaten är vägledande.
+    </p>
+    <p class="text-sm text-gray-700">
+      AI-förslag är inte auktoritativ skatte- eller juridisk rådgivning.
+    </p>
+    <p class="text-sm text-gray-700">
+      Du och din revisor bör alltid kontrollera exporter, tolkningar och skatteunderlag innan de används.
+    </p>
+  </article>
+
+  <article class="space-y-3 rounded-2xl border border-gray-200 bg-white p-5 shadow-sm sm:p-6">
+    <h2 class="text-lg font-semibold text-gray-900">Lagring av kvittobilder</h2>
+    <p class="text-sm text-gray-700">
+      Kvittobilder och fakturabilder lagras i appens privata lagringsyta för att kunna visas, följas upp och exporteras tillsammans med underlag.
+    </p>
+    <p class="text-sm text-gray-700">
+      Endast behöriga processer i tjänsten ska ha åtkomst till lagrade filer.
+    </p>
+  </article>
+
+  <article class="space-y-3 rounded-2xl border border-gray-200 bg-white p-5 shadow-sm sm:p-6">
+    <h2 class="text-lg font-semibold text-gray-900">Dina rättigheter</h2>
+    <p class="text-sm text-gray-700">
+      Du kan begära export av dina uppgifter och du kan begära radering av konto och lagrat material.
+    </p>
+    <p class="text-sm text-gray-700">
+      Vi hanterar sådana förfrågningar så snabbt vi kan och i linje med gällande dataskyddsregler.
+    </p>
+  </article>
+
+  <article class="space-y-3 rounded-2xl border border-gray-200 bg-white p-5 shadow-sm sm:p-6">
+    <h2 class="text-lg font-semibold text-gray-900">Cookies</h2>
+    <p class="text-sm text-gray-700">
+      Vi använder främst nödvändiga cookies för inloggning, säkerhet och att tjänsten ska fungera korrekt.
+    </p>
+    <p class="text-sm text-gray-700">
+      Om vi använder fler typer av cookies berättar vi det tydligt i appen.
+    </p>
+  </article>
+
+  <article class="space-y-3 rounded-2xl border border-gray-200 bg-white p-5 shadow-sm sm:p-6">
+    <h2 class="text-lg font-semibold text-gray-900">Kontakt för integritetsfrågor</h2>
+    <p class="text-sm text-gray-700">
+      Vid frågor om integritet, export eller radering: kontakta oss via <span class="font-medium">[ange kontaktadress via miljövariabel i driftmiljön]</span>.
+    </p>
+  </article>
+</section>
+{% endblock %}

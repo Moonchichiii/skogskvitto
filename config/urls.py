@@ -1,5 +1,6 @@
 from django.contrib import admin
 from django.urls import include, path
+from django.views.generic import TemplateView
 from ninja import NinjaAPI
 
 from apps.core.views import index
@@ -18,6 +19,16 @@ api.add_router("receipts/", receipts_router)
 urlpatterns = [
     path("", index, name="index"),
     path("dashboard/", dashboard, name="dashboard"),
+    path(
+        "integritetspolicy/",
+        TemplateView.as_view(template_name="core/privacy_policy.html"),
+        name="privacy_policy",
+    ),
+    path(
+        "anvandarvillkor/",
+        TemplateView.as_view(template_name="core/terms_of_service.html"),
+        name="terms_of_service",
+    ),
     path("receipts/export/excel/", export_excel, name="export_excel"),
     path("billing/checkout/", start_checkout, name="start_checkout"),
     path("billing/success/", billing_success, name="billing_success"),
