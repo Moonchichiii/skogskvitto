@@ -1,11 +1,13 @@
 <!doctype html>
 <html lang="sv">
 <head>
+  {% load static %}
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>SkogsKvitto</title>
-  <script defer src="https://cdn.jsdelivr.net/npm/htmx.org@2.0.4/dist/htmx.min.js" integrity="sha384-HGfztofotfshcF7+8n44JQL2oJmowVChPTg48S+jvZoztPfvwD79OC/LTtG6dMp+" crossorigin="anonymous"></script>
-  <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.14.9/dist/cdn.min.js" integrity="sha384-l9Esl9s4B4AOLtuakyn7z6Qx/GIbbzRjodcL8W7kRZA8xWvov6vwrKZcA2V8jvWy" crossorigin="anonymous"></script>
+  <link rel="stylesheet" href="{% static 'css/app.css' %}">
+  <script defer src="https://cdn.jsdelivr.net/npm/htmx.org@2.0.4/dist/htmx.min.js" crossorigin="anonymous"></script>
+  <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.14.9/dist/cdn.min.js" crossorigin="anonymous"></script>
 </head>
 <body class="min-h-screen bg-gray-50 text-gray-900">
   <header class="bg-emerald-800 text-white">
