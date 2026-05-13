@@ -1,10 +1,9 @@
+from pathlib import Path
+
 import django
 from django.conf import settings
 
-TEMPLATES_DIR = (
-    __file__.replace("tests/conftest.py", "")
-    + "apps/core/templates"
-)
+TEMPLATES_DIR = Path(__file__).parent.parent / "apps/core/templates"
 
 
 def pytest_configure() -> None:
