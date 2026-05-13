@@ -1,0 +1,22 @@
+<!doctype html>
+<html lang="sv">
+<head>
+  {% load static %}
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>SkogsKvitto</title>
+  <link rel="stylesheet" href="{% static 'css/app.css' %}">
+  <script defer src="https://cdn.jsdelivr.net/npm/htmx.org@2.0.4/dist/htmx.min.js" crossorigin="anonymous"></script>
+  <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.14.9/dist/cdn.min.js" crossorigin="anonymous"></script>
+</head>
+<body class="min-h-screen bg-gray-50 text-gray-900">
+  <header class="bg-emerald-800 text-white">
+    <nav class="mx-auto flex w-full max-w-5xl items-center justify-between px-4 py-4">
+      <a href="/" class="text-lg font-semibold tracking-tight">SkogsKvitto</a>
+    </nav>
+  </header>
+  <main id="content" hx-target="this" class="mx-auto w-full max-w-5xl p-4 sm:p-6">
+    {% block content %}{% endblock %}
+  </main>
+</body>
+</html>
