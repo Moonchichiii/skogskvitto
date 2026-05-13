@@ -4,11 +4,11 @@
 <div class="space-y-6">
 
   <div class="grid grid-cols-2 gap-4">
-    <div class="rounded-2xl bg-white p-4 shadow-sm">
+    <div class="rounded-2xl border border-gray-100 bg-white p-4 shadow-sm">
       <p class="text-xs font-medium uppercase tracking-wide text-gray-500">Total utlägg {{ year }}</p>
       <p class="mt-2 text-2xl font-semibold text-emerald-700">{{ total_year|floatformat:2 }} kr</p>
     </div>
-    <div class="rounded-2xl bg-white p-4 shadow-sm">
+    <div class="rounded-2xl border border-gray-100 bg-white p-4 shadow-sm">
       <p class="text-xs font-medium uppercase tracking-wide text-gray-500">Momsavdrag {{ year }}</p>
       <p class="mt-2 text-2xl font-semibold text-emerald-700">{{ vat_year|floatformat:2 }} kr</p>
     </div>
@@ -16,12 +16,12 @@
 
   <a
     href="/receipts/export/excel/"
-    class="block w-full rounded-xl bg-emerald-700 px-4 py-4 text-center text-base font-semibold text-white"
+    class="block w-full rounded-2xl bg-emerald-700 px-4 py-4 text-center text-base font-semibold text-white transition-all duration-200 hover:bg-emerald-800"
   >
     Exportera till Excel
   </a>
 
-  <div class="overflow-hidden rounded-2xl bg-white shadow-sm">
+  <div class="overflow-hidden rounded-2xl border border-gray-100 bg-white shadow-sm">
     <table class="w-full text-sm">
       <thead class="border-b border-gray-100 bg-gray-50">
         <tr>

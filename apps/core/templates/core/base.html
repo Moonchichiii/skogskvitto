@@ -10,11 +10,11 @@
   <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.14.9/dist/cdn.min.js" crossorigin="anonymous"></script>
 </head>
 <body class="min-h-screen bg-gray-50 text-gray-900">
-  <header class="bg-emerald-800 text-white">
+  <header class="border-b border-gray-100 bg-gray-50">
     <nav class="mx-auto flex w-full max-w-5xl items-center justify-between px-4 py-4">
-      <a href="/" class="text-lg font-semibold tracking-tight">SkogsKvitto</a>
+      <a href="/" class="text-lg font-semibold tracking-tight text-gray-900 transition-all duration-200 hover:text-emerald-700">SkogsKvitto</a>
       {% if user.is_authenticated %}
-      <a href="/dashboard/" class="text-sm font-medium text-emerald-200 hover:text-white">Dashboard</a>
+      <a href="/dashboard/" class="rounded-xl bg-emerald-700 px-4 py-2 text-sm font-semibold text-white transition-all duration-200 hover:bg-emerald-800">Dashboard</a>
       {% endif %}
     </nav>
   </header>
