@@ -6,6 +6,8 @@ from tempfile import NamedTemporaryFile
 import magic
 from asgiref.sync import sync_to_async
 from django.http import HttpRequest, HttpResponse
+from django.http.response import HttpResponseForbidden
+from django.core.signing import BadSignature, Signer
 from django.template.loader import render_to_string
 from ninja import File, Form, Router
 from ninja.files import UploadedFile
@@ -20,6 +22,7 @@ from receipts.services import (
 router = Router(tags=["receipts"])
 
 MAX_UPLOAD_SIZE_BYTES = 10 * 1024 * 1024
+RECEIPT_SIGNER = Signer(salt="receipt-save")
 
 
 def _parse_decimal(value: str) -> Decimal | None:
@@ -99,20 +102,25 @@ async def scan_receipt(request: HttpRequest, image: UploadedFile = File(...)) ->
 
     return await sync_to_async(_render_fragment)(
         "receipts/partials/scan_result_form.html",
-        {"receipt": receipt},
+        {"receipt": receipt, "signed_receipt": RECEIPT_SIGNER.sign(str(receipt.pk))},
     )
 
 
-@router.post("/save/{receipt_id}")
+@router.post("/save")
 async def save_receipt(
     _request: HttpRequest,
-    receipt_id: int,
+    signed_receipt: str = Form(...),
     vendor: str = Form(""),
     total_amount: str = Form(""),
     vat_amount: str = Form(""),
     date: str = Form(""),
     category: str = Form(""),
 ) -> HttpResponse:
+    try:
+        receipt_id = int(RECEIPT_SIGNER.unsign(signed_receipt))
+    except (BadSignature, ValueError):
+        return HttpResponseForbidden("Ogiltig kvittosession.")
+
     receipt = await Receipt.objects.aget(pk=receipt_id)
     receipt.vendor = vendor.strip()
     receipt.total_amount = _parse_decimal(total_amount)

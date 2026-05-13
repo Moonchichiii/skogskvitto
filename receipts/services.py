@@ -1,5 +1,6 @@
 import base64
 import json
+import logging
 from datetime import date
 from decimal import Decimal
 from io import BytesIO
@@ -16,6 +17,7 @@ from pydantic import BaseModel, Field, ValidationError
 
 OPENAI_API_KEY = config("OPENAI_API_KEY", default="")
 OPENAI_MODEL = config("OPENAI_MODEL", default="gpt-4.1-mini")
+logger = logging.getLogger(__name__)
 
 
 class ReceiptScanResult(BaseModel):
@@ -32,6 +34,7 @@ SUPPORTED_IMAGE_MIME_TYPES = {
     "image/webp": ("WEBP", ".webp"),
 }
 EXTENSION_TO_MIME = {ext: mime for mime, (_, ext) in SUPPORTED_IMAGE_MIME_TYPES.items()}
+Image.MAX_IMAGE_PIXELS = 20_000_000
 
 
 def strip_exif_and_prepare_image(uploaded_file: UploadedFile, detected_mime: str) -> ContentFile:
@@ -101,4 +104,5 @@ async def process_receipt_image(file_path: Path) -> ReceiptScanResult:
         parsed = _extract_json_payload(content)
         return ReceiptScanResult.model_validate(parsed)
     except (json.JSONDecodeError, KeyError, IndexError, TypeError, ValidationError):
+        logger.warning("Failed to parse OpenAI receipt response", exc_info=True)
         return ReceiptScanResult()

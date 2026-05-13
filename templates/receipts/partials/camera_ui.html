@@ -19,7 +19,7 @@
       capture="environment"
       class="hidden"
       x-ref="fileInput"
-      @change="const file = $event.target.files[0]; preview = file ? URL.createObjectURL(file) : ''"
+      @change="const file = $event.target.files[0]; if (preview) URL.revokeObjectURL(preview); preview = file ? URL.createObjectURL(file) : ''"
       required
     >
 
