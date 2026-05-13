@@ -1,10 +1,12 @@
-from django.contrib.auth.decorators import login_required
+from django.contrib.auth.views import redirect_to_login
 from django.http import HttpRequest, HttpResponse
 from django.shortcuts import render
-from django.views.decorators.http import require_GET
+
+from apps.receipts.billing import get_feature_gates
 
 
-@login_required
-@require_GET
-def index(request: HttpRequest) -> HttpResponse:
-    return render(request, "core/index.html")
+async def index(request: HttpRequest) -> HttpResponse:
+    if not request.user.is_authenticated:
+        return redirect_to_login(request.get_full_path())
+    gates = await get_feature_gates(request.user)
+    return render(request, "core/index.html", {"gates": gates})
