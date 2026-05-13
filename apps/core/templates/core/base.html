@@ -21,5 +21,14 @@
   <main id="content" hx-target="this" class="mx-auto w-full max-w-5xl p-4 sm:p-6">
     {% block content %}{% endblock %}
   </main>
+  <footer class="border-t border-gray-200 bg-white">
+    <div class="mx-auto flex w-full max-w-5xl flex-col gap-3 px-4 py-5 text-sm text-gray-600 sm:flex-row sm:items-center sm:justify-between sm:px-6">
+      <p>© {% now "Y" %} SkogsKvitto</p>
+      <nav class="flex flex-wrap gap-4">
+        <a href="{% url 'privacy_policy' %}" class="font-medium text-gray-700 hover:text-emerald-700">Integritetspolicy</a>
+        <a href="{% url 'terms_of_service' %}" class="font-medium text-gray-700 hover:text-emerald-700">Användarvillkor</a>
+      </nav>
+    </div>
+  </footer>
 </body>
 </html>
