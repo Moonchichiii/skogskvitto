@@ -1,5 +1,95 @@
 {% extends "core/base.html" %}
 
 {% block content %}
-  {% include "receipts/partials/camera_ui.html" %}
+  <section class="rounded-3xl bg-emerald-50 p-4 sm:p-8" x-data="{ yearly: true }">
+    {% comment %}
+    Driftkalkyl (intern referens):
+    - Konkurrentprisintervall: 1000-3000 kr/år
+    - SkogsKvitto årspris: 499 kr/år
+    - Besparing mot 1000 kr/år: 501 kr/år (~50.1%)
+    - Besparing mot 3000 kr/år: 2501 kr/år (~83.4%)
+    - Månad 49 kr => 588 kr/år; årspris sparar 89 kr/år mot månadsbetalning
+    {% endcomment %}
+
+    <div class="mx-auto max-w-4xl space-y-8">
+      <div class="space-y-4 text-center">
+        <p class="inline-flex rounded-full bg-white px-4 py-2 text-xs font-semibold uppercase tracking-wide text-emerald-800">
+          Smålandspriser för skogsägare
+        </p>
+        <h1 class="text-3xl font-bold tracking-tight text-slate-800 sm:text-4xl">
+          Utmana dyra system på 1000–3000 kr/år med en smidigare vardag
+        </h1>
+        <p class="text-sm text-slate-600 sm:text-base">
+          Mobilanpassad kvittohantering med AI-kvittoavläsning, komplett Excel-export för revisorn och körjournal i ett enda flöde.
+        </p>
+      </div>
+
+      <div class="mx-auto flex w-full max-w-xs items-center justify-between rounded-full bg-white p-1">
+        <button
+          type="button"
+          @click="yearly = false"
+          :class="yearly ? 'text-slate-600' : 'bg-emerald-700 text-white'"
+          class="w-1/2 rounded-full px-4 py-2 text-sm font-semibold transition-all duration-200"
+        >
+          Månad
+        </button>
+        <button
+          type="button"
+          @click="yearly = true"
+          :class="yearly ? 'bg-emerald-700 text-white' : 'text-slate-600'"
+          class="w-1/2 rounded-full px-4 py-2 text-sm font-semibold transition-all duration-200"
+        >
+          År
+        </button>
+      </div>
+
+      <div class="grid gap-4 sm:grid-cols-2">
+        <article class="rounded-3xl bg-white p-6 shadow-sm ring-1 ring-slate-100">
+          <p class="text-sm font-medium text-slate-500">Månadsbetalning</p>
+          <p class="mt-3 text-4xl font-bold text-slate-800">49 kr</p>
+          <p class="text-sm text-slate-500">/ mån</p>
+          <ul class="mt-4 space-y-2 text-sm text-slate-600">
+            <li>• Full mobilupplevelse för skogsägare</li>
+            <li>• AI-kvittoavläsning på sekunder</li>
+            <li>• Excel-export till revisorn</li>
+            <li>• Körjournal i samma system</li>
+          </ul>
+          <a
+            href="{% url 'start_checkout' %}?plan=monthly"
+            class="mt-6 block rounded-2xl bg-emerald-700 px-4 py-3 text-center text-sm font-semibold text-white transition-all duration-200 hover:bg-emerald-800"
+          >
+            Välj månadsplan
+          </a>
+        </article>
+
+        <article class="rounded-3xl bg-white p-6 shadow-sm ring-2 ring-emerald-700">
+          <p class="text-sm font-semibold text-emerald-700">Årsbetalning · Mest prisvärd</p>
+          <p class="mt-3 text-4xl font-bold text-slate-800">499 kr</p>
+          <p class="text-sm text-slate-500">/ år</p>
+          <p class="mt-2 text-sm font-medium text-emerald-800">Lägsta årskostnad för aktiva skogsägare.</p>
+          <ul class="mt-4 space-y-2 text-sm text-slate-600">
+            <li>• Full mobilupplevelse för skogsägare</li>
+            <li>• AI-kvittoavläsning på sekunder</li>
+            <li>• Excel-export till revisorn</li>
+            <li>• Körjournal i samma system</li>
+          </ul>
+          <a
+            href="{% url 'start_checkout' %}?plan=yearly"
+            class="mt-6 block rounded-2xl bg-emerald-700 px-4 py-3 text-center text-sm font-semibold text-white transition-all duration-200 hover:bg-emerald-800"
+          >
+            Välj årsplan
+          </a>
+        </article>
+      </div>
+
+      <div class="rounded-3xl bg-white p-4 text-center text-sm text-slate-600 shadow-sm">
+        <span x-show="!yearly">Du har valt månadsbetalning: 49 kr / mån.</span>
+        <span x-show="yearly">Du har valt årsbetalning: 499 kr / år (mest prisvärd).</span>
+      </div>
+    </div>
+  </section>
+
+  <section class="mt-6">
+    {% include "receipts/partials/camera_ui.html" %}
+  </section>
 {% endblock %}
