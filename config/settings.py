@@ -8,6 +8,9 @@ SECRET_KEY = config("DJANGO_SECRET_KEY")
 DEBUG = config("DJANGO_DEBUG", default=False, cast=bool)
 ALLOWED_HOSTS = config("DJANGO_ALLOWED_HOSTS", default="localhost,127.0.0.1", cast=Csv())
 CSRF_TRUSTED_ORIGINS = config("DJANGO_CSRF_TRUSTED_ORIGINS", default="", cast=Csv())
+PRIVACY_CONTACT = config(
+    "PRIVACY_CONTACT", default="[ange kontaktadress via miljövariabel i driftmiljön]"
+)
 
 INSTALLED_APPS = [
     "django.contrib.admin",
@@ -50,6 +53,7 @@ TEMPLATES = [
                 "django.template.context_processors.request",
                 "django.contrib.auth.context_processors.auth",
                 "django.contrib.messages.context_processors.messages",
+                "apps.core.context_processors.legal_contact",
             ],
         },
     }
