@@ -6,8 +6,8 @@ from asgiref.sync import sync_to_async
 from django.http import FileResponse, HttpRequest, HttpResponse, HttpResponseForbidden
 from django.shortcuts import redirect, render
 
-from receipts.exports import build_excel
-from receipts.models import Receipt
+from apps.receipts.exports import build_excel
+from apps.receipts.models import Receipt
 
 
 async def dashboard(request: HttpRequest) -> HttpResponse:

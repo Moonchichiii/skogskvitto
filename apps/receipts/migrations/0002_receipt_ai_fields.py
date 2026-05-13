@@ -1,7 +1,7 @@
 import django.db.models.deletion
 from django.db import migrations, models
 
-import receipts.models
+import apps.receipts.models
 
 
 class Migration(migrations.Migration):
@@ -35,7 +35,7 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name="receipt",
             name="image",
-            field=models.ImageField(default="", upload_to=receipts.models.receipt_image_upload_path),
+            field=models.ImageField(default="", upload_to=apps.receipts.models.receipt_image_upload_path),
             preserve_default=False,
         ),
         migrations.AddField(

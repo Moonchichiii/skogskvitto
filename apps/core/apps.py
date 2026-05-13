@@ -1,6 +1,7 @@
 from django.apps import AppConfig
 
 
-class ReceiptsConfig(AppConfig):
+class CoreConfig(AppConfig):
     default_auto_field = "django.db.models.BigAutoField"
-    name = "receipts"
+    name = "apps.core"
+    label = "core"

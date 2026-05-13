@@ -5,7 +5,7 @@ from openpyxl import Workbook
 from openpyxl.styles import Font
 from openpyxl.utils import get_column_letter
 
-from receipts.models import Receipt
+from apps.receipts.models import Receipt
 
 
 def build_excel(receipts: list[Receipt]) -> io.BytesIO:

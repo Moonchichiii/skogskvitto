@@ -12,8 +12,8 @@ from django.template.loader import render_to_string
 from ninja import File, Form, Router
 from ninja.files import UploadedFile
 
-from receipts.models import Receipt
-from receipts.services import (
+from apps.receipts.models import Receipt
+from apps.receipts.services import (
     SUPPORTED_IMAGE_MIME_TYPES,
     process_receipt_image,
     strip_exif_and_prepare_image,

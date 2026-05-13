@@ -2,9 +2,9 @@ from django.contrib import admin
 from django.urls import path
 from ninja import NinjaAPI
 
-from core.views import index
-from receipts.api import router as receipts_router
-from receipts.views import dashboard, export_excel
+from apps.core.views import index
+from apps.receipts.api import router as receipts_router
+from apps.receipts.views import dashboard, export_excel
 
 api = NinjaAPI()
 api.add_router("receipts/", receipts_router)
