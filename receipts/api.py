@@ -77,7 +77,7 @@ async def scan_receipt(request: HttpRequest, image: UploadedFile = File(...)) ->
     extension = Path(receipt.image.name).suffix or ".jpg"
     tmp_path: Path | None = None
     try:
-        with NamedTemporaryFile(suffix=extension, delete=False, dir="/tmp") as tmp:
+        with NamedTemporaryFile(suffix=extension, delete=False) as tmp:
             tmp_path = Path(tmp.name)
             await sync_to_async(receipt.image.open)("rb")
             file_bytes = await sync_to_async(receipt.image.read)()
