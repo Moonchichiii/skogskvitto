@@ -1,6 +1,11 @@
 <div class="rounded-2xl bg-white p-4 shadow-sm sm:p-6">
   <h2 class="mb-4 text-lg font-semibold text-gray-900">Verifiera kvittodata</h2>
-  <form class="space-y-3">
+  <form
+    hx-post="/api/receipts/save/{{ receipt.pk }}"
+    hx-target="this"
+    hx-swap="outerHTML"
+    class="space-y-3"
+  >
     <label class="block">
       <span class="mb-1 block text-sm font-medium text-gray-700">Butik</span>
       <input name="vendor" type="text" value="{{ receipt.vendor }}" class="w-full rounded-xl bg-gray-100 px-4 py-3 text-base text-gray-900">
@@ -21,7 +26,7 @@
       <span class="mb-1 block text-sm font-medium text-gray-700">Kategori</span>
       <input name="category" type="text" value="{{ receipt.category }}" class="w-full rounded-xl bg-gray-100 px-4 py-3 text-base text-gray-900">
     </label>
-    <button type="button" class="w-full rounded-xl bg-emerald-700 px-4 py-4 text-base font-semibold text-white">
+    <button type="submit" class="w-full rounded-xl bg-emerald-700 px-4 py-4 text-base font-semibold text-white">
       Spara kvitto
     </button>
   </form>

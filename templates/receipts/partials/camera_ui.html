@@ -7,6 +7,7 @@
     hx-encoding="multipart/form-data"
     hx-target="#scan-result"
     hx-swap="innerHTML"
+    hx-indicator="#scan-loading-indicator"
     class="space-y-4"
   >
     {% csrf_token %}
@@ -41,7 +42,7 @@
       Scanna med AI
     </button>
 
-    <div class="htmx-indicator inline-flex items-center gap-2 text-sm text-emerald-700">
+    <div id="scan-loading-indicator" class="htmx-indicator hidden items-center gap-2 text-sm text-emerald-700">
       <span class="inline-block h-4 w-4 animate-spin rounded-full border-2 border-emerald-700 border-t-transparent"></span>
       <span>AI analyserar kvittot...</span>
     </div>

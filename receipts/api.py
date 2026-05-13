@@ -1,10 +1,13 @@
+from datetime import date as date_cls
+from decimal import Decimal, InvalidOperation
 from pathlib import Path
+from tempfile import NamedTemporaryFile
 
 import magic
 from asgiref.sync import sync_to_async
 from django.http import HttpRequest, HttpResponse
 from django.template.loader import render_to_string
-from ninja import File, Router
+from ninja import File, Form, Router
 from ninja.files import UploadedFile
 
 from receipts.models import Receipt
@@ -17,6 +20,26 @@ from receipts.services import (
 router = Router(tags=["receipts"])
 
 MAX_UPLOAD_SIZE_BYTES = 10 * 1024 * 1024
+
+
+def _parse_decimal(value: str) -> Decimal | None:
+    cleaned = value.strip()
+    if not cleaned:
+        return None
+    try:
+        return Decimal(cleaned.replace(",", "."))
+    except InvalidOperation:
+        return None
+
+
+def _parse_date(value: str) -> date_cls | None:
+    cleaned = value.strip()
+    if not cleaned:
+        return None
+    try:
+        return date_cls.fromisoformat(cleaned)
+    except ValueError:
+        return None
 
 
 def _render_fragment(template: str, context: dict[str, object], status: int = 200) -> HttpResponse:
@@ -51,7 +74,20 @@ async def scan_receipt(request: HttpRequest, image: UploadedFile = File(...)) ->
     owner = request.user if request.user.is_authenticated else None
     receipt = await Receipt.objects.acreate(owner=owner, image=cleaned_file)
 
-    ai_data = await process_receipt_image(Path(receipt.image.path))
+    extension = Path(receipt.image.name).suffix or ".jpg"
+    tmp_path: Path | None = None
+    try:
+        with NamedTemporaryFile(suffix=extension, delete=False, dir="/tmp") as tmp:
+            tmp_path = Path(tmp.name)
+            await sync_to_async(receipt.image.open)("rb")
+            file_bytes = await sync_to_async(receipt.image.read)()
+            tmp.write(file_bytes)
+            await sync_to_async(receipt.image.close)()
+        ai_data = await process_receipt_image(tmp_path)
+    finally:
+        if tmp_path is not None:
+            tmp_path.unlink(missing_ok=True)
+
     receipt.vendor = ai_data.vendor
     receipt.total_amount = ai_data.total_amount
     receipt.vat_amount = ai_data.vat_amount
@@ -63,5 +99,30 @@ async def scan_receipt(request: HttpRequest, image: UploadedFile = File(...)) ->
 
     return await sync_to_async(_render_fragment)(
         "receipts/partials/scan_result_form.html",
+        {"receipt": receipt},
+    )
+
+
+@router.post("/save/{receipt_id}")
+async def save_receipt(
+    request: HttpRequest,
+    receipt_id: int,
+    vendor: str = Form(""),
+    total_amount: str = Form(""),
+    vat_amount: str = Form(""),
+    date: str = Form(""),
+    category: str = Form(""),
+) -> HttpResponse:
+    del request
+    receipt = await Receipt.objects.aget(pk=receipt_id)
+    receipt.vendor = vendor.strip()
+    receipt.total_amount = _parse_decimal(total_amount)
+    receipt.vat_amount = _parse_decimal(vat_amount)
+    receipt.date = _parse_date(date)
+    receipt.category = category.strip()
+    await receipt.asave(update_fields=["vendor", "total_amount", "vat_amount", "date", "category"])
+
+    return await sync_to_async(_render_fragment)(
+        "receipts/partials/scan_saved.html",
         {"receipt": receipt},
     )
