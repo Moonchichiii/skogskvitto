@@ -121,3 +121,26 @@ async def can_export_excel(user: AbstractBaseUser | AnonymousUser) -> bool:
 
 async def can_use_korjournal(user: AbstractBaseUser | AnonymousUser) -> bool:
     return await is_premium_user(user)
+
+
+async def can_use_skogsinkomster(user: AbstractBaseUser | AnonymousUser) -> bool:
+    return await is_premium_user(user)
+
+
+async def can_use_arsrapport(user: AbstractBaseUser | AnonymousUser) -> bool:
+    return await is_premium_user(user)
+
+
+async def get_feature_gates(user: AbstractBaseUser | AnonymousUser) -> dict[str, bool | str]:
+    plan = await get_user_plan(user)
+    return {
+        "user_plan": plan,
+        "is_pilot": plan == PLAN_PILOT,
+        "is_premium": plan == PLAN_PREMIUM,
+        "is_free": plan == PLAN_FREE,
+        "can_ai_scan": await can_use_ai_scan(user),
+        "can_excel_export": await can_export_excel(user),
+        "can_korjournal": await can_use_korjournal(user),
+        "can_skogsinkomster": await can_use_skogsinkomster(user),
+        "can_arsrapport": await can_use_arsrapport(user),
+    }

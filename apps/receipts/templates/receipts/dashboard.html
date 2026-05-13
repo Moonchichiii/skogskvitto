@@ -3,6 +3,12 @@
 {% block content %}
 <div class="space-y-6">
 
+  {% if gates.is_pilot %}
+  <div class="flex items-center gap-2">
+    {% include "core/partials/pilot_badge.html" %}
+  </div>
+  {% endif %}
+
   <div class="grid grid-cols-2 gap-4">
     <div class="rounded-2xl border border-gray-100 bg-white p-4 shadow-sm">
       <p class="text-xs font-medium uppercase tracking-wide text-gray-500">Total utlägg {{ year }}</p>
@@ -14,12 +20,76 @@
     </div>
   </div>
 
+  {% if gates.can_excel_export %}
   <a
     href="/receipts/export/excel/"
     class="block w-full rounded-2xl bg-emerald-700 px-4 py-4 text-center text-base font-semibold text-white transition-all duration-200 hover:bg-emerald-800"
   >
     Exportera till Excel
   </a>
+  {% else %}
+  <div class="rounded-2xl border border-gray-100 bg-white p-4 shadow-sm">
+    <div class="flex items-center justify-between">
+      <p class="text-sm font-semibold text-gray-700">Exportera till Excel</p>
+      {% include "core/partials/premium_badge.html" %}
+    </div>
+    <div class="mt-3">
+      {% include "core/partials/premium_cta.html" %}
+    </div>
+  </div>
+  {% endif %}
+
+  <div class="grid gap-4 sm:grid-cols-3">
+
+    <div class="rounded-2xl border border-gray-100 bg-white p-4 shadow-sm">
+      {% if gates.can_korjournal %}
+      <a href="#" class="flex items-center justify-between text-sm font-semibold text-gray-900 hover:text-emerald-700">
+        <span>Körjournal</span>
+        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-emerald-700" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
+          <path fill-rule="evenodd" d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z" clip-rule="evenodd"/>
+        </svg>
+      </a>
+      {% else %}
+      <div class="flex items-center justify-between">
+        <p class="text-sm font-medium text-gray-400">Körjournal</p>
+        {% include "core/partials/premium_badge.html" %}
+      </div>
+      {% endif %}
+    </div>
+
+    <div class="rounded-2xl border border-gray-100 bg-white p-4 shadow-sm">
+      {% if gates.can_skogsinkomster %}
+      <a href="#" class="flex items-center justify-between text-sm font-semibold text-gray-900 hover:text-emerald-700">
+        <span>Skogsinkomster</span>
+        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-emerald-700" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
+          <path fill-rule="evenodd" d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z" clip-rule="evenodd"/>
+        </svg>
+      </a>
+      {% else %}
+      <div class="flex items-center justify-between">
+        <p class="text-sm font-medium text-gray-400">Skogsinkomster</p>
+        {% include "core/partials/premium_badge.html" %}
+      </div>
+      {% endif %}
+    </div>
+
+    <div class="rounded-2xl border border-gray-100 bg-white p-4 shadow-sm">
+      {% if gates.can_arsrapport %}
+      <a href="#" class="flex items-center justify-between text-sm font-semibold text-gray-900 hover:text-emerald-700">
+        <span>Årsrapport</span>
+        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-emerald-700" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
+          <path fill-rule="evenodd" d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z" clip-rule="evenodd"/>
+        </svg>
+      </a>
+      {% else %}
+      <div class="flex items-center justify-between">
+        <p class="text-sm font-medium text-gray-400">Årsrapport</p>
+        {% include "core/partials/premium_badge.html" %}
+      </div>
+      {% endif %}
+    </div>
+
+  </div>
 
   <div class="overflow-hidden rounded-2xl border border-gray-100 bg-white shadow-sm">
     <table class="w-full text-sm">
@@ -56,3 +126,4 @@
 
 </div>
 {% endblock %}
+

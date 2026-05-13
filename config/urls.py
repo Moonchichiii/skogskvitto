@@ -19,7 +19,7 @@ api = NinjaAPI()
 api.add_router("receipts/", receipts_router)
 
 urlpatterns = [
-    path("", index, name="index"),
+    path("", cast(Any, index), name="index"),
     path("dashboard/", cast(Any, dashboard), name="dashboard"),
     path(
         "integritetspolicy/",

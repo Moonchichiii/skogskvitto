@@ -17,8 +17,7 @@ from django.utils import timezone
 from apps.core.models import User
 from apps.receipts.billing import (
     can_export_excel,
-    can_use_korjournal,
-    get_user_plan,
+    get_feature_gates,
     is_premium_user,
     plan_to_price_id,
     stripe_is_configured,
@@ -55,7 +54,7 @@ async def dashboard(request: HttpRequest) -> HttpResponseBase:
     total_year = sum((r.total_amount or Decimal(0) for r in year_receipts), Decimal(0))
     vat_year = sum((r.vat_amount or Decimal(0) for r in year_receipts), Decimal(0))
 
-    has_premium_access = await is_premium_user(user)
+    gates = await get_feature_gates(user)
 
     return render(
         request,
@@ -65,9 +64,7 @@ async def dashboard(request: HttpRequest) -> HttpResponseBase:
             "total_year": total_year,
             "vat_year": vat_year,
             "year": year,
-            "has_active_subscription": has_premium_access,
-            "user_plan": await get_user_plan(user),
-            "can_use_korjournal": await can_use_korjournal(user),
+            "gates": gates,
         },
     )
 
