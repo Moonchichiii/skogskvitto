@@ -60,6 +60,7 @@ def _write_kvitton_sheet(wb: Workbook, receipts: list[Receipt]) -> None:
         inkop = _decimal(receipt.total_amount)
         moms = _decimal(receipt.vat_amount)
         netto = inkop - moms
+        # TODO: Koppla öresutjämning till en explicit modellkälla när fält finns.
         oresutjamning = ZERO
 
         ws.cell(row=row, column=1, value=inkop)
@@ -145,6 +146,7 @@ def _write_korjournal_sheet(wb: Workbook, receipts: list[Receipt]) -> None:
         month_key = receipt.date.strftime("%Y-%m")
         month_data = monthly[month_key]
         month_data["trips"] = int(month_data["trips"]) + 1
+        # TODO: Kilometer bör hämtas från dedikerat fält när det finns i datamodellen.
 
     total_trips = 0
     total_kilometers = ZERO
