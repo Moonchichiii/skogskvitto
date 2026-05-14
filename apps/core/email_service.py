@@ -31,5 +31,5 @@ def send_transactional_email(
         )
         return True
     except Exception:
-        logger.exception("Transaktionsmail misslyckades (mottagare=%s, mall=%s)", to, template)
+        logger.exception("Transaktionsmail misslyckades (mall=%s)", template)
         return False

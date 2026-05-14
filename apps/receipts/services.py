@@ -3,6 +3,7 @@ from __future__ import annotations
 import base64
 import json
 import logging
+import re
 from datetime import date as date_type
 from decimal import Decimal
 from io import BytesIO
@@ -27,6 +28,7 @@ class ReceiptScanResult(BaseModel):
     vat_amount: Decimal | None = Field(default=None)
     date: date_type | None = Field(default=None)
     category: str = Field(default="")
+    note: str = Field(default="")
 
 
 SUPPORTED_IMAGE_MIME_TYPES = {
@@ -110,7 +112,18 @@ async def process_receipt_image(file_path: Path) -> ReceiptScanResult:
 
     try:
         parsed = _extract_json_payload(content)
-        return ReceiptScanResult.model_validate(parsed)
+        result = ReceiptScanResult.model_validate(parsed)
+        result.vendor = _sanitize_text(result.vendor)
+        result.category = _sanitize_text(result.category)
+        result.note = _sanitize_text(result.note)
+        return result
     except (json.JSONDecodeError, KeyError, IndexError, TypeError, ValidationError):
         logger.warning("Failed to parse OpenAI receipt response", exc_info=True)
         return ReceiptScanResult()
+
+
+def _sanitize_text(value: str) -> str:
+    sanitized = re.sub(r"\b\d{6,8}[-+]?\d{4}\b", "[redacted]", value)
+    sanitized = re.sub(r"\b(?:\+46|0)\d{7,12}\b", "[redacted]", sanitized)
+    sanitized = re.sub(r"\b[\w\.-]+@[\w\.-]+\.\w+\b", "[redacted]", sanitized)
+    return sanitized.strip()

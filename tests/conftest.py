@@ -31,5 +31,6 @@ def pytest_configure() -> None:
         ],
         DEFAULT_FROM_EMAIL="noreply@test.invalid",
         EMAIL_BACKEND="django.core.mail.backends.locmem.EmailBackend",
+        SECRET_KEY="test-key",
     )
     django.setup()
