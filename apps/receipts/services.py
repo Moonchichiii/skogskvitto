@@ -3,6 +3,7 @@ from __future__ import annotations
 import base64
 import json
 import logging
+import re
 from datetime import date as date_type
 from decimal import Decimal
 from io import BytesIO
@@ -19,6 +20,9 @@ from pydantic import BaseModel, Field, ValidationError
 OPENAI_API_KEY = config("OPENAI_API_KEY", default="")
 OPENAI_MODEL = config("OPENAI_MODEL", default="gpt-4.1-mini")
 logger = logging.getLogger(__name__)
+PERSONAL_NUMBER_PATTERN = re.compile(r"\b\d{6,8}[-+]?\d{4}\b")
+PHONE_PATTERN = re.compile(r"\b(?:\+46|0)\d{7,12}\b")
+EMAIL_PATTERN = re.compile(r"\b[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}\b")
 
 
 class ReceiptScanResult(BaseModel):
@@ -27,6 +31,7 @@ class ReceiptScanResult(BaseModel):
     vat_amount: Decimal | None = Field(default=None)
     date: date_type | None = Field(default=None)
     category: str = Field(default="")
+    note: str = Field(default="")
 
 
 SUPPORTED_IMAGE_MIME_TYPES = {
@@ -110,7 +115,18 @@ async def process_receipt_image(file_path: Path) -> ReceiptScanResult:
 
     try:
         parsed = _extract_json_payload(content)
-        return ReceiptScanResult.model_validate(parsed)
+        result = ReceiptScanResult.model_validate(parsed)
+        result.vendor = _sanitize_text(result.vendor)
+        result.category = _sanitize_text(result.category)
+        result.note = _sanitize_text(result.note)
+        return result
     except (json.JSONDecodeError, KeyError, IndexError, TypeError, ValidationError):
         logger.warning("Failed to parse OpenAI receipt response", exc_info=True)
         return ReceiptScanResult()
+
+
+def _sanitize_text(value: str) -> str:
+    sanitized = PERSONAL_NUMBER_PATTERN.sub("[redacted]", value)
+    sanitized = PHONE_PATTERN.sub("[redacted]", sanitized)
+    sanitized = EMAIL_PATTERN.sub("[redacted]", sanitized)
+    return sanitized.strip()

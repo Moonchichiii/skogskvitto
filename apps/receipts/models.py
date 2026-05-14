@@ -10,6 +10,11 @@ def receipt_image_upload_path(_: "Receipt", filename: str) -> str:
     return f"receipts/{uuid4().hex}{suffix}"
 
 
+def receipt_scan_job_upload_path(_: "ReceiptScanJob", filename: str) -> str:
+    suffix = Path(filename).suffix.lower() or ".jpg"
+    return f"receipt-scan-jobs/{uuid4().hex}{suffix}"
+
+
 class Receipt(models.Model):
     owner = models.ForeignKey(
         settings.AUTH_USER_MODEL,
@@ -24,10 +29,59 @@ class Receipt(models.Model):
     vendor = models.CharField(max_length=255, blank=True)
     date = models.DateField(null=True, blank=True)
     category = models.CharField(max_length=100, blank=True)
+    note = models.TextField(blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        indexes = [
+            models.Index(fields=["owner", "-created_at"]),
+        ]
 
     def __str__(self) -> str:
         return self.vendor or f"Receipt #{self.pk}"
+
+
+class ReceiptScanJob(models.Model):
+    STATUS_PENDING = "pending"
+    STATUS_RUNNING = "running"
+    STATUS_PREVIEW_READY = "preview_ready"
+    STATUS_CONFIRMED = "confirmed"
+    STATUS_FAILED = "failed"
+
+    STATUS_CHOICES = [
+        (STATUS_PENDING, "Pending"),
+        (STATUS_RUNNING, "Running"),
+        (STATUS_PREVIEW_READY, "Preview ready"),
+        (STATUS_CONFIRMED, "Confirmed"),
+        (STATUS_FAILED, "Failed"),
+    ]
+
+    user = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.CASCADE,
+        related_name="receipt_scan_jobs",
+    )
+    status = models.CharField(max_length=32, choices=STATUS_CHOICES, default=STATUS_PENDING)
+    image = models.ImageField(upload_to=receipt_scan_job_upload_path)
+    preview_data = models.JSONField(default=dict, blank=True)
+    error_message = models.CharField(max_length=255, blank=True)
+    confirmed_receipt = models.ForeignKey(
+        "Receipt",
+        null=True,
+        blank=True,
+        on_delete=models.SET_NULL,
+        related_name="scan_jobs",
+    )
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        indexes = [
+            models.Index(fields=["user", "status", "-created_at"]),
+        ]
+
+    def __str__(self) -> str:
+        return f"ScanJob #{self.pk} ({self.status})"
 
 
 class UserSubscription(models.Model):

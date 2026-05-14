@@ -8,6 +8,8 @@ from typing import cast
 import httpx
 from asgiref.sync import sync_to_async
 from django.contrib.auth.views import redirect_to_login
+from django.core.paginator import Paginator
+from django.db.models import Sum
 from django.http import FileResponse, HttpRequest, HttpResponseBadRequest, HttpResponseRedirect
 from django.http.response import HttpResponseBase, HttpResponseForbidden
 from django.shortcuts import redirect, render
@@ -16,7 +18,8 @@ from django.utils import timezone
 
 from apps.core.models import User
 from apps.receipts.billing import (
-    can_export_excel,
+    FEATURE_EXCEL_DOWNLOAD,
+    can_use_feature,
     get_feature_gates,
     is_premium_user,
     plan_to_price_id,
@@ -43,16 +46,24 @@ def login_required_async(view: AsyncView) -> AsyncView:
 async def dashboard(request: HttpRequest) -> HttpResponseBase:
     user = cast(User, request.user)
     year = date.today().year
-    receipts = [
-        r
-        async for r in Receipt.objects.filter(owner=user).order_by(
-            "-date", "-created_at"
-        )
-    ]
+    page_number_raw = request.GET.get("page", "1")
+    page_number = int(page_number_raw) if page_number_raw.isdigit() else 1
+    page_number = max(page_number, 1)
+    page_size = 25
 
-    year_receipts = [r for r in receipts if r.date and r.date.year == year]
-    total_year = sum((r.total_amount or Decimal(0) for r in year_receipts), Decimal(0))
-    vat_year = sum((r.vat_amount or Decimal(0) for r in year_receipts), Decimal(0))
+    base_queryset = Receipt.objects.filter(owner=user).order_by("-date", "-created_at")
+    receipt_count = await base_queryset.acount()
+    paginator = await sync_to_async(Paginator)(range(receipt_count), page_size)
+    page_obj = paginator.get_page(page_number)
+
+    offset = (page_obj.number - 1) * page_size
+    receipts = [r async for r in base_queryset[offset : offset + page_size]]
+    aggregates = await Receipt.objects.filter(owner=user, date__year=year).aaggregate(
+        total_year=Sum("total_amount"),
+        vat_year=Sum("vat_amount"),
+    )
+    total_year = cast(Decimal | None, aggregates.get("total_year")) or Decimal(0)
+    vat_year = cast(Decimal | None, aggregates.get("vat_year")) or Decimal(0)
 
     gates = await get_feature_gates(user)
 
@@ -62,18 +73,20 @@ async def dashboard(request: HttpRequest) -> HttpResponseBase:
         {
             "receipts": receipts,
             "total_year": total_year,
-            "vat_year": vat_year,
-            "year": year,
-            "gates": gates,
-        },
+                "vat_year": vat_year,
+                "year": year,
+                "gates": gates,
+                "page_obj": page_obj,
+            },
     )
 
 
 @login_required_async
 async def export_excel(request: HttpRequest) -> HttpResponseBase:
     user = cast(User, request.user)
-    if not await can_export_excel(user):
-        return HttpResponseForbidden("Export till Excel kräver Premium eller pilotåtkomst.")
+    decision = await can_use_feature(user, FEATURE_EXCEL_DOWNLOAD)
+    if not decision.allowed:
+        return HttpResponseForbidden("Export och nedladdning ingår i betalplanen.")
 
     receipts = [
         r
