@@ -3,7 +3,7 @@ from datetime import date as date_cls
 from decimal import Decimal, InvalidOperation
 from pathlib import Path
 from tempfile import NamedTemporaryFile
-from typing import Any, cast
+from typing import cast
 
 import magic
 from asgiref.sync import sync_to_async
@@ -32,6 +32,7 @@ router = Router(tags=["receipts"])
 
 MAX_UPLOAD_SIZE_BYTES = 10 * 1024 * 1024
 MAX_CORRECTION_TEXT_LENGTH = 300
+AMOUNT_PATTERN = re.compile(r"(\d+(?:\s?\d{3})*[,.]\d{1,2})")
 SCAN_JOB_SIGNER = Signer(salt="receipt-scan-job")
 
 
@@ -93,7 +94,7 @@ def _suggest_correction(correction_text: str) -> dict[str, str]:
     lowered = correction_text.lower()
     suggestion: dict[str, str] = {}
 
-    amount_match = re.search(r"(\d+(?:\s?\d{3})*[,.]\d{1,2})", correction_text)
+    amount_match = AMOUNT_PATTERN.search(correction_text)
     if amount_match:
         suggestion["total_amount"] = amount_match.group(1).replace(" ", "").replace(",", ".")
     if "drivmedel" in lowered:
@@ -228,23 +229,14 @@ async def save_receipt(
             403,
         )
 
-    preview = cast(dict[str, Any], scan_job.preview_data or {})
     receipt = Receipt(
         owner=user,
-        vendor=vendor.strip() or str(preview.get("vendor", "")),
-        total_amount=(
-            _parse_decimal(total_amount)
-            if total_amount.strip()
-            else _parse_decimal(str(preview.get("total_amount", "")))
-        ),
-        vat_amount=(
-            _parse_decimal(vat_amount)
-            if vat_amount.strip()
-            else _parse_decimal(str(preview.get("vat_amount", "")))
-        ),
-        date=_parse_date(date) if date.strip() else _parse_date(str(preview.get("date", ""))),
-        category=category.strip() or str(preview.get("category", "")),
-        note=note.strip() or str(preview.get("note", "")),
+        vendor=vendor.strip(),
+        total_amount=_parse_decimal(total_amount),
+        vat_amount=_parse_decimal(vat_amount),
+        date=_parse_date(date),
+        category=category.strip(),
+        note=note.strip(),
     )
 
     await sync_to_async(scan_job.image.open)("rb")
