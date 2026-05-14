@@ -4,25 +4,23 @@ import logging
 from dataclasses import dataclass
 
 import httpx
-from decouple import config
+from django.conf import settings
 from django.contrib.auth.models import AbstractBaseUser, AnonymousUser
 from django.db.models import Q
 from django.utils import timezone
 
 from apps.receipts.models import Receipt, UserSubscription
 
-# Max antal gratis kvitton innan nästa skapande kräver prenumeration.
-FREE_RECEIPT_LIMIT: int = config("FREEMIUM_RECEIPT_LIMIT", default=5, cast=int)
+logger = logging.getLogger(__name__)
+
+FREE_RECEIPT_LIMIT: int = int(getattr(settings, "FREEMIUM_RECEIPT_LIMIT", 5))
+
 STRIPE_API_BASE = "https://api.stripe.com/v1"
 STRIPE_REQUEST_TIMEOUT = 30.0
-STRIPE_SECRET_KEY: str = config("STRIPE_SECRET_KEY", default="", cast=str)
-STRIPE_PRICE_MONTHLY_ID: str = config("STRIPE_PRICE_MONTHLY_ID", default="", cast=str)
-STRIPE_PRICE_YEARLY_ID: str = config("STRIPE_PRICE_YEARLY_ID", default="", cast=str)
+STRIPE_SECRET_KEY: str = str(getattr(settings, "STRIPE_SECRET_KEY", ""))
+STRIPE_PRICE_MONTHLY_ID: str = str(getattr(settings, "STRIPE_PRICE_MONTHLY_ID", ""))
+STRIPE_PRICE_YEARLY_ID: str = str(getattr(settings, "STRIPE_PRICE_YEARLY_ID", ""))
 
-ACTIVE_SUBSCRIPTION_STATUSES = {
-    UserSubscription.STATUS_ACTIVE,
-    UserSubscription.STATUS_TRIALING,
-}
 PLAN_FREE = "free"
 PLAN_TRIAL = "trial"
 PLAN_PREMIUM = "premium"
@@ -36,7 +34,18 @@ FEATURE_PDF_DOWNLOAD = "pdf_download"
 FEATURE_YEARLY_REPORT_DOWNLOAD = "yearly_report_download"
 FEATURE_DRIVING_LOG_EXPORT = "driving_log_export"
 
-logger = logging.getLogger(__name__)
+PREMIUM_FEATURES = {
+    FEATURE_RECEIPT_CONFIRM_SAVE,
+    FEATURE_EXCEL_DOWNLOAD,
+    FEATURE_PDF_DOWNLOAD,
+    FEATURE_YEARLY_REPORT_DOWNLOAD,
+    FEATURE_DRIVING_LOG_EXPORT,
+}
+
+FREE_FEATURES = {
+    FEATURE_RECEIPT_SCAN_PREVIEW,
+    FEATURE_EXCEL_PREVIEW,
+}
 
 
 @dataclass(frozen=True, slots=True)
@@ -45,19 +54,6 @@ class AccessDecision:
     reason: str
     plan: str
     is_pilot_bypass: bool
-
-
-PREMIUM_FEATURES = {
-    FEATURE_RECEIPT_CONFIRM_SAVE,
-    FEATURE_EXCEL_DOWNLOAD,
-    FEATURE_PDF_DOWNLOAD,
-    FEATURE_YEARLY_REPORT_DOWNLOAD,
-    FEATURE_DRIVING_LOG_EXPORT,
-}
-FREE_FEATURES = {
-    FEATURE_RECEIPT_SCAN_PREVIEW,
-    FEATURE_EXCEL_PREVIEW,
-}
 
 
 def stripe_is_configured() -> bool:
@@ -76,6 +72,7 @@ async def stripe_request(
         raise ValueError(msg)
 
     headers = {"Authorization": f"Bearer {STRIPE_SECRET_KEY}"}
+
     async with httpx.AsyncClient(timeout=STRIPE_REQUEST_TIMEOUT) as client:
         response = await client.request(
             method=method,
@@ -84,69 +81,70 @@ async def stripe_request(
             params=params,
             headers=headers,
         )
+
     response.raise_for_status()
+
     payload = response.json()
     if not isinstance(payload, dict):
         msg = "Invalid Stripe response payload."
         raise ValueError(msg)
+
     return payload
 
 
 def plan_to_price_id(plan: str) -> str | None:
-    mapping: dict[str, str] = {
+    mapping = {
         "monthly": STRIPE_PRICE_MONTHLY_ID,
         "yearly": STRIPE_PRICE_YEARLY_ID,
     }
-    price_id = mapping.get(plan)
-    if not price_id:
-        return None
-    return price_id
+    return mapping.get(plan) or None
 
 
 async def user_has_active_subscription(user: AbstractBaseUser | AnonymousUser) -> bool:
     if not user.is_authenticated or user.pk is None:
         return False
+
     now = timezone.now()
+
     return await UserSubscription.objects.filter(
         user_id=user.pk,
         status=UserSubscription.STATUS_ACTIVE,
-    ).filter(Q(current_period_end__isnull=True) | Q(current_period_end__gt=now)).aexists()
+    ).filter(
+        Q(current_period_end__isnull=True) | Q(current_period_end__gt=now)
+    ).aexists()
 
 
 async def user_has_trial_subscription(user: AbstractBaseUser | AnonymousUser) -> bool:
     if not user.is_authenticated or user.pk is None:
         return False
+
     now = timezone.now()
+
     return await UserSubscription.objects.filter(
         user_id=user.pk,
         status=UserSubscription.STATUS_TRIALING,
-    ).filter(Q(current_period_end__isnull=True) | Q(current_period_end__gt=now)).aexists()
-
-
-async def user_has_reached_free_limit(user: AbstractBaseUser | AnonymousUser) -> bool:
-    if not user.is_authenticated or user.pk is None:
-        return True
-    if await is_pilot_user(user):
-        return False
-    if await user_has_active_subscription(user):
-        return False
-    receipt_count = await Receipt.objects.filter(owner_id=user.pk).acount()
-    return receipt_count >= FREE_RECEIPT_LIMIT
+    ).filter(
+        Q(current_period_end__isnull=True) | Q(current_period_end__gt=now)
+    ).aexists()
 
 
 async def is_pilot_user(user: AbstractBaseUser | AnonymousUser) -> bool:
     if not user.is_authenticated:
         return False
+
     return bool(getattr(user, "is_pilot", False))
 
 
 async def get_user_plan(user: AbstractBaseUser | AnonymousUser) -> str:
     if await is_pilot_user(user):
         return PLAN_PILOT
+
     if await user_has_trial_subscription(user):
         return PLAN_TRIAL
+
     if await user_has_active_subscription(user):
         return PLAN_PREMIUM
+
     return PLAN_FREE
 
 
@@ -154,11 +152,35 @@ async def is_premium_user(user: AbstractBaseUser | AnonymousUser) -> bool:
     return (await get_user_plan(user)) in {PLAN_PREMIUM, PLAN_PILOT}
 
 
+async def user_has_reached_free_limit(user: AbstractBaseUser | AnonymousUser) -> bool:
+    if not user.is_authenticated or user.pk is None:
+        return True
+
+    if await is_pilot_user(user):
+        return False
+
+    if await user_has_active_subscription(user):
+        return False
+
+    receipt_count = await Receipt.objects.filter(owner_id=user.pk).acount()
+    return receipt_count >= FREE_RECEIPT_LIMIT
+
+
 def _log_pilot_bypass(user_id: int | None, feature: str, status: str) -> None:
-    logger.info("pilot_feature_bypass status=%s user_id=%s feature=%s", status, user_id, feature)
+    logger.info(
+        "pilot_feature_bypass",
+        extra={
+            "status": status,
+            "user_id": user_id,
+            "feature": feature,
+        },
+    )
 
 
-async def can_use_feature(user: AbstractBaseUser | AnonymousUser, feature: str) -> AccessDecision:
+async def can_use_feature(
+    user: AbstractBaseUser | AnonymousUser,
+    feature: str,
+) -> AccessDecision:
     if not user.is_authenticated:
         return AccessDecision(
             allowed=False,
@@ -186,6 +208,7 @@ async def can_use_feature(user: AbstractBaseUser | AnonymousUser, feature: str) 
                 plan=plan,
                 is_pilot_bypass=True,
             )
+
         if plan == PLAN_PREMIUM:
             return AccessDecision(
                 allowed=True,
@@ -193,6 +216,7 @@ async def can_use_feature(user: AbstractBaseUser | AnonymousUser, feature: str) 
                 plan=plan,
                 is_pilot_bypass=False,
             )
+
         return AccessDecision(
             allowed=False,
             reason="Export och nedladdning ingår i betalplanen.",
@@ -230,13 +254,15 @@ async def can_use_arsrapport(user: AbstractBaseUser | AnonymousUser) -> bool:
 
 async def get_feature_gates(user: AbstractBaseUser | AnonymousUser) -> dict[str, bool | str]:
     plan = await get_user_plan(user)
-    excel_download = await can_use_feature(user, FEATURE_EXCEL_DOWNLOAD)
+
     scan_preview = await can_use_feature(user, FEATURE_RECEIPT_SCAN_PREVIEW)
     confirm_save = await can_use_feature(user, FEATURE_RECEIPT_CONFIRM_SAVE)
+    excel_download = await can_use_feature(user, FEATURE_EXCEL_DOWNLOAD)
+
     return {
         "user_plan": plan,
         "is_pilot": plan == PLAN_PILOT,
-        "is_premium": plan == PLAN_PREMIUM,
+        "is_premium": plan in {PLAN_PREMIUM, PLAN_PILOT},
         "is_trial": plan == PLAN_TRIAL,
         "is_free": plan == PLAN_FREE,
         "can_ai_scan": scan_preview.allowed,

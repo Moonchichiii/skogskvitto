@@ -1,17 +1,48 @@
-import os
+from __future__ import annotations
+
 from pathlib import Path
 
-from decouple import Csv, config
+from decouple import config
 
-BASE_DIR = Path(__file__).resolve().parent.parent
+BASE_DIR = Path(__file__).resolve().parent.parent.parent
 
-SECRET_KEY = config("DJANGO_SECRET_KEY")
+
+def env_str(name: str, default: str = "") -> str:
+    value = config(name, default=default)
+    return default if value is None else str(value).strip()
+
+
+def env_csv(name: str, default: str = "") -> list[str]:
+    value = env_str(name, default)
+    if not value:
+        return []
+    return [item.strip() for item in value.split(",") if item.strip()]
+
+
+def env_int(name: str, default: int) -> int:
+    value = env_str(name, "")
+    return default if value == "" else int(value)
+
+
+def env_required(name: str) -> str:
+    value = env_str(name, "")
+    if not value:
+        raise ValueError(f"{name} must be set")
+    return value
+
+
+SECRET_KEY = env_str("DJANGO_SECRET_KEY", "")
 DEBUG = config("DJANGO_DEBUG", default=False, cast=bool)
-ALLOWED_HOSTS = config("DJANGO_ALLOWED_HOSTS", default="localhost,127.0.0.1", cast=Csv())
-CSRF_TRUSTED_ORIGINS = config("DJANGO_CSRF_TRUSTED_ORIGINS", default="", cast=Csv())
-PRIVACY_CONTACT = config(
-    "PRIVACY_CONTACT", default="[ange kontaktadress via miljövariabel i driftmiljön]"
+
+ALLOWED_HOSTS = env_csv("DJANGO_ALLOWED_HOSTS", "localhost,127.0.0.1")
+CSRF_TRUSTED_ORIGINS = env_csv("DJANGO_CSRF_TRUSTED_ORIGINS", "")
+
+PRIVACY_CONTACT = env_str(
+    "PRIVACY_CONTACT",
+    "[ange kontaktadress via miljövariabel i driftmiljön]",
 )
+
+FREEMIUM_RECEIPT_LIMIT = env_int("FREEMIUM_RECEIPT_LIMIT", 5)
 
 INSTALLED_APPS = [
     "django.contrib.admin",
@@ -63,18 +94,6 @@ TEMPLATES = [
 WSGI_APPLICATION = "config.wsgi.application"
 ASGI_APPLICATION = "config.asgi.application"
 
-DATABASES = {
-    "default": {
-        "ENGINE": "django.db.backends.postgresql",
-        "NAME": config("POSTGRES_DB"),
-        "USER": config("POSTGRES_USER"),
-        "PASSWORD": config("POSTGRES_PASSWORD", default=""),
-        "HOST": config("POSTGRES_HOST", default="db"),
-        "PORT": config("POSTGRES_PORT", default=5432, cast=int),
-        "CONN_MAX_AGE": config("POSTGRES_CONN_MAX_AGE", default=60, cast=int),
-    }
-}
-
 AUTH_PASSWORD_VALIDATORS = [
     {"NAME": "django.contrib.auth.password_validation.UserAttributeSimilarityValidator"},
     {"NAME": "django.contrib.auth.password_validation.MinimumLengthValidator"},
@@ -84,6 +103,7 @@ AUTH_PASSWORD_VALIDATORS = [
 
 AUTH_USER_MODEL = "core.User"
 SITE_ID = 1
+
 LOGIN_URL = "/accounts/login/"
 LOGIN_REDIRECT_URL = "/dashboard/"
 LOGOUT_REDIRECT_URL = "/accounts/login/"
@@ -96,6 +116,7 @@ AUTHENTICATION_BACKENDS = [
 ACCOUNT_LOGIN_METHODS = {"email"}
 ACCOUNT_SIGNUP_FIELDS = ["email*"]
 ACCOUNT_EMAIL_VERIFICATION = "none"
+
 SOCIALACCOUNT_ONLY = True
 SOCIALACCOUNT_AUTO_SIGNUP = True
 SOCIALACCOUNT_STORE_TOKENS = False
@@ -104,21 +125,33 @@ SOCIALACCOUNT_PROVIDERS = {
         "SCOPE": ["openid", "email", "profile"],
         "AUTH_PARAMS": {"prompt": "select_account"},
         "APP": {
-            "client_id": config("GOOGLE_OAUTH_CLIENT_ID"),
-            "secret": config("GOOGLE_OAUTH_CLIENT_SECRET"),
+            "client_id": env_str("GOOGLE_OAUTH_CLIENT_ID", ""),
+            "secret": env_str("GOOGLE_OAUTH_CLIENT_SECRET", ""),
             "key": "",
         },
     }
 }
 
-EMAIL_BACKEND = config("EMAIL_BACKEND", default="django.core.mail.backends.smtp.EmailBackend")
-EMAIL_HOST = config("EMAIL_HOST", default="localhost")
-EMAIL_PORT = config("EMAIL_PORT", default=1025, cast=int)
-EMAIL_HOST_USER = config("EMAIL_HOST_USER", default="")
-EMAIL_HOST_PASSWORD = config("EMAIL_HOST_PASSWORD", default="")
+EMAIL_BACKEND = env_str(
+    "EMAIL_BACKEND",
+    "django.core.mail.backends.smtp.EmailBackend",
+)
+EMAIL_HOST = env_str("EMAIL_HOST", "localhost")
+EMAIL_PORT = env_int("EMAIL_PORT", 1025)
+EMAIL_HOST_USER = env_str("EMAIL_HOST_USER", "")
+EMAIL_HOST_PASSWORD = env_str("EMAIL_HOST_PASSWORD", "")
 EMAIL_USE_TLS = config("EMAIL_USE_TLS", default=False, cast=bool)
-DEFAULT_FROM_EMAIL = config("DEFAULT_FROM_EMAIL", default="noreply@example.test")
+DEFAULT_FROM_EMAIL = env_str("DEFAULT_FROM_EMAIL", "noreply@example.test")
 SERVER_EMAIL = DEFAULT_FROM_EMAIL
+
+
+OPENAI_API_KEY = env_str("OPENAI_API_KEY", "")
+OPENAI_MODEL = env_str("OPENAI_MODEL", "gpt-4.1-mini")
+
+STRIPE_SECRET_KEY = env_str("STRIPE_SECRET_KEY", "")
+STRIPE_PRICE_MONTHLY_ID = env_str("STRIPE_PRICE_MONTHLY_ID", "")
+STRIPE_PRICE_YEARLY_ID = env_str("STRIPE_PRICE_YEARLY_ID", "")
+
 
 LANGUAGE_CODE = "sv-se"
 TIME_ZONE = "Europe/Stockholm"
@@ -127,43 +160,15 @@ USE_TZ = True
 
 STATIC_URL = "static/"
 STATIC_ROOT = BASE_DIR / "staticfiles"
+
 MEDIA_URL = "/_private-media/"
 MEDIA_ROOT = BASE_DIR / "private_media"
+
 FILE_UPLOAD_PERMISSIONS = 0o640
 FILE_UPLOAD_DIRECTORY_PERMISSIONS = 0o750
 
-CLOUDINARY_URL = config("CLOUDINARY_URL", default="")
-CLOUDINARY_CLOUD_NAME = config("CLOUDINARY_CLOUD_NAME", default="")
-CLOUDINARY_API_KEY = config("CLOUDINARY_API_KEY", default="")
-CLOUDINARY_API_SECRET = config("CLOUDINARY_API_SECRET", default="")
-CI = config("CI", default=False, cast=bool)
-USE_CLOUDINARY_MEDIA = bool(CLOUDINARY_URL or CLOUDINARY_CLOUD_NAME)
-
-if USE_CLOUDINARY_MEDIA:
-    INSTALLED_APPS.extend(["cloudinary_storage", "cloudinary"])
-    STORAGES = {
-        "default": {"BACKEND": "cloudinary_storage.storage.MediaCloudinaryStorage"},
-        "staticfiles": {"BACKEND": "django.contrib.staticfiles.storage.StaticFilesStorage"},
-    }
-    if CLOUDINARY_URL:
-        os.environ.setdefault("CLOUDINARY_URL", CLOUDINARY_URL)
-    CLOUDINARY_STORAGE = {
-        "CLOUD_NAME": CLOUDINARY_CLOUD_NAME,
-        "API_KEY": CLOUDINARY_API_KEY,
-        "API_SECRET": CLOUDINARY_API_SECRET,
-        "SECURE": True,
-    }
-elif not DEBUG and not CI:
-    raise ValueError("Cloudinary måste vara konfigurerat i produktion för media-filstorage.")
-
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 
-SECURE_SSL_REDIRECT = config("DJANGO_SECURE_SSL_REDIRECT", default=not DEBUG, cast=bool)
-SESSION_COOKIE_SECURE = True
-CSRF_COOKIE_SECURE = True
-SECURE_HSTS_SECONDS = config("DJANGO_SECURE_HSTS_SECONDS", default=31536000, cast=int)
-SECURE_HSTS_INCLUDE_SUBDOMAINS = True
-SECURE_HSTS_PRELOAD = True
 SECURE_CONTENT_TYPE_NOSNIFF = True
 X_FRAME_OPTIONS = "DENY"
 SECURE_REFERRER_POLICY = "no-referrer"
