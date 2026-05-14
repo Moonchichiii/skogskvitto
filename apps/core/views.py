@@ -1,10 +1,7 @@
-from typing import cast
-
 from django.contrib.auth.views import redirect_to_login
 from django.http import HttpRequest, HttpResponse
 from django.shortcuts import render
 
-from apps.core.models import User
 from apps.receipts.billing import (
     FREE_RECEIPT_LIMIT,
     PLAN_FREE,
@@ -14,6 +11,10 @@ from apps.receipts.billing import (
     get_feature_gates,
 )
 from apps.receipts.models import Receipt
+
+
+async def _get_receipt_count(user_id: int | None) -> int:
+    return await Receipt.objects.filter(owner_id=user_id).acount()
 
 
 async def index(request: HttpRequest) -> HttpResponse:
@@ -27,10 +28,10 @@ async def profile(request: HttpRequest) -> HttpResponse:
     if not request.user.is_authenticated:
         return redirect_to_login(request.get_full_path())
 
-    user = cast(User, request.user)
+    user = request.user
     gates = await get_feature_gates(user)
     user_plan = str(gates.get("user_plan", PLAN_FREE))
-    receipt_count = await Receipt.objects.filter(owner_id=user.pk).acount()
+    receipt_count = await _get_receipt_count(user.pk)
 
     plan_labels = {
         PLAN_FREE: "Gratis",
