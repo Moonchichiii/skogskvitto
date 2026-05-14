@@ -1,7 +1,7 @@
 <header x-data="{ menuOpen: false }" class="border-b border-gray-200 bg-white text-gray-900">
   <nav class="mx-auto w-full max-w-5xl px-4 py-3 sm:px-6" aria-label="Huvudnavigering">
     <div class="flex items-center justify-between">
-      <a href="{% url 'index' %}" class="text-lg font-semibold tracking-tight text-gray-900 hover:text-emerald-700">SkogsKvitto</a>
+      <a href="{% url 'index' %}" aria-label="Gå till startsidan" class="text-lg font-semibold tracking-tight text-gray-900 hover:text-emerald-700">SkogsKvitto</a>
       {% if user.is_authenticated %}
       <button
         type="button"

@@ -14,6 +14,8 @@ from apps.receipts.models import Receipt
 
 
 async def _get_receipt_count(user_id: int | None) -> int:
+    if user_id is None:
+        return 0
     return await Receipt.objects.filter(owner_id=user_id).acount()
 
 
