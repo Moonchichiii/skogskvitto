@@ -20,6 +20,9 @@ from pydantic import BaseModel, Field, ValidationError
 OPENAI_API_KEY = config("OPENAI_API_KEY", default="")
 OPENAI_MODEL = config("OPENAI_MODEL", default="gpt-4.1-mini")
 logger = logging.getLogger(__name__)
+PERSONAL_NUMBER_PATTERN = re.compile(r"\b\d{6,8}[-+]?\d{4}\b")
+PHONE_PATTERN = re.compile(r"\b(?:\+46|0)\d{7,12}\b")
+EMAIL_PATTERN = re.compile(r"\b[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}\b")
 
 
 class ReceiptScanResult(BaseModel):
@@ -123,7 +126,7 @@ async def process_receipt_image(file_path: Path) -> ReceiptScanResult:
 
 
 def _sanitize_text(value: str) -> str:
-    sanitized = re.sub(r"\b\d{6,8}[-+]?\d{4}\b", "[redacted]", value)
-    sanitized = re.sub(r"\b(?:\+46|0)\d{7,12}\b", "[redacted]", sanitized)
-    sanitized = re.sub(r"\b[\w\.-]+@[\w\.-]+\.\w+\b", "[redacted]", sanitized)
+    sanitized = PERSONAL_NUMBER_PATTERN.sub("[redacted]", value)
+    sanitized = PHONE_PATTERN.sub("[redacted]", sanitized)
+    sanitized = EMAIL_PATTERN.sub("[redacted]", sanitized)
     return sanitized.strip()

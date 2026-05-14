@@ -84,11 +84,14 @@ async def test_premium_can_download_excel(monkeypatch: pytest.MonkeyPatch) -> No
             return self
 
         def __aiter__(self) -> Any:
-            async def _iter() -> Any:
-                return
-                yield
+            class _EmptyAsyncIterator:
+                def __aiter__(self) -> "_EmptyAsyncIterator":
+                    return self
 
-            return _iter()
+                async def __anext__(self) -> object:
+                    raise StopAsyncIteration
+
+            return _EmptyAsyncIterator()
 
     class _FakeManager:
         def filter(self, **_: object) -> _FakeQuerySet:
@@ -113,11 +116,14 @@ async def test_pilot_can_download_excel(monkeypatch: pytest.MonkeyPatch) -> None
             return self
 
         def __aiter__(self) -> Any:
-            async def _iter() -> Any:
-                return
-                yield
+            class _EmptyAsyncIterator:
+                def __aiter__(self) -> "_EmptyAsyncIterator":
+                    return self
 
-            return _iter()
+                async def __anext__(self) -> object:
+                    raise StopAsyncIteration
+
+            return _EmptyAsyncIterator()
 
     class _FakeManager:
         def filter(self, **_: object) -> _FakeQuerySet:
@@ -312,8 +318,13 @@ async def test_oversized_file_is_blocked(monkeypatch: pytest.MonkeyPatch) -> Non
 
 
 def test_ui_locked_cta_for_free_trial_copy_present() -> None:
-    template_path = Path(
-        "/home/runner/work/skogskvitto/skogskvitto/apps/receipts/templates/receipts/dashboard.html"
+    template_path = (
+        Path(__file__).resolve().parents[1]
+        / "apps"
+        / "receipts"
+        / "templates"
+        / "receipts"
+        / "dashboard.html"
     )
     content = template_path.read_text(encoding="utf-8")
     assert "Du kan testa scanningen gratis." in content

@@ -31,6 +31,7 @@ from apps.receipts.services import (
 router = Router(tags=["receipts"])
 
 MAX_UPLOAD_SIZE_BYTES = 10 * 1024 * 1024
+MAX_CORRECTION_TEXT_LENGTH = 300
 SCAN_JOB_SIGNER = Signer(salt="receipt-scan-job")
 
 
@@ -92,7 +93,7 @@ def _suggest_correction(correction_text: str) -> dict[str, str]:
     lowered = correction_text.lower()
     suggestion: dict[str, str] = {}
 
-    amount_match = re.search(r"(\d[\d\s]*[,.]\d{1,2})", correction_text)
+    amount_match = re.search(r"(\d+(?:\s?\d{3})*[,.]\d{1,2})", correction_text)
     if amount_match:
         suggestion["total_amount"] = amount_match.group(1).replace(" ", "").replace(",", ".")
     if "drivmedel" in lowered:
@@ -288,7 +289,7 @@ async def correction_suggestion(
     except ReceiptScanJob.DoesNotExist:
         return HttpResponseForbidden("Skanningen saknas eller är inte tillgänglig.")
 
-    suggestion = _suggest_correction(correction_text[:300])
+    suggestion = _suggest_correction(correction_text[:MAX_CORRECTION_TEXT_LENGTH])
     if not suggestion:
         return await sync_to_async(_render_fragment)(
             "receipts/partials/correction_suggestion.html",
