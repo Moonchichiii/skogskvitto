@@ -5,7 +5,7 @@ from django.urls import include, path
 from django.views.generic import TemplateView
 from ninja import NinjaAPI
 
-from apps.core.views import index
+from apps.core.views import index, profile
 from apps.receipts.api import router as receipts_router
 from apps.receipts.views import (
     billing_cancel,
@@ -21,6 +21,7 @@ api.add_router("receipts/", receipts_router)
 urlpatterns = [
     path("", cast(Any, index), name="index"),
     path("dashboard/", cast(Any, dashboard), name="dashboard"),
+    path("profile/", cast(Any, profile), name="profile"),
     path(
         "integritetspolicy/",
         TemplateView.as_view(template_name="core/privacy_policy.html"),
