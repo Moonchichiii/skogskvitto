@@ -1,7 +1,14 @@
-(() => {
-        document.addEventListener('DOMContentLoaded', () => {
-            const btn = document.querySelector('[data-mobile-menu-button]');
-            const panel = document.querySelector('[data-mobile-menu-panel]');
-            if (btn && panel) btn.onclick = () => panel.classList.toggle('hidden');
-        });
-    })();
+﻿document.addEventListener("DOMContentLoaded", () => {
+  const button = document.querySelector("[data-mobile-menu-button]");
+  const panel = document.querySelector("[data-mobile-menu-panel]");
+
+  if (!button || !panel) {
+    return;
+  }
+
+  button.addEventListener("click", () => {
+    const isOpen = button.getAttribute("aria-expanded") === "true";
+    button.setAttribute("aria-expanded", String(!isOpen));
+    panel.hidden = isOpen;
+  });
+});

@@ -22,7 +22,7 @@
     try {
       window.localStorage.setItem("cookie_consent", "necessary");
     } catch {
-      // Ignore private browsing/localStorage failures.
+      // Ignore localStorage failures.
     }
 
     banner.hidden = true;

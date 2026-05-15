@@ -320,8 +320,6 @@ async def test_oversized_file_is_blocked(monkeypatch: pytest.MonkeyPatch) -> Non
 def test_ui_locked_cta_for_free_trial_copy_present() -> None:
     template_path = (
         Path(__file__).resolve().parents[1]
-        / "apps"
-        / "receipts"
         / "templates"
         / "receipts"
         / "dashboard.html"

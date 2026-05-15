@@ -1,12 +1,10 @@
-﻿Hej{{ " " }}{{ user_name }},
+Hej {{ user_name }},
 
-Välkommen till SkogsKvitto! Ditt konto som testpilot är nu aktiverat.
+VÃ¤lkommen till SkogsKvitto. Ditt konto Ã¤r nu aktiverat.
 
-Du kan börja ladda upp och analysera kvitton direkt – inga kreditkortsuppgifter behövs under testperioden.
+Du kan bÃ¶rja ladda upp och granska kvitton direkt.
 
-Logga in här: {{ login_url }}
+Logga in hÃ¤r: {{ login_url }}
 
-Har du frågor är du alltid välkommen att höra av dig.
-
-Med vänliga hälsningar,
-SkogsKvitto-teamet
+Med vÃ¤nliga hÃ¤lsningar,
+SkogsKvitto

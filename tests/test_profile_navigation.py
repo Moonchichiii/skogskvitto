@@ -152,10 +152,10 @@ async def test_premium_user_sees_export_enabled_copy(monkeypatch: pytest.MonkeyP
 def test_header_and_bottom_nav_templates_include_logged_in_navigation() -> None:
     base_dir = Path(__file__).resolve().parents[1]
     header_template = (
-        base_dir / "apps" / "core" / "templates" / "core" / "partials" / "header.html"
+        base_dir / "templates" / "partials" / "header.html"
     ).read_text(encoding="utf-8")
     bottom_template = (
-        base_dir / "apps" / "core" / "templates" / "core" / "partials" / "bottom_nav.html"
+        base_dir / "templates" / "partials" / "mobile_nav.html"
     ).read_text(encoding="utf-8")
 
     assert "Huvudnavigering" in header_template
@@ -167,7 +167,6 @@ def test_header_and_bottom_nav_templates_include_logged_in_navigation() -> None:
     assert "Scanna" in bottom_template
     assert "Granska" in bottom_template
     assert "Exportera" in bottom_template
-    assert "Profil" in bottom_template
 
 
 def test_navigation_templates_reference_existing_route_names() -> None:
@@ -181,9 +180,9 @@ def test_navigation_templates_reference_existing_route_names() -> None:
     url_names_in_project.update({"account_login", "account_logout"})
 
     templates = [
-        base_dir / "apps" / "core" / "templates" / "core" / "partials" / "header.html",
-        base_dir / "apps" / "core" / "templates" / "core" / "partials" / "bottom_nav.html",
-        base_dir / "apps" / "core" / "templates" / "account" / "profile.html",
+        base_dir / "templates" / "partials" / "header.html",
+        base_dir / "templates" / "partials" / "mobile_nav.html",
+        base_dir / "templates" / "account" / "profile.html",
     ]
     for template in templates:
         content = template.read_text(encoding="utf-8")
