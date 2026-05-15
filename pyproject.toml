@@ -34,7 +34,7 @@ dev = [
   "mypy>=1.15.0",
   "django-stubs>=5.2.0",
   "pytest>=8.3.0",
-  "pytest-asyncio>=0.26.0",
+  "pytest-asyncio>=0.26.0",`n    "pytest-django>=4.11.0",
   "pip-audit>=2.8.0",
 ]
 
@@ -74,3 +74,7 @@ django_settings_module = "config.settings.test"
 
 [tool.hatch.build.targets.wheel]
 packages = ["config", "apps"]
+
+[tool.pytest.ini_options]
+DJANGO_SETTINGS_MODULE = "config.settings.test"
+python_files = ["test_*.py"]

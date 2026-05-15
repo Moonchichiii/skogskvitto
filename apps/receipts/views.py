@@ -17,7 +17,7 @@ from django.urls import reverse
 from django.utils import timezone
 
 from apps.core.models import User
-from apps.receipts.billing import (
+from apps.billing.services import (
     FEATURE_EXCEL_DOWNLOAD,
     can_use_feature,
     get_feature_gates,
@@ -26,7 +26,7 @@ from apps.receipts.billing import (
     stripe_is_configured,
     stripe_request,
 )
-from apps.receipts.exports import build_excel
+from apps.exports.services import build_excel
 from apps.receipts.models import Receipt, UserSubscription
 
 type AsyncView = Callable[[HttpRequest], Awaitable[HttpResponseBase]]

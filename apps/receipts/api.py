@@ -16,7 +16,7 @@ from ninja import File, Form, Router
 from ninja.files import UploadedFile
 
 from apps.core.models import User
-from apps.receipts.billing import (
+from apps.billing.services import (
     FEATURE_RECEIPT_CONFIRM_SAVE,
     FEATURE_RECEIPT_SCAN_PREVIEW,
     can_use_feature,

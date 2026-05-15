@@ -53,8 +53,7 @@ INSTALLED_APPS = [
     "django.contrib.messages",
     "django.contrib.staticfiles",
     # Local apps
-    "apps.core.apps.CoreConfig",
-    "apps.receipts.apps.ReceiptsConfig",
+    "apps.core.apps.CoreConfig",`n    "apps.accounts.apps.AccountsConfig",`n    "apps.receipts.apps.ReceiptsConfig",`n    "apps.billing.apps.BillingConfig",`n    "apps.exports.apps.ExportsConfig",
     "allauth",
     "allauth.account",
     "allauth.socialaccount",
@@ -115,10 +114,14 @@ AUTHENTICATION_BACKENDS = [
 ]
 
 ACCOUNT_LOGIN_METHODS = {"email"}
-ACCOUNT_SIGNUP_FIELDS = ["email*"]
-ACCOUNT_EMAIL_VERIFICATION = "none"
-
-SOCIALACCOUNT_ONLY = True
+ACCOUNT_SIGNUP_FIELDS = ["email*", "password1*", "password2*"]
+ACCOUNT_EMAIL_VERIFICATION = "mandatory"
+ACCOUNT_EMAIL_UNKNOWN_ACCOUNTS = False
+ACCOUNT_LOGIN_ON_EMAIL_CONFIRMATION = True
+ACCOUNT_EMAIL_CONFIRMATION_AUTHENTICATED_REDIRECT_URL = "/scan/"
+ACCOUNT_EMAIL_CONFIRMATION_ANONYMOUS_REDIRECT_URL = "/accounts/login/"
+ACCOUNT_LOGOUT_ON_GET = False
+SOCIALACCOUNT_ONLY = False
 SOCIALACCOUNT_AUTO_SIGNUP = True
 SOCIALACCOUNT_STORE_TOKENS = False
 SOCIALACCOUNT_PROVIDERS = {

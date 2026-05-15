@@ -40,7 +40,7 @@ else:
         }
     }
 
-EMAIL_BACKEND = "django.core.mail.backends.locmem.EmailBackend"
+EMAIL_BACKEND = "django.core.mail.backends.console.EmailBackend"
 
 SECURE_SSL_REDIRECT = False
 SESSION_COOKIE_SECURE = False
