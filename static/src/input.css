@@ -1,0 +1,5 @@
+@import 'tailwindcss';
+@source '../../templates/**/*.html';
+@source '../../apps/**/*.py';
+.htmx-indicator { display: none; }
+.htmx-request .htmx-indicator { display: flex; }

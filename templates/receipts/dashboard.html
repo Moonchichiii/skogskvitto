@@ -1,0 +1,144 @@
+{% extends "layouts/app.html" %}
+
+{% block content %}
+<div class="space-y-6">
+
+  {% if gates.is_pilot %}
+  <div class="flex items-center gap-2">
+    {% include "partials/pilot_badge.html" %}
+  </div>
+  {% endif %}
+
+  <div class="grid grid-cols-2 gap-4">
+    <div class="rounded-2xl border border-gray-100 bg-white p-4 shadow-sm">
+      <p class="text-xs font-medium uppercase tracking-wide text-gray-500">Total utlÃ¤gg {{ year }}</p>
+      <p class="mt-2 text-2xl font-semibold text-emerald-700">{{ total_year|floatformat:2 }} kr</p>
+    </div>
+    <div class="rounded-2xl border border-gray-100 bg-white p-4 shadow-sm">
+      <p class="text-xs font-medium uppercase tracking-wide text-gray-500">Momsavdrag {{ year }}</p>
+      <p class="mt-2 text-2xl font-semibold text-emerald-700">{{ vat_year|floatformat:2 }} kr</p>
+    </div>
+  </div>
+
+  {% if gates.can_excel_download %}
+  <a
+    id="dashboard-export"
+    href="/receipts/export/excel/"
+    class="block w-full rounded-2xl bg-emerald-700 px-4 py-4 text-center text-base font-semibold text-white transition-all duration-200 hover:bg-emerald-800"
+  >
+    Exportera till Excel
+  </a>
+  {% else %}
+  <div id="dashboard-export" class="rounded-2xl border border-gray-100 bg-white p-4 shadow-sm">
+    <div class="flex items-center justify-between">
+      <p class="text-sm font-semibold text-gray-700">Exportera</p>
+      {% include "partials/premium_badge.html" %}
+    </div>
+    <div class="mt-3 space-y-1 text-sm text-gray-600">
+      <p>Du kan testa scanningen gratis.</p>
+      <p>Export och nedladdning ingÃ¥r i betalplanen.</p>
+      <p class="font-medium text-emerald-700">Uppgradera fÃ¶r att ladda ner Excel/PDF.</p>
+    </div>
+    <div class="mt-3">
+      {% include "partials/premium_cta.html" %}
+    </div>
+  </div>
+  {% endif %}
+
+  <div class="grid gap-4 sm:grid-cols-3">
+
+    <div class="rounded-2xl border border-gray-100 bg-white p-4 shadow-sm">
+      {% if gates.can_korjournal %}
+      <div class="flex items-center justify-between">
+        <p class="text-sm font-semibold text-gray-900">KÃ¶rjournal</p>
+        <span class="rounded-full bg-gray-100 px-2 py-0.5 text-xs text-gray-500">Kommer snart</span>
+      </div>
+      {% else %}
+      <div class="flex items-center justify-between">
+        <p class="text-sm font-medium text-gray-400">KÃ¶rjournal</p>
+        {% include "partials/premium_badge.html" %}
+      </div>
+      {% endif %}
+    </div>
+
+    <div class="rounded-2xl border border-gray-100 bg-white p-4 shadow-sm">
+      {% if gates.can_skogsinkomster %}
+      <div class="flex items-center justify-between">
+        <p class="text-sm font-semibold text-gray-900">Skogsinkomster</p>
+        <span class="rounded-full bg-gray-100 px-2 py-0.5 text-xs text-gray-500">Kommer snart</span>
+      </div>
+      {% else %}
+      <div class="flex items-center justify-between">
+        <p class="text-sm font-medium text-gray-400">Skogsinkomster</p>
+        {% include "partials/premium_badge.html" %}
+      </div>
+      {% endif %}
+    </div>
+
+    <div class="rounded-2xl border border-gray-100 bg-white p-4 shadow-sm">
+      {% if gates.can_arsrapport %}
+      <div class="flex items-center justify-between">
+        <p class="text-sm font-semibold text-gray-900">Ã…rsrapport</p>
+        <span class="rounded-full bg-gray-100 px-2 py-0.5 text-xs text-gray-500">Kommer snart</span>
+      </div>
+      {% else %}
+      <div class="flex items-center justify-between">
+        <p class="text-sm font-medium text-gray-400">Ã…rsrapport</p>
+        {% include "partials/premium_badge.html" %}
+      </div>
+      {% endif %}
+    </div>
+
+  </div>
+
+  <div class="overflow-hidden rounded-2xl border border-gray-100 bg-white shadow-sm">
+    <table class="w-full text-sm">
+      <thead class="border-b border-gray-100 bg-gray-50">
+        <tr>
+          <th class="px-4 py-3 text-left font-medium text-gray-500">Datum</th>
+          <th class="px-4 py-3 text-left font-medium text-gray-500">Butik</th>
+          <th class="px-4 py-3 text-right font-medium text-gray-500">Total</th>
+          <th class="px-4 py-3 text-right font-medium text-gray-500">Moms</th>
+        </tr>
+      </thead>
+      <tbody class="divide-y divide-gray-100">
+        {% for receipt in receipts %}
+        <tr>
+          <td class="px-4 py-3 text-gray-600">{{ receipt.date|date:"Y-m-d"|default:"â€“" }}</td>
+          <td class="px-4 py-3 text-gray-900">{{ receipt.vendor|default:"OkÃ¤nd" }}</td>
+          <td class="px-4 py-3 text-right font-medium text-emerald-700">
+            {% if receipt.total_amount %}{{ receipt.total_amount|floatformat:2 }} kr{% else %}â€“{% endif %}
+          </td>
+          <td class="px-4 py-3 text-right text-gray-600">
+            {% if receipt.vat_amount %}{{ receipt.vat_amount|floatformat:2 }} kr{% else %}â€“{% endif %}
+          </td>
+        </tr>
+        {% empty %}
+        <tr>
+          <td colspan="4" class="px-4 py-10 text-center text-gray-400">
+            Inga kvitton Ã¤nnu. BÃ¶rja scanna!
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+
+  {% if page_obj.has_other_pages %}
+  <nav class="flex items-center justify-between rounded-2xl border border-gray-100 bg-white p-3 text-sm">
+    {% if page_obj.has_previous %}
+    <a href="?page={{ page_obj.previous_page_number }}" class="rounded-xl bg-gray-50 px-3 py-2 text-gray-700">FÃ¶regÃ¥ende</a>
+    {% else %}
+    <span class="rounded-xl bg-gray-50 px-3 py-2 text-gray-400">FÃ¶regÃ¥ende</span>
+    {% endif %}
+    <span class="text-gray-600">Sida {{ page_obj.number }} av {{ page_obj.paginator.num_pages }}</span>
+    {% if page_obj.has_next %}
+    <a href="?page={{ page_obj.next_page_number }}" class="rounded-xl bg-gray-50 px-3 py-2 text-gray-700">NÃ¤sta</a>
+    {% else %}
+    <span class="rounded-xl bg-gray-50 px-3 py-2 text-gray-400">NÃ¤sta</span>
+    {% endif %}
+  </nav>
+  {% endif %}
+
+</div>
+{% endblock %}

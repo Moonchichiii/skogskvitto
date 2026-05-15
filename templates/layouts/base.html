@@ -1,0 +1,20 @@
+<!doctype html>
+<html lang="sv">
+<head>
+    {% load static %}
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>{% block title %}SkogsKvitto{% endblock %}</title>
+    <link rel="stylesheet" href="{% static 'css/app.css' %}">
+    {% block extra_head %}{% endblock %}
+</head>
+<body class="min-h-screen bg-stone-50 text-stone-950 antialiased">
+    {% block body %}{% endblock %}
+    <script defer src="https://cdn.jsdelivr.net/npm/htmx.org@2.0.4/dist/htmx.min.js"></script>
+    <script defer src="{% static 'js/mobile-nav.js' %}"></script>
+    <script defer src="{% static 'js/cookie-banner.js' %}"></script>
+    <script defer src="{% static 'js/receipt-upload.js' %}"></script>
+    <script defer src="{% static 'js/correction-suggestion.js' %}"></script>
+    {% block extra_scripts %}{% endblock %}
+</body>
+</html>

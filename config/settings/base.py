@@ -39,7 +39,7 @@ CSRF_TRUSTED_ORIGINS = env_csv("DJANGO_CSRF_TRUSTED_ORIGINS", "")
 
 PRIVACY_CONTACT = env_str(
     "PRIVACY_CONTACT",
-    "[ange kontaktadress via miljövariabel i driftmiljön]",
+    "[ange kontaktadress via miljÃƒÂ¶variabel i driftmiljÃƒÂ¶n]",
 )
 
 FREEMIUM_RECEIPT_LIMIT = env_int("FREEMIUM_RECEIPT_LIMIT", 5)
@@ -52,13 +52,16 @@ INSTALLED_APPS = [
     "django.contrib.sites",
     "django.contrib.messages",
     "django.contrib.staticfiles",
+
+    # Local apps
+    "apps.core.apps.CoreConfig",
+    "apps.receipts.apps.ReceiptsConfig",
+
     "allauth",
     "allauth.account",
     "allauth.socialaccount",
     "allauth.socialaccount.providers.google",
     "csp",
-    "apps.core.apps.CoreConfig",
-    "apps.receipts.apps.ReceiptsConfig",
 ]
 
 MIDDLEWARE = [
@@ -78,7 +81,7 @@ ROOT_URLCONF = "config.urls"
 TEMPLATES = [
     {
         "BACKEND": "django.template.backends.django.DjangoTemplates",
-        "DIRS": [],
+        "DIRS": [BASE_DIR / "templates"],
         "APP_DIRS": True,
         "OPTIONS": {
             "context_processors": [
@@ -105,7 +108,7 @@ AUTH_USER_MODEL = "core.User"
 SITE_ID = 1
 
 LOGIN_URL = "/accounts/login/"
-LOGIN_REDIRECT_URL = "/dashboard/"
+LOGIN_REDIRECT_URL = "/scan/"
 LOGOUT_REDIRECT_URL = "/accounts/login/"
 
 AUTHENTICATION_BACKENDS = [
@@ -160,6 +163,7 @@ USE_TZ = True
 
 STATIC_URL = "static/"
 STATIC_ROOT = BASE_DIR / "staticfiles"
+STATICFILES_DIRS = [BASE_DIR / "static"]
 
 MEDIA_URL = "/_private-media/"
 MEDIA_ROOT = BASE_DIR / "private_media"
