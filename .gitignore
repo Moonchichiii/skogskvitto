@@ -1,6 +1,4 @@
-﻿# 1. Uppdatera .gitignore ordentligt
-@"
-__pycache__/
+﻿__pycache__/
 *.py[cod]
 *.sqlite3
 
