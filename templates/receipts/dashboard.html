@@ -1,144 +1,142 @@
-{% extends "layouts/app.html" %}
+{% extends "layouts/base.html" %}
+
+{% block title %}Granska kvitton | SkogsKvitto{% endblock %}
 
 {% block content %}
-<div class="space-y-6">
-
-  {% if gates.is_pilot %}
-  <div class="flex items-center gap-2">
-    {% include "partials/pilot_badge.html" %}
-  </div>
-  {% endif %}
-
-  <div class="grid grid-cols-2 gap-4">
-    <div class="rounded-2xl border border-gray-100 bg-white p-4 shadow-sm">
-      <p class="text-xs font-medium uppercase tracking-wide text-gray-500">Totala utlägg {{ year }}</p>
-      <p class="mt-2 text-2xl font-semibold text-emerald-700">{{ total_year|floatformat:2 }} kr</p>
+<section class="page-stack">
+  <header class="hero-card">
+    <div class="section-header">
+      <div>
+        <p class="eyebrow">Underlag</p>
+        <h1 class="hero-title">Granska kvitton</h1>
+        <p class="hero-text">
+          Följ upp årets kvitton, moms och exportstatus.
+        </p>
+      </div>
+      {% if gates.is_pilot %}
+        {% include "partials/pilot_badge.html" %}
+      {% endif %}
     </div>
-    <div class="rounded-2xl border border-gray-100 bg-white p-4 shadow-sm">
-      <p class="text-xs font-medium uppercase tracking-wide text-gray-500">Momsavdrag {{ year }}</p>
-      <p class="mt-2 text-2xl font-semibold text-emerald-700">{{ vat_year|floatformat:2 }} kr</p>
-    </div>
+  </header>
+
+  <div class="grid gap-4 sm:grid-cols-2">
+    <article class="card">
+      <p class="metric-label">Totala utlägg {{ year }}</p>
+      <p class="metric-value">{{ total_year|floatformat:2 }} kr</p>
+    </article>
+    <article class="card">
+      <p class="metric-label">Momsavdrag {{ year }}</p>
+      <p class="metric-value">{{ vat_year|floatformat:2 }} kr</p>
+    </article>
   </div>
 
   {% if gates.can_excel_download %}
-  <a
-    id="dashboard-export"
-    href="/receipts/export/excel/"
-    class="block w-full rounded-2xl bg-emerald-700 px-4 py-4 text-center text-base font-semibold text-white transition-all duration-200 hover:bg-emerald-800"
-  >
-    Exportera till Excel
-  </a>
+    <a id="dashboard-export" href="{% url 'export_excel' %}" class="btn-primary w-full">
+      Exportera till Excel
+    </a>
   {% else %}
-  <div id="dashboard-export" class="rounded-2xl border border-gray-100 bg-white p-4 shadow-sm">
-    <div class="flex items-center justify-between">
-      <p class="text-sm font-semibold text-gray-700">Exportera</p>
-      {% include "partials/premium_badge.html" %}
-    </div>
-    <div class="mt-3 space-y-1 text-sm text-gray-600">
-      <p>Du kan testa scanningen gratis.</p>
-      <p>Export och nedladdning ingår i betalplanen.</p>
-      <p class="font-medium text-emerald-700">Uppgradera för att ladda ner Excel/PDF.</p>
-    </div>
-    <div class="mt-3">
-      {% include "partials/premium_cta.html" %}
-    </div>
-  </div>
+    <section id="dashboard-export" class="card">
+      <div class="section-header">
+        <div>
+          <h2 class="card-title">Exportera</h2>
+          <div class="mt-3 space-y-1 text-sm text-stone-600">
+            <p>Du kan testa scanningen gratis.</p>
+            <p>Export och nedladdning ingår i betalplanen.</p>
+            <p class="font-semibold text-emerald-800">Uppgradera för att ladda ner Excel/PDF.</p>
+          </div>
+        </div>
+        {% include "partials/premium_badge.html" %}
+      </div>
+      <div class="mt-4">
+        {% include "partials/premium_cta.html" %}
+      </div>
+    </section>
   {% endif %}
 
   <div class="grid gap-4 sm:grid-cols-3">
+    <article class="card">
+      <div class="flex items-center justify-between gap-3">
+        <p class="{% if gates.can_korjournal %}font-bold text-emerald-950{% else %}font-semibold text-stone-400{% endif %}">Körjournal</p>
+        {% if gates.can_korjournal %}
+          <span class="status-pill">Kommer snart</span>
+        {% else %}
+          {% include "partials/premium_badge.html" %}
+        {% endif %}
+      </div>
+    </article>
 
-    <div class="rounded-2xl border border-gray-100 bg-white p-4 shadow-sm">
-      {% if gates.can_korjournal %}
-      <div class="flex items-center justify-between">
-        <p class="text-sm font-semibold text-gray-900">Körjournal</p>
-        <span class="rounded-full bg-gray-100 px-2 py-0.5 text-xs text-gray-500">Kommer snart</span>
+    <article class="card">
+      <div class="flex items-center justify-between gap-3">
+        <p class="{% if gates.can_skogsinkomster %}font-bold text-emerald-950{% else %}font-semibold text-stone-400{% endif %}">Skogsinkomster</p>
+        {% if gates.can_skogsinkomster %}
+          <span class="status-pill">Kommer snart</span>
+        {% else %}
+          {% include "partials/premium_badge.html" %}
+        {% endif %}
       </div>
-      {% else %}
-      <div class="flex items-center justify-between">
-        <p class="text-sm font-medium text-gray-400">Körjournal</p>
-        {% include "partials/premium_badge.html" %}
-      </div>
-      {% endif %}
-    </div>
+    </article>
 
-    <div class="rounded-2xl border border-gray-100 bg-white p-4 shadow-sm">
-      {% if gates.can_skogsinkomster %}
-      <div class="flex items-center justify-between">
-        <p class="text-sm font-semibold text-gray-900">Skogsinkomster</p>
-        <span class="rounded-full bg-gray-100 px-2 py-0.5 text-xs text-gray-500">Kommer snart</span>
+    <article class="card">
+      <div class="flex items-center justify-between gap-3">
+        <p class="{% if gates.can_arsrapport %}font-bold text-emerald-950{% else %}font-semibold text-stone-400{% endif %}">Årsrapport</p>
+        {% if gates.can_arsrapport %}
+          <span class="status-pill">Kommer snart</span>
+        {% else %}
+          {% include "partials/premium_badge.html" %}
+        {% endif %}
       </div>
-      {% else %}
-      <div class="flex items-center justify-between">
-        <p class="text-sm font-medium text-gray-400">Skogsinkomster</p>
-        {% include "partials/premium_badge.html" %}
-      </div>
-      {% endif %}
-    </div>
-
-    <div class="rounded-2xl border border-gray-100 bg-white p-4 shadow-sm">
-      {% if gates.can_arsrapport %}
-      <div class="flex items-center justify-between">
-        <p class="text-sm font-semibold text-gray-900">Årsrapport</p>
-        <span class="rounded-full bg-gray-100 px-2 py-0.5 text-xs text-gray-500">Kommer snart</span>
-      </div>
-      {% else %}
-      <div class="flex items-center justify-between">
-        <p class="text-sm font-medium text-gray-400">Årsrapport</p>
-        {% include "partials/premium_badge.html" %}
-      </div>
-      {% endif %}
-    </div>
-
+    </article>
   </div>
 
-  <div class="overflow-hidden rounded-2xl border border-gray-100 bg-white shadow-sm">
-    <table class="w-full text-sm">
-      <thead class="border-b border-gray-100 bg-gray-50">
+  <section class="table-card">
+    <table class="data-table">
+      <thead>
         <tr>
-          <th class="px-4 py-3 text-left font-medium text-gray-500">Datum</th>
-          <th class="px-4 py-3 text-left font-medium text-gray-500">Butik</th>
-          <th class="px-4 py-3 text-right font-medium text-gray-500">Total</th>
-          <th class="px-4 py-3 text-right font-medium text-gray-500">Moms</th>
+          <th>Datum</th>
+          <th>Butik</th>
+          <th class="text-right">Total</th>
+          <th class="text-right">Moms</th>
         </tr>
       </thead>
-      <tbody class="divide-y divide-gray-100">
+      <tbody class="divide-y divide-stone-100">
         {% for receipt in receipts %}
         <tr>
-          <td class="px-4 py-3 text-gray-600">{{ receipt.date|date:"Y-m-d"|default:"â€“" }}</td>
-          <td class="px-4 py-3 text-gray-900">{{ receipt.vendor|default:"Okänd" }}</td>
-          <td class="px-4 py-3 text-right font-medium text-emerald-700">
-            {% if receipt.total_amount %}{{ receipt.total_amount|floatformat:2 }} kr{% else %}â€“{% endif %}
+          <td>{{ receipt.date|date:"Y-m-d"|default:"–" }}</td>
+          <td class="font-semibold text-stone-950">{{ receipt.vendor|default:"Okänd" }}</td>
+          <td class="text-right font-semibold text-emerald-800">
+            {% if receipt.total_amount %}{{ receipt.total_amount|floatformat:2 }} kr{% else %}–{% endif %}
           </td>
-          <td class="px-4 py-3 text-right text-gray-600">
-            {% if receipt.vat_amount %}{{ receipt.vat_amount|floatformat:2 }} kr{% else %}â€“{% endif %}
+          <td class="text-right">
+            {% if receipt.vat_amount %}{{ receipt.vat_amount|floatformat:2 }} kr{% else %}–{% endif %}
           </td>
         </tr>
         {% empty %}
         <tr>
-          <td colspan="4" class="px-4 py-10 text-center text-gray-400">
+          <td colspan="4" class="py-10 text-center text-stone-400">
             Inga kvitton ännu. Börja scanna!
           </td>
         </tr>
         {% endfor %}
       </tbody>
     </table>
-  </div>
+  </section>
 
   {% if page_obj.has_other_pages %}
-  <nav class="flex items-center justify-between rounded-2xl border border-gray-100 bg-white p-3 text-sm">
+  <nav class="flex items-center justify-between rounded-3xl border border-stone-200 bg-white p-3 text-sm">
     {% if page_obj.has_previous %}
-    <a href="?page={{ page_obj.previous_page_number }}" class="rounded-xl bg-gray-50 px-3 py-2 text-gray-700">Föregående</a>
+      <a href="?page={{ page_obj.previous_page_number }}" class="btn-secondary px-3 py-2">Föregående</a>
     {% else %}
-    <span class="rounded-xl bg-gray-50 px-3 py-2 text-gray-400">Föregående</span>
+      <span class="rounded-2xl bg-stone-50 px-3 py-2 text-stone-400">Föregående</span>
     {% endif %}
-    <span class="text-gray-600">Sida {{ page_obj.number }} av {{ page_obj.paginator.num_pages }}</span>
+
+    <span class="text-stone-600">Sida {{ page_obj.number }} av {{ page_obj.paginator.num_pages }}</span>
+
     {% if page_obj.has_next %}
-    <a href="?page={{ page_obj.next_page_number }}" class="rounded-xl bg-gray-50 px-3 py-2 text-gray-700">Nästa</a>
+      <a href="?page={{ page_obj.next_page_number }}" class="btn-secondary px-3 py-2">Nästa</a>
     {% else %}
-    <span class="rounded-xl bg-gray-50 px-3 py-2 text-gray-400">Nästa</span>
+      <span class="rounded-2xl bg-stone-50 px-3 py-2 text-stone-400">Nästa</span>
     {% endif %}
   </nav>
   {% endif %}
-
-</div>
+</section>
 {% endblock %}

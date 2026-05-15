@@ -151,12 +151,12 @@ async def test_premium_user_sees_export_enabled_copy(monkeypatch: pytest.MonkeyP
 
 def test_header_and_bottom_nav_templates_include_logged_in_navigation() -> None:
     base_dir = Path(__file__).resolve().parents[1]
-    header_template = (
-        base_dir / "templates" / "partials" / "header.html"
-    ).read_text(encoding="utf-8")
-    bottom_template = (
-        base_dir / "templates" / "partials" / "mobile_nav.html"
-    ).read_text(encoding="utf-8")
+    header_template = (base_dir / "templates" / "partials" / "header.html").read_text(
+        encoding="utf-8"
+    )
+    bottom_template = (base_dir / "templates" / "partials" / "mobile_nav.html").read_text(
+        encoding="utf-8"
+    )
 
     assert "Huvudnavigering" in header_template
     assert "Scanna" in header_template

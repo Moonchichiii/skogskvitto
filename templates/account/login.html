@@ -1,26 +1,26 @@
-﻿{% extends "layouts/base.html" %}
+{% extends "layouts/base.html" %}
 {% load socialaccount %}
 
 {% block title %}Logga in | SkogsKvitto{% endblock %}
 
 {% block content %}
 <section class="auth-card">
-  <div class="auth-icon" aria-hidden="true">â™²</div>
+  <div class="auth-icon" aria-hidden="true">SK</div>
 
   <div class="text-center">
     <p class="eyebrow">SkogsKvitto</p>
-    <h1 class="mt-2 text-3xl font-bold tracking-tight text-forest-950">Logga in</h1>
+    <h1 class="mt-2 text-3xl font-bold tracking-tight text-emerald-950">Logga in</h1>
     <p class="mt-3 text-sm leading-relaxed text-stone-600">
-      FortsÃ¤tt med ditt Google-konto fÃ¶r att scanna, granska och exportera dina skogskvitton.
+      Fortsätt med ditt Google-konto för att scanna, granska och exportera dina skogskvitton.
     </p>
   </div>
 
-  <a href="{% provider_login_url 'google' process='login' %}" class="btn-primary w-full justify-center">
-    FortsÃ¤tt med Google
+  <a href="{% provider_login_url 'google' process='login' %}" class="btn-primary w-full">
+    Fortsätt med Google
   </a>
 
   <p class="text-center text-xs leading-relaxed text-stone-500">
-    Endast nÃ¶dvÃ¤ndiga cookies anvÃ¤nds fÃ¶r inloggning och sÃ¤kerhet.
+    Endast nödvändiga cookies används för inloggning och säkerhet.
   </p>
 </section>
 {% endblock %}

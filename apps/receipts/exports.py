@@ -119,9 +119,8 @@ def _write_inkomster_skog_sheet(wb: Workbook, receipts: list[Receipt]) -> None:
             inkomster["Flis"] += amount
 
     skogsavdragsmoms = (
-        (inkomster["Slutavverkning"] + inkomster["Gallring"] + inkomster["Flis"])
-        * SKOGSAVDRAGS_MOMS_RATE
-    )
+        inkomster["Slutavverkning"] + inkomster["Gallring"] + inkomster["Flis"]
+    ) * SKOGSAVDRAGS_MOMS_RATE
 
     ws.cell(row=2, column=1, value=inkomster["Slutavverkning"])
     ws.cell(row=2, column=2, value=inkomster["Gallring"])

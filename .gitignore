@@ -1,4 +1,4 @@
-﻿__pycache__/
+__pycache__/
 *.py[cod]
 *.sqlite3
 
@@ -23,6 +23,8 @@ node_modules/
 .bun/
 
 tools/tailwindcss.exe
+_scratch/
+script.ps1
 
 .DS_Store
 Thumbs.db

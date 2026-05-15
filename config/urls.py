@@ -1,4 +1,4 @@
-﻿from typing import Any, cast
+from typing import Any, cast
 
 from django.contrib import admin
 from django.urls import include, path

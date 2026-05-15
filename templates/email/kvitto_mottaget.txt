@@ -1,13 +1,13 @@
 Hej {{ user_name }},
 
-Vi har tagit emot ditt kvitto och sparat det sÃ¤kert i SkogsKvitto.
+Vi har tagit emot ditt kvitto och sparat det säkert i SkogsKvitto.
 
 Detaljer:
-  LeverantÃ¶r : {{ vendor|default:"â€“" }}
-  Datum      : {{ receipt_date|default:"â€“" }}
-  Belopp     : {{ total_amount|default:"â€“" }} kr
+  Leverantör : {{ vendor|default:"–" }}
+  Datum      : {{ receipt_date|default:"–" }}
+  Belopp     : {{ total_amount|default:"–" }} kr
 
-Du hittar kvittot i din dashboard nÃ¤r du loggar in.
+Du hittar kvittot i din dashboard när du loggar in.
 
-Med vÃ¤nliga hÃ¤lsningar,
+Med vänliga hälsningar,
 SkogsKvitto

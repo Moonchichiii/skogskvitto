@@ -1,8 +1,8 @@
-﻿document.addEventListener("DOMContentLoaded", () => {
+document.addEventListener("DOMContentLoaded", () => {
   const banner = document.querySelector("[data-cookie-banner]");
   const button = document.querySelector("[data-cookie-accept]");
 
-  if (!banner || !button) {
+  if (!(banner instanceof HTMLElement) || !(button instanceof HTMLButtonElement)) {
     return;
   }
 
@@ -22,7 +22,7 @@
     try {
       window.localStorage.setItem("cookie_consent", "necessary");
     } catch {
-      // Ignore localStorage failures.
+      // localStorage may be unavailable in private mode.
     }
 
     banner.hidden = true;

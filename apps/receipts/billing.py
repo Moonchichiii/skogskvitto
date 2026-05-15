@@ -106,12 +106,14 @@ async def user_has_active_subscription(user: AbstractBaseUser | AnonymousUser) -
 
     now = timezone.now()
 
-    return await UserSubscription.objects.filter(
-        user_id=user.pk,
-        status=UserSubscription.STATUS_ACTIVE,
-    ).filter(
-        Q(current_period_end__isnull=True) | Q(current_period_end__gt=now)
-    ).aexists()
+    return (
+        await UserSubscription.objects.filter(
+            user_id=user.pk,
+            status=UserSubscription.STATUS_ACTIVE,
+        )
+        .filter(Q(current_period_end__isnull=True) | Q(current_period_end__gt=now))
+        .aexists()
+    )
 
 
 async def user_has_trial_subscription(user: AbstractBaseUser | AnonymousUser) -> bool:
@@ -120,12 +122,14 @@ async def user_has_trial_subscription(user: AbstractBaseUser | AnonymousUser) ->
 
     now = timezone.now()
 
-    return await UserSubscription.objects.filter(
-        user_id=user.pk,
-        status=UserSubscription.STATUS_TRIALING,
-    ).filter(
-        Q(current_period_end__isnull=True) | Q(current_period_end__gt=now)
-    ).aexists()
+    return (
+        await UserSubscription.objects.filter(
+            user_id=user.pk,
+            status=UserSubscription.STATUS_TRIALING,
+        )
+        .filter(Q(current_period_end__isnull=True) | Q(current_period_end__gt=now))
+        .aexists()
+    )
 
 
 async def is_pilot_user(user: AbstractBaseUser | AnonymousUser) -> bool:

@@ -1,4 +1,4 @@
-﻿import io
+import io
 from collections.abc import Awaitable, Callable
 from datetime import date, datetime
 from decimal import Decimal
@@ -48,6 +48,7 @@ async def scan(request: HttpRequest) -> HttpResponseBase:
     gates = await get_feature_gates(user)
     return render(request, "receipts/scan.html", {"gates": gates})
 
+
 @login_required_async
 async def dashboard(request: HttpRequest) -> HttpResponseBase:
     user = cast(User, request.user)
@@ -79,11 +80,11 @@ async def dashboard(request: HttpRequest) -> HttpResponseBase:
         {
             "receipts": receipts,
             "total_year": total_year,
-                "vat_year": vat_year,
-                "year": year,
-                "gates": gates,
-                "page_obj": page_obj,
-            },
+            "vat_year": vat_year,
+            "year": year,
+            "gates": gates,
+            "page_obj": page_obj,
+        },
     )
 
 
@@ -92,13 +93,10 @@ async def export_excel(request: HttpRequest) -> HttpResponseBase:
     user = cast(User, request.user)
     decision = await can_use_feature(user, FEATURE_EXCEL_DOWNLOAD)
     if not decision.allowed:
-        return HttpResponseForbidden("Export och nedladdning ingÃƒÂ¥r i betalplanen.")
+        return HttpResponseForbidden("Export och nedladdning ingår i betalplanen.")
 
     receipts = [
-        r
-        async for r in Receipt.objects.filter(owner=user).order_by(
-            "-date", "-created_at"
-        )
+        r async for r in Receipt.objects.filter(owner=user).order_by("-date", "-created_at")
     ]
 
     buf: io.BytesIO = await sync_to_async(build_excel)(receipts)
@@ -155,7 +153,7 @@ async def start_checkout(request: HttpRequest) -> HttpResponseBase:
 
     checkout_url = checkout_session.get("url")
     if not isinstance(checkout_url, str) or not checkout_url:
-        return HttpResponseBadRequest("Stripe returnerade ingen checkout-lÃƒÂ¤nk.")
+        return HttpResponseBadRequest("Stripe returnerade ingen checkout-länk.")
 
     return HttpResponseRedirect(checkout_url)
 
@@ -186,19 +184,19 @@ async def billing_success(request: HttpRequest) -> HttpResponseBase:
         return HttpResponseBadRequest("Ogiltig checkout-session.")
 
     if checkout_session.get("status") != "complete":
-        return HttpResponseBadRequest("Betalningen ÃƒÂ¤r inte slutfÃƒÂ¶rd.")
+        return HttpResponseBadRequest("Betalningen är inte slutförd.")
 
     if str(checkout_session.get("client_reference_id", "")) != str(user.id):
-        return HttpResponseBadRequest("Checkout-session tillhÃƒÂ¶r inte aktuell anvÃƒÂ¤ndare.")
+        return HttpResponseBadRequest("Checkout-session tillhör inte aktuell användare.")
 
     subscription = checkout_session.get("subscription")
     if not isinstance(subscription, dict):
-        return HttpResponseBadRequest("Saknar abonnemangsdata frÃƒÂ¥n Stripe.")
+        return HttpResponseBadRequest("Saknar abonnemangsdata från Stripe.")
 
     subscription_id = subscription.get("id")
     status = subscription.get("status")
     if not isinstance(subscription_id, str) or not isinstance(status, str):
-        return HttpResponseBadRequest("Ogiltig abonnemangsdata frÃƒÂ¥n Stripe.")
+        return HttpResponseBadRequest("Ogiltig abonnemangsdata från Stripe.")
 
     customer_id = checkout_session.get("customer")
     if not isinstance(customer_id, str):
@@ -259,4 +257,3 @@ async def billing_success(request: HttpRequest) -> HttpResponseBase:
 @login_required_async
 async def billing_cancel(_: HttpRequest) -> HttpResponseBase:
     return redirect("scan")
-

@@ -1,4 +1,4 @@
-﻿{% extends "layouts/base.html" %}
+{% extends "layouts/base.html" %}
 
 {% block title %}Min profil | SkogsKvitto{% endblock %}
 
@@ -7,7 +7,7 @@
   <header class="hero-card">
     <p class="eyebrow">Konto</p>
     <h1 class="hero-title">Min profil</h1>
-    <p class="hero-text">Hantera konto, plan och Ã¥tkomst till export.</p>
+    <p class="hero-text">Hantera konto, plan och åtkomst till export.</p>
   </header>
 
   <div class="grid gap-4 md:grid-cols-3">
@@ -43,38 +43,38 @@
 
     <article class="card">
       <h2 class="card-title">Plan</h2>
-      <p class="mt-3 text-2xl font-bold text-forest-950">{{ plan_label }}</p>
+      <p class="mt-3 text-2xl font-bold text-emerald-950">{{ plan_label }}</p>
       <p class="mt-2 text-sm leading-relaxed text-stone-600">{{ plan_description }}</p>
     </article>
   </div>
 
   <article class="card">
-    <h2 class="card-title">AnvÃ¤ndning</h2>
-    <div class="mt-4 grid gap-4 sm:grid-cols-3">
+    <h2 class="card-title">Användning</h2>
+    <div class="mt-4 metric-grid">
       <div class="metric-tile">
         <p class="metric-label">Sparade kvitton</p>
         <p class="metric-value">{{ receipt_count }}</p>
       </div>
       <div class="metric-tile">
-        <p class="metric-label">GratisgrÃ¤ns</p>
+        <p class="metric-label">Gratisgräns</p>
         <p class="metric-value">{{ free_receipt_limit }}</p>
       </div>
       <div class="metric-tile">
         <p class="metric-label">Export</p>
-        <p class="metric-value">{% if export_enabled %}Aktiv{% else %}LÃ¥st{% endif %}</p>
+        <p class="metric-value">{% if export_enabled %}Aktiv{% else %}Låst{% endif %}</p>
       </div>
     </div>
   </article>
 
   <article class="card">
-    <h2 class="card-title">Ã…tgÃ¤rder</h2>
+    <h2 class="card-title">Åtgärder</h2>
     <div class="mt-4 grid gap-3 sm:grid-cols-2">
       {% if export_enabled %}
-        <a href="{% url 'dashboard' %}?nav=export#dashboard-export" class="btn-primary justify-center">GÃ¥ till export</a>
+        <a href="{% url 'dashboard' %}?nav=export#dashboard-export" class="btn-primary">Gå till export</a>
       {% else %}
-        <a href="{% url 'start_checkout' %}?plan=yearly" class="btn-primary justify-center">Uppgradera</a>
+        <a href="{% url 'start_checkout' %}?plan=yearly" class="btn-primary">Uppgradera</a>
       {% endif %}
-      <a href="{% url 'account_logout' %}" class="btn-secondary justify-center">Logga ut</a>
+      <a href="{% url 'account_logout' %}" class="btn-secondary">Logga ut</a>
     </div>
   </article>
 </section>

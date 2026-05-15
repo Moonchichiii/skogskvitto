@@ -1,49 +1,42 @@
-{% extends "layouts/app.html" %}
+{% extends "layouts/base.html" %}
+
+{% block title %}Användarvillkor | SkogsKvitto{% endblock %}
 
 {% block content %}
-<section class="mx-auto max-w-3xl space-y-4">
-  <header class="rounded-2xl border border-gray-200 bg-white p-5 shadow-sm sm:p-6">
-    <h1 class="text-2xl font-bold tracking-tight text-emerald-800 sm:text-3xl">AnvÃ¤ndarvillkor</h1>
-    <p class="mt-2 text-sm text-gray-600">
-      SkogsKvitto Ã¤r byggt fÃ¶r att gÃ¶ra dokumentation och underlag enklare fÃ¶r skogsÃ¤gare.
-    </p>
+<section class="legal-page">
+  <header class="hero-card">
+    <p class="eyebrow">Juridik</p>
+    <h1 class="hero-title">Användarvillkor</h1>
+    <p class="hero-text">SkogsKvitto hjälper skogsägare att samla kvitton och skapa tydliga underlag.</p>
   </header>
 
-  <article class="space-y-3 rounded-2xl border border-gray-200 bg-white p-5 shadow-sm sm:p-6">
-    <h2 class="text-lg font-semibold text-gray-900">TjÃ¤nstens syfte</h2>
-    <p class="text-sm text-gray-700">
-      Appen Ã¤r ett hjÃ¤lpmedel fÃ¶r dokumentation av kvitton, fakturor, kÃ¶rjournal, skogsinkomster och export av underlag till revisor.
+  <article class="legal-section">
+    <h2>Tjänstens syfte</h2>
+    <p>
+      SkogsKvitto är ett hjälpmedel för dokumentation av kvitton, fakturor, körjournal,
+      skogsinkomster och export av underlag till bokföring eller revisor.
     </p>
   </article>
 
-  <article class="space-y-3 rounded-2xl border border-gray-200 bg-white p-5 shadow-sm sm:p-6">
-    <h2 class="text-lg font-semibold text-gray-900">Ditt ansvar</h2>
-    <p class="text-sm text-gray-700">
-      Du ansvarar fÃ¶r att uppgifter du laddar upp eller registrerar Ã¤r korrekta, fullstÃ¤ndiga och lagliga att anvÃ¤nda.
-    </p>
-    <p class="text-sm text-gray-700">
-      SkogsKvitto ersÃ¤tter inte revisor, bokfÃ¶ringskonsult eller Skatteverket.
+  <article class="legal-section">
+    <h2>Ditt ansvar</h2>
+    <p>
+      Du ansvarar för att uppgifter du laddar upp är korrekta, fullständiga och lagliga att använda.
+      SkogsKvitto ersätter inte revisor, bokföringskonsult eller Skatteverket.
     </p>
   </article>
 
-  <article class="space-y-3 rounded-2xl border border-gray-200 bg-white p-5 shadow-sm sm:p-6">
-    <h2 class="text-lg font-semibold text-gray-900">AI-stÃ¶d</h2>
-    <p class="text-sm text-gray-700">
-      AI-tips och automatiska tolkningar Ã¤r vÃ¤gledande och mÃ¥ste alltid kontrolleras av dig innan anvÃ¤ndning i bokfÃ¶ring eller deklaration.
+  <article class="legal-section">
+    <h2>AI-stöd</h2>
+    <p>
+      AI-tips och automatiska tolkningar är vägledande och måste alltid kontrolleras innan användning.
     </p>
   </article>
 
-  <article class="space-y-3 rounded-2xl border border-gray-200 bg-white p-5 shadow-sm sm:p-6">
-    <h2 class="text-lg font-semibold text-gray-900">TillÃ¥ten anvÃ¤ndning</h2>
-    <p class="text-sm text-gray-700">
-      Du fÃ¥r inte ladda upp olagligt material eller andras dokument utan att ha rÃ¤tt till det.
-    </p>
-  </article>
-
-  <article class="space-y-3 rounded-2xl border border-gray-200 bg-white p-5 shadow-sm sm:p-6">
-    <h2 class="text-lg font-semibold text-gray-900">Beta- och pilotperiod</h2>
-    <p class="text-sm text-gray-700">
-      Under beta eller pilot kan funktioner, grÃ¤nssnitt och villkor Ã¤ndras fÃ¶r att fÃ¶rbÃ¤ttra tjÃ¤nsten.
+  <article class="legal-section">
+    <h2>Beta- och pilotperiod</h2>
+    <p>
+      Under beta eller pilot kan funktioner, gränssnitt och villkor ändras för att förbättra tjänsten.
     </p>
   </article>
 </section>

@@ -1,4 +1,4 @@
-﻿from django.contrib.auth.views import redirect_to_login
+from django.contrib.auth.views import redirect_to_login
 from django.http import HttpRequest, HttpResponse
 from django.shortcuts import render
 

@@ -39,7 +39,7 @@ CSRF_TRUSTED_ORIGINS = env_csv("DJANGO_CSRF_TRUSTED_ORIGINS", "")
 
 PRIVACY_CONTACT = env_str(
     "PRIVACY_CONTACT",
-    "[ange kontaktadress via miljÃƒÂ¶variabel i driftmiljÃƒÂ¶n]",
+    "[ange kontaktadress via miljövariabel i driftmiljön]",
 )
 
 FREEMIUM_RECEIPT_LIMIT = env_int("FREEMIUM_RECEIPT_LIMIT", 5)
@@ -52,11 +52,9 @@ INSTALLED_APPS = [
     "django.contrib.sites",
     "django.contrib.messages",
     "django.contrib.staticfiles",
-
     # Local apps
     "apps.core.apps.CoreConfig",
     "apps.receipts.apps.ReceiptsConfig",
-
     "allauth",
     "allauth.account",
     "allauth.socialaccount",

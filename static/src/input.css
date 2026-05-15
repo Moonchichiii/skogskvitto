@@ -1,15 +1,13 @@
-﻿@import "tailwindcss";
+@import "tailwindcss";
 @source "../../templates";
 @source "../../apps";
 
 @layer base {
   :root {
-    --forest-950: #0d2818;
-    --forest-900: #12351f;
-    --forest-800: #174527;
-    --leaf-600: #3f8f2f;
-    --cream-50: #faf8ef;
-    --cream-100: #f2efdf;
+    --skog-bg: #faf8ef;
+    --skog-panel: #ffffff;
+    --skog-ink: #0d2818;
+    --skog-muted: #5f6f64;
   }
 
   html {
@@ -19,9 +17,9 @@
   body {
     min-height: 100vh;
     background:
-      radial-gradient(circle at top left, rgba(63, 143, 47, 0.10), transparent 34rem),
-      linear-gradient(180deg, var(--cream-50), #f7f5ec);
-    color: var(--forest-950);
+      radial-gradient(circle at top left, rgb(22 101 52 / 0.10), transparent 34rem),
+      linear-gradient(180deg, var(--skog-bg), #f4f0df);
+    color: var(--skog-ink);
   }
 
   button,
@@ -59,11 +57,11 @@
   }
 
   .site-header {
-    @apply sticky top-0 z-40 border-b border-stone-200/80 bg-white/90 backdrop-blur;
+    @apply sticky top-0 z-40 border-b border-stone-200 bg-white/90 backdrop-blur;
   }
 
   .site-header-inner {
-    @apply relative mx-auto flex w-full max-w-6xl items-center justify-between px-4 py-3 sm:px-6;
+    @apply relative mx-auto flex w-full max-w-6xl items-center justify-between gap-4 px-4 py-3 sm:px-6;
   }
 
   .brand-link {
@@ -71,7 +69,7 @@
   }
 
   .brand-mark {
-    @apply inline-flex h-8 w-8 items-center justify-center rounded-2xl bg-emerald-950 text-white;
+    @apply inline-flex h-8 w-8 items-center justify-center rounded-2xl bg-emerald-950 text-xs font-bold text-white;
   }
 
   .desktop-nav {
@@ -111,7 +109,7 @@
   }
 
   .site-footer {
-    @apply border-t border-stone-200 bg-emerald-950 text-white;
+    @apply mt-auto border-t border-emerald-900 bg-emerald-950 text-white;
   }
 
   .site-footer-inner {
@@ -127,12 +125,17 @@
   }
 
   .hero-card,
-  .hero-grid {
-    @apply rounded-[2rem] border border-stone-200 bg-white p-6 shadow-sm sm:p-8;
+  .hero-grid,
+  .card {
+    @apply rounded-3xl border border-stone-200 bg-white shadow-sm;
+  }
+
+  .hero-card {
+    @apply p-6 sm:p-8;
   }
 
   .hero-grid {
-    @apply grid gap-8 md:grid-cols-[1.1fr_0.9fr] md:items-center;
+    @apply grid gap-8 p-6 sm:p-8 md:grid-cols-2 md:items-center;
   }
 
   .hero-title {
@@ -144,11 +147,11 @@
   }
 
   .hero-panel {
-    @apply relative hidden min-h-72 rounded-[2rem] bg-emerald-950 p-6 shadow-lg md:block;
+    @apply relative hidden min-h-72 rounded-3xl bg-emerald-950 p-6 shadow-lg md:block;
   }
 
   .hero-stat-card {
-    @apply absolute bottom-6 left-6 right-6 rounded-3xl bg-white/95 p-5 text-sm text-stone-600;
+    @apply absolute bottom-6 left-6 right-6 rounded-3xl bg-white p-5 text-sm text-stone-600;
   }
 
   .hero-stat-card strong {
@@ -160,8 +163,8 @@
     clip-path: polygon(0 0, 78% 0, 100% 18%, 100% 100%, 84% 88%, 68% 100%, 50% 88%, 32% 100%, 16% 88%, 0 100%);
   }
 
-  .mini-receipt-tree {
-    @apply mb-auto text-4xl text-emerald-900;
+  .mini-receipt-mark {
+    @apply mb-auto flex h-10 w-10 items-center justify-center rounded-2xl bg-emerald-950 text-xs font-bold text-white;
   }
 
   .mini-line {
@@ -169,15 +172,15 @@
   }
 
   .card {
-    @apply rounded-[2rem] border border-stone-200 bg-white p-5 shadow-sm sm:p-6;
+    @apply p-5 sm:p-6;
   }
 
   .auth-card {
-    @apply mx-auto flex w-full max-w-md flex-col items-center gap-6 rounded-[2rem] border border-stone-200 bg-white p-6 shadow-sm sm:p-8;
+    @apply mx-auto flex w-full max-w-md flex-col items-center gap-6 rounded-3xl border border-stone-200 bg-white p-6 shadow-sm sm:p-8;
   }
 
   .auth-icon {
-    @apply flex h-14 w-14 items-center justify-center rounded-3xl bg-emerald-950 text-2xl text-white;
+    @apply flex h-14 w-14 items-center justify-center rounded-3xl bg-emerald-950 text-sm font-bold text-white;
   }
 
   .section-header {
@@ -193,7 +196,7 @@
   }
 
   .eyebrow {
-    @apply text-xs font-bold uppercase tracking-[0.2em] text-emerald-800;
+    @apply text-xs font-bold uppercase tracking-wide text-emerald-800;
   }
 
   .card-title {
@@ -209,6 +212,10 @@
     @apply mt-1 font-semibold text-stone-950;
   }
 
+  .metric-grid {
+    @apply grid gap-4 sm:grid-cols-2 lg:grid-cols-3;
+  }
+
   .metric-tile {
     @apply rounded-3xl bg-stone-50 p-4;
   }
@@ -218,11 +225,15 @@
   }
 
   .btn-primary {
-    @apply inline-flex items-center rounded-2xl bg-emerald-950 px-5 py-3 text-sm font-bold text-white transition hover:bg-emerald-900;
+    @apply inline-flex items-center justify-center rounded-2xl bg-emerald-950 px-5 py-3 text-sm font-bold text-white transition hover:bg-emerald-900;
   }
 
   .btn-secondary {
-    @apply inline-flex items-center rounded-2xl border border-stone-200 bg-white px-5 py-3 text-sm font-bold text-emerald-950 transition hover:bg-stone-100;
+    @apply inline-flex items-center justify-center rounded-2xl border border-stone-200 bg-white px-5 py-3 text-sm font-bold text-emerald-950 transition hover:bg-stone-100;
+  }
+
+  .btn-danger {
+    @apply inline-flex items-center justify-center rounded-2xl border border-red-200 bg-red-50 px-5 py-3 text-sm font-bold text-red-700;
   }
 
   .status-pill {
@@ -241,12 +252,57 @@
     @apply font-semibold text-emerald-900 underline underline-offset-2;
   }
 
+  .form-label {
+    @apply block text-sm font-semibold text-stone-700;
+  }
+
+  .form-input {
+    @apply mt-1 w-full rounded-2xl border border-stone-200 bg-stone-50 px-4 py-3 text-base text-stone-950 outline-none transition focus:border-emerald-900 focus:ring-2 focus:ring-emerald-900/20;
+  }
+
   .upload-preview {
-    @apply rounded-[2rem] border border-dashed border-stone-300 bg-stone-50 p-6 text-center;
+    @apply rounded-3xl border border-dashed border-stone-300 bg-stone-50 p-6 text-center;
   }
 
   .premium-box {
-    @apply rounded-[2rem] border border-emerald-200 bg-emerald-50 p-5;
+    @apply rounded-3xl border border-emerald-200 bg-emerald-50 p-5;
+  }
+
+  .table-card {
+    @apply overflow-hidden rounded-3xl border border-stone-200 bg-white shadow-sm;
+  }
+
+  .data-table {
+    @apply w-full text-sm;
+  }
+
+  .data-table thead {
+    @apply border-b border-stone-200 bg-stone-50;
+  }
+
+  .data-table th {
+    @apply px-4 py-3 text-left text-xs font-bold uppercase tracking-wide text-stone-500;
+  }
+
+  .data-table td {
+    @apply px-4 py-3 text-stone-700;
+  }
+
+  .legal-page {
+    @apply mx-auto max-w-3xl space-y-4;
+  }
+
+  .legal-section {
+    @apply rounded-3xl border border-stone-200 bg-white p-5 shadow-sm sm:p-6;
+  }
+
+  .legal-section h2 {
+    @apply text-lg font-bold text-emerald-950;
+  }
+
+  .legal-section p,
+  .legal-section li {
+    @apply mt-2 text-sm leading-relaxed text-stone-700;
   }
 
   .htmx-indicator {

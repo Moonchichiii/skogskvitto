@@ -1,33 +1,44 @@
-﻿document.addEventListener("click", (event) => {
-  const trigger = event.target.closest("[data-upload-trigger]");
+document.addEventListener("click", (event) => {
+  const target = event.target;
 
-  if (!trigger) {
+  if (!(target instanceof Element)) {
+    return;
+  }
+
+  const trigger = target.closest("[data-upload-trigger]");
+
+  if (!(trigger instanceof HTMLElement)) {
     return;
   }
 
   const wrapper = trigger.closest("[data-receipt-upload]");
   const input = wrapper?.querySelector("[data-receipt-file]");
 
-  if (input) {
+  if (input instanceof HTMLInputElement) {
     input.click();
   }
 });
 
 document.addEventListener("change", (event) => {
-  const input = event.target;
+  const target = event.target;
 
-  if (!input.matches("[data-receipt-file]")) {
+  if (!(target instanceof HTMLInputElement) || !target.matches("[data-receipt-file]")) {
     return;
   }
 
-  const file = input.files?.[0];
-  const wrapper = input.closest("[data-receipt-upload]");
+  const file = target.files?.[0];
+  const wrapper = target.closest("[data-receipt-upload]");
   const emptyState = wrapper?.querySelector("[data-upload-empty]");
   const previewWrap = wrapper?.querySelector("[data-upload-preview-wrap]");
   const preview = wrapper?.querySelector("[data-receipt-preview]");
   const fileName = wrapper?.querySelector("[data-file-name]");
 
-  if (!file || !preview || !previewWrap) {
+  if (
+    !file ||
+    !(emptyState instanceof HTMLElement) ||
+    !(previewWrap instanceof HTMLElement) ||
+    !(preview instanceof HTMLImageElement)
+  ) {
     return;
   }
 
@@ -39,13 +50,10 @@ document.addEventListener("change", (event) => {
   preview.src = objectUrl;
   preview.dataset.objectUrl = objectUrl;
 
-  if (fileName) {
+  if (fileName instanceof HTMLElement) {
     fileName.textContent = file.name;
   }
 
-  if (emptyState) {
-    emptyState.classList.add("hidden");
-  }
-
+  emptyState.classList.add("hidden");
   previewWrap.classList.remove("hidden");
 });

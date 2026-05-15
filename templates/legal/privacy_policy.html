@@ -1,88 +1,55 @@
-{% extends "layouts/app.html" %}
+{% extends "layouts/base.html" %}
+
+{% block title %}Integritetspolicy | SkogsKvitto{% endblock %}
 
 {% block content %}
-<section class="mx-auto max-w-3xl space-y-4">
-  <header class="rounded-2xl border border-gray-200 bg-white p-5 shadow-sm sm:p-6">
-    <h1 class="text-2xl font-bold tracking-tight text-emerald-800 sm:text-3xl">Integritetspolicy</h1>
-    <p class="mt-2 text-sm text-gray-600">
-      Vi vill gÃ¶ra det enkelt fÃ¶r svenska skogsÃ¤gare att samla underlag utan att tumma pÃ¥ integriteten.
+<section class="legal-page">
+  <header class="hero-card">
+    <p class="eyebrow">Juridik</p>
+    <h1 class="hero-title">Integritetspolicy</h1>
+    <p class="hero-text">
+      Vi vill göra det enkelt för svenska skogsägare att samla underlag utan att tumma på integriteten.
     </p>
   </header>
 
-  <article class="space-y-4 rounded-2xl border border-gray-200 bg-white p-5 shadow-sm sm:p-6">
-    <h2 class="text-lg font-semibold text-gray-900">Vilken data kan sparas</h2>
-    <p class="text-sm text-gray-700">SkogsKvitto kan spara:</p>
-    <ul class="space-y-1 text-sm text-gray-700">
-      <li>â€¢ konto och e-postadress</li>
-      <li>â€¢ kvittobilder och fakturor</li>
-      <li>â€¢ belopp, moms, datum och leverantÃ¶r</li>
-      <li>â€¢ kÃ¶rjournal</li>
-      <li>â€¢ skogsinkomster</li>
-      <li>â€¢ Excel-exporter och andra ekonomiska underlag</li>
+  <article class="legal-section">
+    <h2>Vilken data kan sparas</h2>
+    <p>SkogsKvitto kan spara:</p>
+    <ul class="mt-3 list-disc space-y-1 pl-5">
+      <li>konto och e-postadress</li>
+      <li>kvittobilder och fakturor</li>
+      <li>belopp, moms, datum och leverantör</li>
+      <li>körjournal, skogsinkomster och exportunderlag</li>
     </ul>
   </article>
 
-  <article class="space-y-3 rounded-2xl border border-gray-200 bg-white p-5 shadow-sm sm:p-6">
-    <h2 class="text-lg font-semibold text-gray-900">Dataminimering och filtrering</h2>
-    <p class="text-sm text-gray-700">
-      Vi minimerar kÃ¤nslig data och sparar bara det som behÃ¶vs fÃ¶r dokumentation, uppfÃ¶ljning och export.
-    </p>
-    <p class="text-sm text-gray-700">
-      Innan data eventuellt skickas till AI/OpenAI tvÃ¤ttas den lokalt eller server-side fÃ¶r att minska risken fÃ¶r onÃ¶diga personuppgifter.
-    </p>
-    <p class="text-sm text-gray-700">
-      Personnummer, adresser och andra onÃ¶diga identifierare ska filtreras bort eller maskas innan AI-anrop.
+  <article class="legal-section">
+    <h2>Dataminimering</h2>
+    <p>
+      Vi sparar bara det som behövs för dokumentation, uppföljning och export.
+      Onödiga identifierare ska filtreras bort eller maskas innan eventuell AI-tolkning.
     </p>
   </article>
 
-  <article class="space-y-3 rounded-2xl border border-gray-200 bg-white p-5 shadow-sm sm:p-6">
-    <h2 class="text-lg font-semibold text-gray-900">Hur AI anvÃ¤nds</h2>
-    <p class="text-sm text-gray-700">
-      AI anvÃ¤nds som hjÃ¤lp fÃ¶r strukturering och tolkning av underlag. Resultaten Ã¤r vÃ¤gledande.
-    </p>
-    <p class="text-sm text-gray-700">
-      AI-fÃ¶rslag Ã¤r inte auktoritativ skatte- eller juridisk rÃ¥dgivning.
-    </p>
-    <p class="text-sm text-gray-700">
-      Du och din revisor bÃ¶r alltid kontrollera exporter, tolkningar och skatteunderlag innan de anvÃ¤nds.
+  <article class="legal-section">
+    <h2>Hur AI används</h2>
+    <p>
+      AI används som stöd för att tolka kvitton och strukturera underlag. Resultatet är vägledande
+      och ska alltid kontrolleras av dig eller din revisor innan det används.
     </p>
   </article>
 
-  <article class="space-y-3 rounded-2xl border border-gray-200 bg-white p-5 shadow-sm sm:p-6">
-    <h2 class="text-lg font-semibold text-gray-900">Lagring av kvittobilder</h2>
-    <p class="text-sm text-gray-700">
-      Kvittobilder och fakturabilder lagras i appens privata lagringsyta fÃ¶r att kunna visas, fÃ¶ljas upp och exporteras tillsammans med underlag.
-    </p>
-    <p class="text-sm text-gray-700">
-      Endast behÃ¶riga processer i tjÃ¤nsten ska ha Ã¥tkomst till lagrade filer.
+  <article class="legal-section">
+    <h2>Dina rättigheter</h2>
+    <p>
+      Du kan begära export eller radering av dina uppgifter. Vi hanterar sådana förfrågningar
+      enligt gällande dataskyddsregler.
     </p>
   </article>
 
-  <article class="space-y-3 rounded-2xl border border-gray-200 bg-white p-5 shadow-sm sm:p-6">
-    <h2 class="text-lg font-semibold text-gray-900">Dina rÃ¤ttigheter</h2>
-    <p class="text-sm text-gray-700">
-      Du kan begÃ¤ra export av dina uppgifter och du kan begÃ¤ra radering av konto och lagrat material.
-    </p>
-    <p class="text-sm text-gray-700">
-      Vi hanterar sÃ¥dana fÃ¶rfrÃ¥gningar sÃ¥ snabbt vi kan och i linje med gÃ¤llande dataskyddsregler.
-    </p>
-  </article>
-
-  <article class="space-y-3 rounded-2xl border border-gray-200 bg-white p-5 shadow-sm sm:p-6">
-    <h2 class="text-lg font-semibold text-gray-900">Cookies</h2>
-    <p class="text-sm text-gray-700">
-      Vi anvÃ¤nder frÃ¤mst nÃ¶dvÃ¤ndiga cookies fÃ¶r inloggning, sÃ¤kerhet och att tjÃ¤nsten ska fungera korrekt.
-    </p>
-    <p class="text-sm text-gray-700">
-      Om vi anvÃ¤nder fler typer av cookies berÃ¤ttar vi det tydligt i appen.
-    </p>
-  </article>
-
-  <article class="space-y-3 rounded-2xl border border-gray-200 bg-white p-5 shadow-sm sm:p-6">
-    <h2 class="text-lg font-semibold text-gray-900">Kontakt fÃ¶r integritetsfrÃ¥gor</h2>
-    <p class="text-sm text-gray-700">
-      Vid frÃ¥gor om integritet, export eller radering: kontakta oss via <strong>{{ privacy_contact }}</strong>.
-    </p>
+  <article class="legal-section">
+    <h2>Kontakt</h2>
+    <p>Vid frågor om integritet, export eller radering: <strong>{{ privacy_contact }}</strong>.</p>
   </article>
 </section>
 {% endblock %}

@@ -1,9 +1,9 @@
-﻿<section id="scan-upload" class="card" data-receipt-upload>
+<section id="scan-upload" class="card" data-receipt-upload>
   <div class="section-header">
     <div>
       <p class="eyebrow">Steg 1</p>
       <h2 class="section-title">Ladda upp kvitto</h2>
-      <p class="section-text">VÃ¤lj en bild frÃ¥n mobilen eller datorn. JPG, PNG och WEBP stÃ¶ds.</p>
+      <p class="section-text">Välj en bild från mobilen eller datorn. JPG, PNG och WEBP stöds.</p>
     </div>
     {% if gates.is_pilot %}
       {% include "partials/pilot_badge.html" %}
@@ -32,27 +32,21 @@
     >
 
     <div class="grid gap-3 sm:grid-cols-2">
-      <button type="button" class="btn-primary justify-center" data-upload-trigger>
-        Scanna med kamera
-      </button>
-      <button type="button" class="btn-secondary justify-center" data-upload-trigger>
-        VÃ¤lj bild
-      </button>
+      <button type="button" class="btn-primary" data-upload-trigger>Scanna med kamera</button>
+      <button type="button" class="btn-secondary" data-upload-trigger>Välj bild</button>
     </div>
 
     <div class="upload-preview" data-upload-empty>
-      <p class="font-semibold text-forest-950">Ingen bild vald Ã¤nnu</p>
-      <p class="mt-1 text-sm text-stone-600">NÃ¤r du vÃ¤ljer en bild visas fÃ¶rhandsvisningen hÃ¤r.</p>
+      <p class="font-semibold text-emerald-950">Ingen bild vald ännu</p>
+      <p class="mt-1 text-sm text-stone-600">När du väljer en bild visas förhandsvisningen här.</p>
     </div>
 
     <figure class="hidden overflow-hidden rounded-3xl border border-stone-200 bg-white" data-upload-preview-wrap>
-      <img src="" alt="FÃ¶rhandsvisning av kvitto" class="max-h-[32rem] w-full object-contain" data-receipt-preview>
+      <img src="" alt="Förhandsvisning av kvitto" class="max-h-[32rem] w-full object-contain" data-receipt-preview>
       <figcaption class="border-t border-stone-200 px-4 py-3 text-sm text-stone-600" data-file-name></figcaption>
     </figure>
 
-    <button type="submit" class="btn-primary w-full justify-center">
-      Starta skanning
-    </button>
+    <button type="submit" class="btn-primary w-full">Starta skanning</button>
 
     <div id="scan-loading-indicator" class="htmx-indicator items-center gap-2 text-sm font-semibold text-emerald-900">
       <span class="h-4 w-4 animate-spin rounded-full border-2 border-emerald-900 border-t-transparent"></span>
