@@ -1,3 +1,13 @@
+import os
+
+import django
+from django.apps import apps
+
+os.environ.setdefault("DJANGO_SETTINGS_MODULE", "config.settings.test")
+
+if not apps.ready:
+    django.setup()
+
 from pathlib import Path
 
 import django
