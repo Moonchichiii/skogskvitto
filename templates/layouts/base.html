@@ -1,20 +1,33 @@
-<!doctype html>
+﻿<!doctype html>
 <html lang="sv">
 <head>
-    {% load static %}
-    <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>{% block title %}SkogsKvitto{% endblock %}</title>
-    <link rel="stylesheet" href="{% static 'css/app.css' %}">
-    {% block extra_head %}{% endblock %}
+  {% load static %}
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>{% block title %}SkogsKvitto{% endblock %}</title>
+  <meta name="description" content="{% block meta_description %}SkogsKvitto hjÃ¤lper skogsÃ¤gare att samla kvitton, granska underlag och exportera till bokfÃ¶ring.{% endblock %}">
+  <link rel="stylesheet" href="{% static 'css/app.css' %}">
+  {% block extra_head %}{% endblock %}
 </head>
-<body class="min-h-screen bg-stone-50 text-stone-950 antialiased">
-    {% block body %}{% endblock %}
-    <script defer src="https://cdn.jsdelivr.net/npm/htmx.org@2.0.4/dist/htmx.min.js"></script>
-    <script defer src="{% static 'js/mobile-nav.js' %}"></script>
-    <script defer src="{% static 'js/cookie-banner.js' %}"></script>
-    <script defer src="{% static 'js/receipt-upload.js' %}"></script>
-    <script defer src="{% static 'js/correction-suggestion.js' %}"></script>
-    {% block extra_scripts %}{% endblock %}
+<body class="app-body">
+  <div class="site-shell">
+    {% include "partials/header.html" %}
+
+    <main id="content" class="page-shell {% if user.is_authenticated %}page-shell-auth{% endif %}">
+      {% include "partials/messages.html" %}
+      {% block content %}{% endblock %}
+    </main>
+
+    {% include "partials/mobile_nav.html" %}
+    {% include "partials/cookie_banner.html" %}
+    {% include "partials/footer.html" %}
+  </div>
+
+  <script defer src="https://cdn.jsdelivr.net/npm/htmx.org@2.0.4/dist/htmx.min.js"></script>
+  <script defer src="{% static 'js/mobile-nav.js' %}"></script>
+  <script defer src="{% static 'js/cookie-banner.js' %}"></script>
+  <script defer src="{% static 'js/receipt-upload.js' %}"></script>
+  <script defer src="{% static 'js/correction-suggestion.js' %}"></script>
+  {% block extra_scripts %}{% endblock %}
 </body>
 </html>

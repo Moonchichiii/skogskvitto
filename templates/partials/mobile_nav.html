@@ -1,24 +1,18 @@
-{% if user.is_authenticated %}
+﻿{% if user.is_authenticated %}
 {% with current_url_name=request.resolver_match.url_name %}
-<nav class="fixed inset-x-0 bottom-0 z-40 border-t border-gray-200 bg-white/95 backdrop-blur md:hidden" aria-label="Bottennavigering">
-  <div class="mx-auto grid w-full max-w-5xl grid-cols-4 gap-1 px-2 py-2">
-    <a href="{% url 'scan' %}" class="rounded-xl px-2 py-2 text-center text-xs font-semibold {% if current_url_name == 'scan' %}bg-emerald-700 text-white{% else %}text-gray-700 hover:bg-gray-100{% endif %}">
-      <span class="block text-sm" aria-hidden="true">âŒ</span>
-      <span>Scanna</span>
-    </a>
-    <a href="{% url 'dashboard' %}" class="rounded-xl px-2 py-2 text-center text-xs font-semibold {% if current_url_name == 'dashboard' and request.GET.nav != 'export' %}bg-emerald-700 text-white{% else %}text-gray-700 hover:bg-gray-100{% endif %}">
-      <span class="block text-sm" aria-hidden="true">â—«</span>
-      <span>Granska</span>
-    </a>
-    <a href="{% url 'dashboard' %}?nav=export#dashboard-export" class="rounded-xl px-2 py-2 text-center text-xs font-semibold {% if current_url_name == 'dashboard' and request.GET.nav == 'export' %}bg-emerald-700 text-white{% else %}text-gray-700 hover:bg-gray-100{% endif %}">
-      <span class="block text-sm" aria-hidden="true">â‡©</span>
-      <span>Exportera</span>
-    </a>
-    <a href="{% url 'profile' %}" class="rounded-xl px-2 py-2 text-center text-xs font-semibold {% if current_url_name == 'profile' %}bg-emerald-700 text-white{% else %}text-gray-700 hover:bg-gray-100{% endif %}">
-      <span class="block text-sm" aria-hidden="true">â—‰</span>
-      <span>Profil</span>
-    </a>
-  </div>
+<nav class="mobile-bottom-nav" aria-label="Bottennavigering">
+  <a href="{% url 'scan' %}" class="mobile-bottom-link {% if current_url_name == 'scan' %}mobile-bottom-link-active{% endif %}">
+    <span aria-hidden="true">ï¼‹</span>
+    <span>Scanna</span>
+  </a>
+  <a href="{% url 'dashboard' %}" class="mobile-bottom-link {% if current_url_name == 'dashboard' and request.GET.nav != 'export' %}mobile-bottom-link-active{% endif %}">
+    <span aria-hidden="true">âœ“</span>
+    <span>Granska</span>
+  </a>
+  <a href="{% url 'dashboard' %}?nav=export#dashboard-export" class="mobile-bottom-link {% if current_url_name == 'dashboard' and request.GET.nav == 'export' %}mobile-bottom-link-active{% endif %}">
+    <span aria-hidden="true">â†“</span>
+    <span>Exportera</span>
+  </a>
 </nav>
 {% endwith %}
 {% endif %}

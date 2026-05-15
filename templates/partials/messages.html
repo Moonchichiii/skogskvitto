@@ -1,9 +1,9 @@
-{% if messages %}
-<section class="mb-4 space-y-2" aria-label="Meddelanden">
+﻿{% if messages %}
+<section class="mb-5 space-y-2" aria-label="Meddelanden">
   {% for message in messages %}
-  <div class="rounded-2xl border border-gray-200 bg-white px-4 py-3 text-sm text-gray-700 shadow-sm">
-    {{ message }}
-  </div>
+    <div class="notice">
+      {{ message }}
+    </div>
   {% endfor %}
 </section>
 {% endif %}

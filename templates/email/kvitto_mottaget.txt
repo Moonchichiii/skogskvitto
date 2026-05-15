@@ -1,0 +1,13 @@
+﻿Hej{{ " " }}{{ user_name }},
+
+Vi har tagit emot ditt kvitto och sparat det säkert i SkogsKvitto.
+
+Detaljer:
+  Leverantör : {{ vendor|default:"–" }}
+  Datum       : {{ receipt_date|default:"–" }}
+  Belopp      : {{ total_amount|default:"–" }} kr
+
+Du hittar kvittot i din dashboard när du loggar in.
+
+Med vänliga hälsningar,
+SkogsKvitto

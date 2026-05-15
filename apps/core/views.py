@@ -1,4 +1,4 @@
-from django.contrib.auth.views import redirect_to_login
+﻿from django.contrib.auth.views import redirect_to_login
 from django.http import HttpRequest, HttpResponse
 from django.shortcuts import render
 
@@ -16,14 +16,8 @@ from apps.receipts.models import Receipt
 async def _get_receipt_count(user_id: int | None) -> int:
     if user_id is None:
         return 0
+
     return await Receipt.objects.filter(owner_id=user_id).acount()
-
-
-async def index(request: HttpRequest) -> HttpResponse:
-    if not request.user.is_authenticated:
-        return redirect_to_login(request.get_full_path())
-    gates = await get_feature_gates(request.user)
-    return render(request, "core/index.html", {"gates": gates})
 
 
 async def profile(request: HttpRequest) -> HttpResponse:
@@ -58,7 +52,8 @@ async def profile(request: HttpRequest) -> HttpResponse:
             "user_plan": user_plan,
             "plan_label": plan_labels.get(user_plan, "Gratis"),
             "plan_description": plan_descriptions.get(
-                user_plan, "Du kan testa scanning och förhandsvisning."
+                user_plan,
+                "Du kan testa scanning och förhandsvisning.",
             ),
             "full_name": full_name,
             "receipt_count": receipt_count,

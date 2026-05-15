@@ -1,0 +1,11 @@
+﻿Hej{{ " " }}{{ user_name }},
+
+Tack för din betalning! Din prenumeration på SkogsKvitto är nu aktiv.
+
+Plan     : {{ plan_name|default:"–" }}
+Giltig t.o.m. : {{ period_end|default:"–" }}
+
+Du kan när som helst hantera din prenumeration via inställningarna i din dashboard.
+
+Med vänliga hälsningar,
+SkogsKvitto

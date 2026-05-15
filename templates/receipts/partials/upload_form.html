@@ -1,19 +1,12 @@
-<nav class="mb-3 grid grid-cols-3 gap-2 rounded-2xl border border-gray-100 bg-white p-2 text-sm font-semibold text-gray-600">
-  <a href="#section-scanna" class="rounded-xl bg-emerald-700 px-3 py-2 text-center text-white">Scanna</a>
-  <a href="#section-granska" class="rounded-xl bg-gray-50 px-3 py-2 text-center">Granska</a>
-  <a href="#section-exportera" class="rounded-xl bg-gray-50 px-3 py-2 text-center">Exportera</a>
-</nav>
-
-<section id="section-scanna" class="rounded-2xl border border-gray-100 bg-white p-4 shadow-sm sm:p-6" x-data="{ preview: '' }">
-  <div class="mb-4 flex items-center justify-between">
+﻿<section id="scan-upload" class="card" data-receipt-upload>
+  <div class="section-header">
     <div>
-      <h2 class="text-xl font-semibold text-gray-900">Scanna</h2>
-      <p class="mt-1 text-sm text-gray-600">
-        Ta en bild pÃ¥ kvittot eller ladda upp en fil. SkogsKvitto lÃ¤ser av informationen automatiskt.
-      </p>
+      <p class="eyebrow">Steg 1</p>
+      <h2 class="section-title">Ladda upp kvitto</h2>
+      <p class="section-text">VÃ¤lj en bild frÃ¥n mobilen eller datorn. JPG, PNG och WEBP stÃ¶ds.</p>
     </div>
     {% if gates.is_pilot %}
-    {% include "partials/pilot_badge.html" %}
+      {% include "partials/pilot_badge.html" %}
     {% endif %}
   </div>
 
@@ -23,67 +16,49 @@
     hx-target="#scan-result"
     hx-swap="innerHTML"
     hx-indicator="#scan-loading-indicator"
-    class="space-y-4"
+    class="mt-6 space-y-4"
   >
     {% csrf_token %}
+
     <input
       id="receipt-image-input"
       name="image"
       type="file"
       accept="image/jpeg,image/png,image/webp"
       capture="environment"
-      class="hidden"
-      x-ref="fileInput"
-      @change="const file = $event.target.files[0]; if (preview) URL.revokeObjectURL(preview); preview = file ? URL.createObjectURL(file) : ''"
+      class="sr-only"
+      data-receipt-file
       required
     >
 
-    <button
-      type="button"
-      class="w-full rounded-2xl bg-emerald-700 px-4 py-4 text-base font-semibold text-white transition-all duration-200 hover:bg-emerald-800"
-      @click="$refs.fileInput.click()"
-    >
-      Scanna kvitto
+    <div class="grid gap-3 sm:grid-cols-2">
+      <button type="button" class="btn-primary justify-center" data-upload-trigger>
+        Scanna med kamera
+      </button>
+      <button type="button" class="btn-secondary justify-center" data-upload-trigger>
+        VÃ¤lj bild
+      </button>
+    </div>
+
+    <div class="upload-preview" data-upload-empty>
+      <p class="font-semibold text-forest-950">Ingen bild vald Ã¤nnu</p>
+      <p class="mt-1 text-sm text-stone-600">NÃ¤r du vÃ¤ljer en bild visas fÃ¶rhandsvisningen hÃ¤r.</p>
+    </div>
+
+    <figure class="hidden overflow-hidden rounded-3xl border border-stone-200 bg-white" data-upload-preview-wrap>
+      <img src="" alt="FÃ¶rhandsvisning av kvitto" class="max-h-[32rem] w-full object-contain" data-receipt-preview>
+      <figcaption class="border-t border-stone-200 px-4 py-3 text-sm text-stone-600" data-file-name></figcaption>
+    </figure>
+
+    <button type="submit" class="btn-primary w-full justify-center">
+      Starta skanning
     </button>
-    <button
-      type="button"
-      class="w-full rounded-2xl border border-emerald-700 bg-white px-4 py-4 text-base font-semibold text-emerald-800 transition-all duration-200 hover:bg-emerald-50"
-      @click="$refs.fileInput.click()"
-    >
-      Ladda upp bild
-    </button>
 
-    <template x-if="preview">
-      <img :src="preview" alt="FÃ¶rhandsvisning av kvitto" class="w-full rounded-2xl border border-gray-100 object-cover">
-    </template>
-
-    <button type="submit" class="w-full rounded-2xl bg-emerald-700 px-4 py-4 text-base font-semibold text-white transition-all duration-200 hover:bg-emerald-800">Starta skanning</button>
-
-    {% if gates.is_free %}
-    <p class="text-center text-xs text-gray-500">
-      Du kan testa scanningen gratis.
-    </p>
-    {% endif %}
-
-    <div id="scan-loading-indicator" class="htmx-indicator hidden items-center gap-2 text-sm text-emerald-700">
-      <span class="inline-block h-4 w-4 animate-spin rounded-full border-2 border-emerald-700 border-t-transparent"></span>
-      <span>AI analyserar kvittot...</span>
+    <div id="scan-loading-indicator" class="htmx-indicator items-center gap-2 text-sm font-semibold text-emerald-900">
+      <span class="h-4 w-4 animate-spin rounded-full border-2 border-emerald-900 border-t-transparent"></span>
+      <span>Analyserar kvittot...</span>
     </div>
   </form>
-</section>
 
-<section id="section-granska" class="mt-4 rounded-2xl border border-gray-100 bg-white p-4 shadow-sm sm:p-6">
-  <h2 class="text-lg font-semibold text-gray-900">Granska</h2>
-  <p class="mt-1 text-sm text-gray-600">Kontrollera att datum, leverantÃ¶r, belopp och moms blev rÃ¤tt innan du sparar.</p>
-  <section id="scan-result" class="mt-4"></section>
-</section>
-
-<section id="section-exportera" class="mt-4 rounded-2xl border border-gray-100 bg-white p-4 shadow-sm sm:p-6">
-  <h2 class="text-lg font-semibold text-gray-900">Exportera dina kvitton</h2>
-  <p class="mt-1 text-sm text-gray-600">
-    Ladda ner underlaget eller skicka det direkt via mejl till dig sjÃ¤lv, bokfÃ¶raren eller nÃ¥gon annan mottagare.
-  </p>
-  <p class="mt-2 text-sm text-gray-600">
-    Exporten innehÃ¥ller granskade kvitton och en sammanstÃ¤llning som kan anvÃ¤ndas som bokfÃ¶ringsunderlag.
-  </p>
+  <section id="scan-result" class="mt-6"></section>
 </section>
