@@ -11,11 +11,12 @@ SECRET_KEY = env_str(  # noqa: F405
 
 ALLOWED_HOSTS = env_csv(  # noqa: F405
     "DJANGO_ALLOWED_HOSTS",
-    "localhost,127.0.0.1",
+    "localhost,127.0.0.1,testserver",
 )
+
 CSRF_TRUSTED_ORIGINS = env_csv(  # noqa: F405
     "DJANGO_CSRF_TRUSTED_ORIGINS",
-    "http://localhost:8001,http://127.0.0.1:8001",
+    "http://localhost:8000,http://127.0.0.1:8000,http://localhost:8001,http://127.0.0.1:8001",
 )
 
 USE_SQLITE = config("DJANGO_USE_SQLITE", default=True, cast=bool)  # noqa: F405
@@ -40,11 +41,33 @@ else:
         }
     }
 
-EMAIL_BACKEND = "django.core.mail.backends.console.EmailBackend"
+EMAIL_BACKEND = env_str(  # noqa: F405
+    "EMAIL_BACKEND",
+    "django.core.mail.backends.console.EmailBackend",
+)
+
+ACCOUNT_EMAIL_VERIFICATION = env_str(  # noqa: F405
+    "ACCOUNT_EMAIL_VERIFICATION",
+    "none",
+)
 
 SECURE_SSL_REDIRECT = False
 SESSION_COOKIE_SECURE = False
 CSRF_COOKIE_SECURE = False
+CSRF_COOKIE_SAMESITE = "Lax"
+SESSION_COOKIE_SAMESITE = "Lax"
 SECURE_HSTS_SECONDS = 0
 SECURE_HSTS_INCLUDE_SUBDOMAINS = False
 SECURE_HSTS_PRELOAD = False
+SECURE_REFERRER_POLICY = "strict-origin-when-cross-origin"
+
+MIDDLEWARE = list(MIDDLEWARE)  # noqa: F405
+
+_local_null_origin_middleware = "apps.core.middleware.LocalNullOriginMiddleware"
+_csrf_middleware = "django.middleware.csrf.CsrfViewMiddleware"
+
+if _local_null_origin_middleware not in MIDDLEWARE:
+    MIDDLEWARE.insert(
+        MIDDLEWARE.index(_csrf_middleware),
+        _local_null_origin_middleware,
+    )

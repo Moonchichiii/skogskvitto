@@ -1,7 +1,6 @@
 {% extends "layouts/base.html" %}
-{% load socialaccount %}
 
-{% block title %}Logga in | SkogsKvitto{% endblock %}
+{% block title %}Skapa konto | SkogsKvitto{% endblock %}
 
 {% block content %}
 <section class="auth-card">
@@ -9,13 +8,13 @@
 
   <div class="text-center">
     <p class="eyebrow">SkogsKvitto</p>
-    <h1 class="mt-2 text-3xl font-bold tracking-tight text-emerald-950">Logga in</h1>
+    <h1 class="mt-2 text-3xl font-bold tracking-tight text-emerald-950">Skapa konto</h1>
     <p class="mt-3 text-sm leading-relaxed text-stone-600">
-      Logga in med e-post och lösenord eller fortsätt med Google.
+      Skapa ett konto för att scanna, granska och exportera dina skogskvitton.
     </p>
   </div>
 
-  <form method="post" action="{% url 'account_login' %}" class="w-full space-y-4">
+  <form method="post" action="{% url 'account_signup' %}" class="w-full space-y-4">
     {% csrf_token %}
 
     {% if form.non_field_errors %}
@@ -26,32 +25,32 @@
 
     <label class="form-label">
       E-post
-      {{ form.login }}
-      {{ form.login.errors }}
+      {{ form.email }}
+      {{ form.email.errors }}
     </label>
 
     <label class="form-label">
       Lösenord
-      {{ form.password }}
-      {{ form.password.errors }}
+      {{ form.password1 }}
+      {{ form.password1.errors }}
+    </label>
+
+    <label class="form-label">
+      Upprepa lösenord
+      {{ form.password2 }}
+      {{ form.password2.errors }}
     </label>
 
     {% if redirect_field_value %}
       <input type="hidden" name="{{ redirect_field_name }}" value="{{ redirect_field_value }}">
     {% endif %}
 
-    <button type="submit" class="btn-primary w-full">Logga in</button>
+    <button type="submit" class="btn-primary w-full">Skapa konto</button>
   </form>
 
-  <div class="w-full border-t border-stone-200 pt-4">
-    <a href="{% provider_login_url 'google' process='login' %}" class="btn-secondary w-full">
-      Fortsätt med Google
-    </a>
-  </div>
-
   <p class="text-center text-sm text-stone-600">
-    Har du inget konto?
-    <a href="{% url 'account_signup' %}" class="text-link">Skapa konto</a>
+    Har du redan konto?
+    <a href="{% url 'account_login' %}" class="text-link">Logga in</a>
   </p>
 </section>
 {% endblock %}

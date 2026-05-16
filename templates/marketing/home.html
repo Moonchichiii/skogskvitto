@@ -1,0 +1,191 @@
+{% extends "layouts/base.html" %}
+
+{% block title %}SkogsKvitto | Digital kvittohantering f?r skogs?gare{% endblock %}
+
+{% block meta_description %}SkogsKvitto hj?lper svenska skogs?gare att samla kvitton, granska moms och exportera tydliga underlag till bokf?ring och revisor.{% endblock %}
+
+{% block content %}
+<section class="landing-page">
+  <section class="landing-hero">
+    <div class="landing-copy">
+      <p class="trust-pill">Byggt f?r svenska skogs?gare</p>
+      <h1 class="landing-title">Kvitton, moms och underlag utan kr?ngel.</h1>
+      <p class="landing-lead">
+        SkogsKvitto hj?lper dig att scanna kvitton, kontrollera uppgifter och samla ett tydligt
+        underlag inf?r bokf?ring, deklaration och revisor.
+      </p>
+
+      <div class="hero-actions">
+        <a href="{% url 'account_signup' %}" class="btn-primary">Kom ig?ng</a>
+        <a href="#funktioner" class="btn-secondary">Se hur det fungerar</a>
+      </div>
+
+      <div class="proof-row">
+        <span>? Svensk tj?nst</span>
+        <span>? Byggd f?r skogs?gare</span>
+        <span>? Export till underlag</span>
+      </div>
+    </div>
+
+    <div class="preview-card" aria-hidden="true">
+      <div class="forest-card"></div>
+      <div class="receipt-panel">
+        <div class="receipt-row">
+          <span>?rets utl?gg</span>
+          <strong>12 480 kr</strong>
+        </div>
+        <div class="receipt-bar w-4/5"></div>
+        <div class="receipt-row">
+          <span>Moms</span>
+          <strong>2 496 kr</strong>
+        </div>
+        <div class="receipt-bar w-3/5"></div>
+        <div class="receipt-row">
+          <span>Status</span>
+          <strong>Redo</strong>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="split-band">
+    <div class="split-band-inner">
+      <div>
+        <p class="eyebrow">Arbetsfl?de</p>
+        <h2>Fr?n kvitto till tydligt underlag.</h2>
+        <p>
+          Ta en bild, granska tolkningen och spara kvittot. N?r det ?r dags kan du exportera
+          underlag som ?r enklare att l?mna vidare.
+        </p>
+        <a href="{% url 'account_signup' %}" class="btn-primary mt-5">Skapa konto</a>
+      </div>
+
+      <div class="feature-mini-grid">
+        <div class="mini-feature">Scanna kvitto</div>
+        <div class="mini-feature">Granska belopp</div>
+        <div class="mini-feature">F?lj moms</div>
+        <div class="mini-feature">Exportera</div>
+      </div>
+    </div>
+  </section>
+
+  <section id="funktioner" class="landing-section">
+    <div class="section-center">
+      <p class="eyebrow">Funktioner</p>
+      <h2>Byggt f?r verklig vardag i skogen.</h2>
+      <p>
+        Inga on?diga menyer. Bara ett tydligt fl?de f?r kvitton, kostnader och ?rsunderlag.
+      </p>
+    </div>
+
+    <div class="feature-grid">
+      <article class="feature-card">
+        <h3>Smart kvittoscanning</h3>
+        <p>Fota kvittot och f? f?rslag p? leverant?r, belopp, moms, datum och kategori.</p>
+      </article>
+      <article class="feature-card">
+        <h3>Manuell kontroll</h3>
+        <p>Du granskar alltid uppgifterna innan n?got sparas. Tryggt och enkelt.</p>
+      </article>
+      <article class="feature-card">
+        <h3>?rs?versikt</h3>
+        <p>Se ?rets utl?gg och moms samlat p? din dashboard.</p>
+      </article>
+      <article class="feature-card">
+        <h3>Export</h3>
+        <p>Ladda ner underlag f?r bokf?ring, revisor eller egen uppf?ljning.</p>
+      </article>
+      <article class="feature-card">
+        <h3>Körjournal</h3>
+        <p>Samla k?rrelaterat underlag p? ett tydligare s?tt n?r funktionen byggs ut.</p>
+      </article>
+      <article class="feature-card">
+        <h3>Svensk integritet</h3>
+        <p>Fokus p? n?dv?ndig data, s?kra sessioner och tydliga villkor.</p>
+      </article>
+    </div>
+  </section>
+
+  <section class="landing-section soft-section">
+    <div class="section-center">
+      <p class="eyebrow">S? fungerar det</p>
+      <h2>Kom ig?ng p? n?gra minuter.</h2>
+    </div>
+
+    <div class="steps-grid">
+      <article class="step-card">
+        <span>01</span>
+        <h3>Skapa konto</h3>
+        <p>Logga in och b?rja samla dina kvitton p? ett st?lle.</p>
+      </article>
+      <article class="step-card">
+        <span>02</span>
+        <h3>Scanna kvitto</h3>
+        <p>Ta en bild och l?t SkogsKvitto f?resl? grunduppgifter.</p>
+      </article>
+      <article class="step-card">
+        <span>03</span>
+        <h3>Granska och exportera</h3>
+        <p>Kontrollera, spara och exportera n?r underlaget beh?vs.</p>
+      </article>
+    </div>
+  </section>
+
+  <section id="priser" class="landing-section">
+    <div class="section-center">
+      <p class="eyebrow">Priser</p>
+      <h2>Enkelt och transparent.</h2>
+      <p>V?lj m?nad eller hel?r. Premium l?ser upp alla funktioner.</p>
+    </div>
+
+    <div class="pricing-grid pricing-grid-two">
+      <article class="pricing-card">
+        <p class="plan-name">Gratis</p>
+        <h3>0 kr</h3>
+        <p>Testa scanning och förhandsvisning.</p>
+        <ul>
+          <li>Scanna kvitto</li>
+          <li>Granska f?rslag</li>
+          <li>Kom ig?ng utan kostnad</li>
+          <li>Export ing?r inte</li>
+        </ul>
+        <a href="{% url 'account_signup' %}" class="btn-secondary w-full">Testa gratis</a>
+      </article>
+
+      <article class="pricing-card pricing-card-featured">
+        <p class="plan-name">Premium</p>
+        <h3>49 kr/mån</h3>
+        <p>eller 599 kr/år</p>
+        <ul>
+          <li>Allt ing?r</li>
+          <li>Spara kvitton</li>
+          <li>Exportera underlag</li>
+          <li>?rs?versikt</li>
+          <li>Körjournal och rapporter n?r de byggs ut</li>
+        </ul>
+        <div class="grid gap-2">
+          <a href="{% url 'start_checkout' %}?plan=yearly" class="btn-primary w-full">V?lj 599 kr/år</a>
+          <a href="{% url 'start_checkout' %}?plan=monthly" class="btn-secondary w-full">V?lj 49 kr/mån</a>
+        </div>
+      </article>
+    </div>
+  </section>
+
+  <section id="om" class="final-cta">
+    <p class="eyebrow">SkogsKvitto</p>
+    <h2>Byggt f?r skogs?gare som vill ha ordning utan mer administration.</h2>
+    <p>
+      M?let ?r enkelt: mindre papperskaos, b?ttre ?verblick och tydligare underlag.
+    </p>
+    <a href="{% url 'account_signup' %}" class="btn-primary">Kom ig?ng</a>
+  </section>
+
+  <section id="kontakt" class="landing-section contact-section">
+    <div class="section-center">
+      <p class="eyebrow">Kontakt</p>
+      <h2>Fr?gor?</h2>
+      <p>Kontakta mig via <strong>{{ privacy_contact }}</strong>.</p>
+    </div>
+  </section>
+</section>
+{% endblock %}

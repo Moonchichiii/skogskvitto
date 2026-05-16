@@ -1,38 +1,41 @@
 <header class="site-header">
   <nav class="site-header-inner" aria-label="Huvudnavigering">
     {% with current_url_name=request.resolver_match.url_name %}
-    <a href="{% url 'scan' %}" class="brand-link" aria-label="Gå till SkogsKvitto">
+    <a href="{% url 'home' %}" class="brand-link" aria-label="Gå till SkogsKvitto">
       <span class="brand-mark" aria-hidden="true">SK</span>
       <span>SkogsKvitto</span>
     </a>
 
     {% if user.is_authenticated %}
-      <div class="desktop-nav">
-        <a href="{% url 'scan' %}" class="nav-link {% if current_url_name == 'scan' %}nav-link-active{% endif %}">Scanna</a>
-        <a href="{% url 'dashboard' %}" class="nav-link {% if current_url_name == 'dashboard' and request.GET.nav != 'export' %}nav-link-active{% endif %}">Granska</a>
-        <a href="{% url 'dashboard' %}?nav=export#dashboard-export" class="nav-link {% if current_url_name == 'dashboard' and request.GET.nav == 'export' %}nav-link-active{% endif %}">Exportera</a>
-        <a href="{% url 'profile' %}" class="nav-link {% if current_url_name == 'profile' %}nav-link-active{% endif %}">Profil</a>
-      </div>
+    <div class="desktop-nav">
+      <a href="{% url 'scan' %}" class="nav-link {% if current_url_name == 'scan' %}nav-link-active{% endif %}">Scanna</a>
+      <a href="{% url 'dashboard' %}" class="nav-link {% if current_url_name == 'dashboard' and request.GET.nav != 'export' %}nav-link-active{% endif %}">Granska</a>
+      <a href="{% url 'dashboard' %}?nav=export#dashboard-export" class="nav-link {% if current_url_name == 'dashboard' and request.GET.nav == 'export' %}nav-link-active{% endif %}">Exportera</a>
+      <a href="{% url 'profile' %}" class="nav-link {% if current_url_name == 'profile' %}nav-link-active{% endif %}">Profil</a>
+    </div>
 
-      <button
-        type="button"
-        class="menu-button"
-        data-mobile-menu-button
-        aria-expanded="false"
-        aria-controls="mobile-menu"
-      >
-        Meny
-      </button>
+    <button type="button" class="menu-button" data-mobile-menu-button aria-expanded="false" aria-controls="mobile-menu">
+      Meny
+    </button>
 
-      <div id="mobile-menu" class="mobile-menu" data-mobile-menu-panel hidden>
-        <a href="{% url 'scan' %}" class="mobile-menu-link">Scanna</a>
-        <a href="{% url 'dashboard' %}" class="mobile-menu-link">Granska</a>
-        <a href="{% url 'dashboard' %}?nav=export#dashboard-export" class="mobile-menu-link">Exportera</a>
-        <a href="{% url 'profile' %}" class="mobile-menu-link">Profil</a>
-        <a href="{% url 'account_logout' %}" class="mobile-menu-link">Logga ut</a>
-      </div>
+    <div id="mobile-menu" class="mobile-menu" data-mobile-menu-panel hidden>
+      <a href="{% url 'scan' %}" class="mobile-menu-link">Scanna</a>
+      <a href="{% url 'dashboard' %}" class="mobile-menu-link">Granska</a>
+      <a href="{% url 'dashboard' %}?nav=export#dashboard-export" class="mobile-menu-link">Exportera</a>
+      <a href="{% url 'profile' %}" class="mobile-menu-link">Profil</a>
+      <a href="{% url 'account_logout' %}" class="mobile-menu-link">Logga ut</a>
+    </div>
     {% else %}
+    <div class="hidden items-center gap-6 md:flex">
+      <a href="{% url 'home' %}#funktioner" class="public-nav-link">Funktioner</a>
+      <a href="{% url 'home' %}#priser" class="public-nav-link">Priser</a>
+      <a href="{% url 'home' %}#om" class="public-nav-link">Om</a>
+      <a href="{% url 'home' %}#kontakt" class="public-nav-link">Kontakt</a>
+    </div>
+    <div class="flex items-center gap-2">
       <a href="{% url 'account_login' %}" class="nav-link">Logga in</a>
+      <a href="{% url 'account_signup' %}" class="btn-primary hidden sm:inline-flex">Kom igång</a>
+    </div>
     {% endif %}
     {% endwith %}
   </nav>

@@ -1,6 +1,8 @@
-"""Core app placeholder. Feature views live in their own apps:
-- apps.accounts
-- apps.billing
-- apps.exports
-- apps.receipts
-"""
+from django.http import HttpRequest, HttpResponse
+from django.shortcuts import redirect, render
+
+
+def home(request: HttpRequest) -> HttpResponse:
+    if request.user.is_authenticated:
+        return redirect("scan")
+    return render(request, "marketing/home.html")

@@ -50,7 +50,7 @@ def _write_kvitton_sheet(wb: Workbook, receipts: list[Receipt]) -> None:
     assert ws is not None
     ws.title = "Kvitton"
 
-    headers = ["inköp", "netto", "moms", "öresutjämning"]
+    headers = ["ink?p", "netto", "moms", "?resutj?mning"]
     _setup_sheet(ws, headers, [16, 16, 16, 18])
 
     total_inkop = ZERO
@@ -67,7 +67,6 @@ def _write_kvitton_sheet(wb: Workbook, receipts: list[Receipt]) -> None:
         inkop = _decimal(receipt.total_amount)
         moms = _decimal(receipt.vat_amount)
         netto = inkop - moms
-        # TODO: Koppla öresutjämning till en explicit modellkälla när fält finns.
         oresutjamning = ZERO
 
         ws.cell(row=row, column=1, value=inkop)
@@ -134,7 +133,7 @@ def _write_inkomster_skog_sheet(wb: Workbook, receipts: list[Receipt]) -> None:
 
 def _write_korjournal_sheet(wb: Workbook, receipts: list[Receipt]) -> None:
     ws = wb.create_sheet("Körjournal")
-    headers = ["Månad", "Antal resor", "Kilometer totalt", "Ersättning (25 kr/mil)"]
+    headers = ["M?nad", "Antal resor", "Kilometer totalt", "Ers?ttning (25 kr/mil)"]
     _setup_sheet(ws, headers, [14, 14, 18, 22])
 
     monthly: defaultdict[str, MonthlyDrive] = defaultdict(MonthlyDrive)
@@ -150,7 +149,6 @@ def _write_korjournal_sheet(wb: Workbook, receipts: list[Receipt]) -> None:
         month_key = receipt.date.strftime("%Y-%m")
         month_data = monthly[month_key]
         month_data.trips += 1
-        # TODO: Körjournal bör få dedikerat kilometerfält i modellen i stället för total_amount.
         month_data.kilometers += _decimal(receipt.total_amount)
 
     total_trips = 0

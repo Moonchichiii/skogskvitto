@@ -3,7 +3,6 @@ from datetime import date as date_cls
 from decimal import Decimal, InvalidOperation
 from pathlib import Path
 from tempfile import NamedTemporaryFile
-from typing import cast
 
 import magic
 from asgiref.sync import sync_to_async
@@ -107,10 +106,9 @@ def _suggest_correction(correction_text: str) -> dict[str, str]:
 
 @router.post("/scan")
 async def scan_receipt(request: HttpRequest, image: File[UploadedFile]) -> HttpResponse:
-    authentication_error = _require_authenticated_user(request)
-    if authentication_error is not None:
-        return authentication_error
-    user = cast(User, request.user)
+    user = await _get_authenticated_user(request)
+    if user is None:
+        return HttpResponseForbidden("Inloggning kr?vs.")
 
     scan_decision = await can_use_feature(user, FEATURE_RECEIPT_SCAN_PREVIEW)
     if not scan_decision.allowed:
@@ -203,10 +201,9 @@ async def save_receipt(
     category: Form[str] = "",
     note: Form[str] = "",
 ) -> HttpResponse:
-    authentication_error = _require_authenticated_user(request)
-    if authentication_error is not None:
-        return authentication_error
-    user = cast(User, request.user)
+    user = await _get_authenticated_user(request)
+    if user is None:
+        return HttpResponseForbidden("Inloggning kr?vs.")
 
     try:
         scan_job_id = int(SCAN_JOB_SIGNER.unsign(signed_scan_job))
@@ -266,10 +263,9 @@ async def correction_suggestion(
     signed_scan_job: Form[str],
     correction_text: Form[str],
 ) -> HttpResponse:
-    authentication_error = _require_authenticated_user(request)
-    if authentication_error is not None:
-        return authentication_error
-    user = cast(User, request.user)
+    user = await _get_authenticated_user(request)
+    if user is None:
+        return HttpResponseForbidden("Inloggning kr?vs.")
 
     try:
         scan_job_id = int(SCAN_JOB_SIGNER.unsign(signed_scan_job))
@@ -296,3 +292,9 @@ async def correction_suggestion(
             "suggestion": suggestion,
         },
     )
+
+async def _get_authenticated_user(request: HttpRequest) -> User | None:
+    from asgiref.sync import sync_to_async
+    def resolve():
+        return cast(User, request.user) if request.user.is_authenticated else None
+    return await sync_to_async(resolve, thread_sensitive=True)()

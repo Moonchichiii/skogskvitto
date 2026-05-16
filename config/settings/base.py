@@ -53,7 +53,11 @@ INSTALLED_APPS = [
     "django.contrib.messages",
     "django.contrib.staticfiles",
     # Local apps
-    "apps.core.apps.CoreConfig",`n    "apps.accounts.apps.AccountsConfig",`n    "apps.receipts.apps.ReceiptsConfig",`n    "apps.billing.apps.BillingConfig",`n    "apps.exports.apps.ExportsConfig",
+    "apps.core.apps.CoreConfig",
+    "apps.accounts.apps.AccountsConfig",
+    "apps.receipts.apps.ReceiptsConfig",
+    "apps.billing.apps.BillingConfig",
+    "apps.exports.apps.ExportsConfig",
     "allauth",
     "allauth.account",
     "allauth.socialaccount",
@@ -176,7 +180,7 @@ DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 
 SECURE_CONTENT_TYPE_NOSNIFF = True
 X_FRAME_OPTIONS = "DENY"
-SECURE_REFERRER_POLICY = "no-referrer"
+SECURE_REFERRER_POLICY = "strict-origin-when-cross-origin"
 
 CONTENT_SECURITY_POLICY = {
     "DIRECTIVES": {
@@ -192,3 +196,7 @@ CONTENT_SECURITY_POLICY = {
         "font-src": ("'self'",),
     }
 }
+
+
+ACCOUNT_ADAPTER = "apps.accounts.adapters.AccountAdapter"
+ACCOUNT_EMAIL_SUBJECT_PREFIX = "[SkogsKvitto] "

@@ -1,33 +1,27 @@
 <!doctype html>
 <html lang="sv">
 <head>
-  {% load static %}
-  <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>{% block title %}SkogsKvitto{% endblock %}</title>
-  <meta name="description" content="{% block meta_description %}SkogsKvitto hjälper skogsägare att samla kvitton, granska underlag och exportera till bokföring.{% endblock %}">`n    <meta name="htmx-config" content='{"includeIndicatorStyles": false, "allowScriptTags": false, "allowEval": false}'>
-  <link rel="stylesheet" href="{% static 'css/app.css' %}">
-  {% block extra_head %}{% endblock %}
+    {% load static %}
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>{% block title %}SkogsKvitto{% endblock %}</title>
+    <meta name="description" content="{% block meta_description %}SkogsKvitto hjälper skogsägare att samla kvitton och exportera underlag.{% endblock %}">
+    <link rel="icon" href="{% static 'img/favicon.svg' %}" type="image/svg+xml">
+    <link rel="stylesheet" href="{% static 'css/app.css' %}">
+    {% block extra_head %}{% endblock %}
 </head>
 <body class="app-body">
-  <div class="site-shell">
-    {% include "partials/header.html" %}
-
-    <main id="content" class="page-shell {% if user.is_authenticated %}page-shell-auth{% endif %}">
-      {% include "partials/messages.html" %}
-      {% block content %}{% endblock %}
-    </main>
-
-    {% include "partials/mobile_nav.html" %}
-    {% include "partials/cookie_banner.html" %}
-    {% include "partials/footer.html" %}
-  </div>
-
-  <script defer src="https://cdn.jsdelivr.net/npm/htmx.org@2.0.4/dist/htmx.min.js"></script>
-  <script defer src="{% static 'js/mobile-nav.js' %}"></script>
-  <script defer src="{% static 'js/cookie-banner.js' %}"></script>
-  <script defer src="{% static 'js/receipt-upload.js' %}"></script>
-  <script defer src="{% static 'js/correction-suggestion.js' %}"></script>
-  {% block extra_scripts %}{% endblock %}
+    <div class="site-shell">
+        {% include "partials/header.html" %}
+        <main id="content" class="page-shell {% if user.is_authenticated %}page-shell-auth{% endif %}">
+            {% include "partials/messages.html" %}
+            {% block content %}{% endblock %}
+        </main>
+        {% include "partials/footer.html" %}
+        {% include "partials/mobile_nav.html" %}
+    </div>
+    <script defer src="https://cdn.jsdelivr.net/npm/htmx.org@2.0.4/dist/htmx.min.js"></script>
+    <script defer src="{% static 'js/mobile-nav.js' %}"></script>
+    {% block extra_scripts %}{% endblock %}
 </body>
 </html>
