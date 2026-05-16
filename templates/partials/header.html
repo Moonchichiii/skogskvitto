@@ -1,42 +1,66 @@
-<header class="site-header">
-  <nav class="site-header-inner" aria-label="Huvudnavigering">
+{% load static %}
+<header class="site-header bg-linear-to-b from-emerald-50 via-emerald-50 to-stone-50 border-b border-emerald-100/30 sticky top-0 z-50 backdrop-blur-sm">
+  <nav class="site-header-inner px-4 sm:px-6 lg:px-8 py-5 flex items-center justify-between max-w-7xl mx-auto" aria-label="Huvudnavigering">
     {% with current_url_name=request.resolver_match.url_name %}
-    <a href="{% url 'home' %}" class="brand-link" aria-label="Gå till SkogsKvitto">
-      <span class="brand-mark" aria-hidden="true">SK</span>
-      <span>SkogsKvitto</span>
+    
+    <a href="{% url 'home' %}" class="brand-link inline-flex items-center gap-3 hover:opacity-80 transition-opacity duration-200" aria-label="Gå till SkogsKvitto">
+      <img src="https://res.cloudinary.com/dakjlrean/image/upload/f_auto,q_auto:eco,c_fill,w_240/webp/v1778878511/skogskvitto/nqyhmj1zplj7zshg189b.webp" alt="" class="h-12 w-12 sm:h-16 sm:w-16" />
+      <span class="text-lg sm:text-xl font-semibold text-emerald-900 hidden sm:inline">SkogsKvitto</span>
     </a>
 
     {% if user.is_authenticated %}
-    <div class="desktop-nav">
-      <a href="{% url 'scan' %}" class="nav-link {% if current_url_name == 'scan' %}nav-link-active{% endif %}">Scanna</a>
-      <a href="{% url 'dashboard' %}" class="nav-link {% if current_url_name == 'dashboard' and request.GET.nav != 'export' %}nav-link-active{% endif %}">Granska</a>
-      <a href="{% url 'dashboard' %}?nav=export#dashboard-export" class="nav-link {% if current_url_name == 'dashboard' and request.GET.nav == 'export' %}nav-link-active{% endif %}">Exportera</a>
-      <a href="{% url 'profile' %}" class="nav-link {% if current_url_name == 'profile' %}nav-link-active{% endif %}">Profil</a>
+    <div class="hidden md:flex items-center gap-1">
+      <a href="{% url 'scan' %}" {% if current_url_name == 'scan' %}aria-current="page"{% endif %} class="nav-link px-4 py-2 text-sm font-medium rounded-lg transition-colors duration-150 {% if current_url_name == 'scan' %}bg-emerald-100 text-emerald-900{% else %}text-stone-700 hover:text-emerald-900 hover:bg-emerald-50{% endif %}">Scanna</a>
+      <a href="{% url 'dashboard' %}" {% if current_url_name == 'dashboard' and request.GET.nav != 'export' %}aria-current="page"{% endif %} class="nav-link px-4 py-2 text-sm font-medium rounded-lg transition-colors duration-150 {% if current_url_name == 'dashboard' and request.GET.nav != 'export' %}bg-emerald-100 text-emerald-900{% else %}text-stone-700 hover:text-emerald-900 hover:bg-emerald-50{% endif %}">Granska</a>
+      <a href="{% url 'dashboard' %}?nav=export#dashboard-export" {% if current_url_name == 'dashboard' and request.GET.nav == 'export' %}aria-current="page"{% endif %} class="nav-link px-4 py-2 text-sm font-medium rounded-lg transition-colors duration-150 {% if current_url_name == 'dashboard' and request.GET.nav == 'export' %}bg-emerald-100 text-emerald-900{% else %}text-stone-700 hover:text-emerald-900 hover:bg-emerald-50{% endif %}">Exportera</a>
+      <a href="{% url 'profile' %}" {% if current_url_name == 'profile' %}aria-current="page"{% endif %} class="nav-link px-4 py-2 text-sm font-medium rounded-lg transition-colors duration-150 {% if current_url_name == 'profile' %}bg-emerald-100 text-emerald-900{% else %}text-stone-700 hover:text-emerald-900 hover:bg-emerald-50{% endif %}">Profil</a>
+      <a href="{% url 'account_logout' %}" class="nav-link px-4 py-2 text-sm font-medium rounded-lg text-stone-700 hover:text-emerald-900 hover:bg-red-50 transition-colors duration-150 ml-2">Logga ut</a>
     </div>
 
-    <button type="button" class="menu-button" data-mobile-menu-button aria-expanded="false" aria-controls="mobile-menu">
-      Meny
+    <button type="button" class="md:hidden inline-flex items-center justify-center w-10 h-10 rounded-lg text-stone-700 hover:bg-emerald-100 transition-colors duration-150" data-mobile-menu-button aria-expanded="false" aria-controls="mobile-menu" aria-label="Öppna meny">
+      <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" />
+      </svg>
     </button>
 
-    <div id="mobile-menu" class="mobile-menu" data-mobile-menu-panel hidden>
-      <a href="{% url 'scan' %}" class="mobile-menu-link">Scanna</a>
-      <a href="{% url 'dashboard' %}" class="mobile-menu-link">Granska</a>
-      <a href="{% url 'dashboard' %}?nav=export#dashboard-export" class="mobile-menu-link">Exportera</a>
-      <a href="{% url 'profile' %}" class="mobile-menu-link">Profil</a>
-      <a href="{% url 'account_logout' %}" class="mobile-menu-link">Logga ut</a>
+    <div id="mobile-menu" class="fixed inset-0 top-16 left-0 right-0 bg-emerald-50 border-b border-emerald-100/30 shadow-lg flex flex-col p-4 gap-2" data-mobile-menu-panel hidden>
+      <a href="{% url 'scan' %}" {% if current_url_name == 'scan' %}aria-current="page"{% endif %} class="mobile-menu-link block px-4 py-3 rounded-lg text-stone-700 font-medium hover:bg-emerald-100 transition-colors duration-150 {% if current_url_name == 'scan' %}bg-emerald-100 text-emerald-900{% endif %}">Scanna</a>
+      <a href="{% url 'dashboard' %}" {% if current_url_name == 'dashboard' and request.GET.nav != 'export' %}aria-current="page"{% endif %} class="mobile-menu-link block px-4 py-3 rounded-lg text-stone-700 font-medium hover:bg-emerald-100 transition-colors duration-150 {% if current_url_name == 'dashboard' and request.GET.nav != 'export' %}bg-emerald-100 text-emerald-900{% endif %}">Granska</a>
+      <a href="{% url 'dashboard' %}?nav=export#dashboard-export" {% if current_url_name == 'dashboard' and request.GET.nav == 'export' %}aria-current="page"{% endif %} class="mobile-menu-link block px-4 py-3 rounded-lg text-stone-700 font-medium hover:bg-emerald-100 transition-colors duration-150 {% if current_url_name == 'dashboard' and request.GET.nav == 'export' %}bg-emerald-100 text-emerald-900{% endif %}">Exportera</a>
+      <a href="{% url 'profile' %}" {% if current_url_name == 'profile' %}aria-current="page"{% endif %} class="mobile-menu-link block px-4 py-3 rounded-lg text-stone-700 font-medium hover:bg-emerald-100 transition-colors duration-150 {% if current_url_name == 'profile' %}bg-emerald-100 text-emerald-900{% endif %}">Profil</a>
+      <hr class="my-2 border-emerald-100" />
+      <a href="{% url 'account_logout' %}" class="mobile-menu-link block px-4 py-3 rounded-lg text-stone-700 font-medium hover:bg-red-50 transition-colors duration-150">Logga ut</a>
     </div>
+
     {% else %}
-    <div class="hidden items-center gap-6 md:flex">
-      <a href="{% url 'home' %}#funktioner" class="public-nav-link">Funktioner</a>
-      <a href="{% url 'home' %}#priser" class="public-nav-link">Priser</a>
-      <a href="{% url 'home' %}#om" class="public-nav-link">Om</a>
-      <a href="{% url 'home' %}#kontakt" class="public-nav-link">Kontakt</a>
+    <div class="hidden md:flex items-center gap-6">
+      <a href="{% url 'home' %}#funktioner" class="public-nav-link text-sm font-medium text-stone-700 hover:text-emerald-900 transition-colors duration-150">Funktioner</a>
+      <a href="{% url 'home' %}#priser" class="public-nav-link text-sm font-medium text-stone-700 hover:text-emerald-900 transition-colors duration-150">Priser</a>
+      <a href="{% url 'home' %}#om" class="public-nav-link text-sm font-medium text-stone-700 hover:text-emerald-900 transition-colors duration-150">Om</a>
+      <a href="{% url 'home' %}#kontakt" class="public-nav-link text-sm font-medium text-stone-700 hover:text-emerald-900 transition-colors duration-150">Kontakt</a>
     </div>
-    <div class="flex items-center gap-2">
-      <a href="{% url 'account_login' %}" class="nav-link">Logga in</a>
-      <a href="{% url 'account_signup' %}" class="btn-primary hidden sm:inline-flex">Kom igång</a>
+
+    <div class="flex items-center gap-3">
+      <a href="{% url 'account_login' %}" class="nav-link text-sm font-medium text-stone-700 hover:text-emerald-900 transition-colors duration-150 hidden sm:inline">Logga in</a>
+      <a href="{% url 'account_signup' %}" class="btn-primary hidden sm:inline-flex px-6 py-2 rounded-full bg-emerald-600 text-white font-medium text-sm hover:bg-emerald-700 active:bg-emerald-800 transition-colors duration-150 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-400 focus-visible:ring-offset-2">Kom igång</a>
+      <button type="button" class="md:hidden inline-flex items-center justify-center w-10 h-10 rounded-lg text-stone-700 hover:bg-emerald-100 transition-colors duration-150" data-mobile-menu-button aria-expanded="false" aria-controls="mobile-menu" aria-label="Öppna meny">
+        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" />
+        </svg>
+      </button>
+    </div>
+
+    <div id="mobile-menu" class="fixed inset-0 top-16 left-0 right-0 bg-emerald-50 border-b border-emerald-100/30 shadow-lg flex flex-col p-4 gap-2" data-mobile-menu-panel hidden>
+      <a href="{% url 'home' %}#funktioner" class="mobile-menu-link block px-4 py-3 rounded-lg text-stone-700 font-medium hover:bg-emerald-100 transition-colors duration-150">Funktioner</a>
+      <a href="{% url 'home' %}#priser" class="mobile-menu-link block px-4 py-3 rounded-lg text-stone-700 font-medium hover:bg-emerald-100 transition-colors duration-150">Priser</a>
+      <a href="{% url 'home' %}#om" class="mobile-menu-link block px-4 py-3 rounded-lg text-stone-700 font-medium hover:bg-emerald-100 transition-colors duration-150">Om</a>
+      <a href="{% url 'home' %}#kontakt" class="mobile-menu-link block px-4 py-3 rounded-lg text-stone-700 font-medium hover:bg-emerald-100 transition-colors duration-150">Kontakt</a>
+      <hr class="my-2 border-emerald-100" />
+      <a href="{% url 'account_login' %}" class="mobile-menu-link block px-4 py-3 rounded-lg text-stone-700 font-medium hover:bg-emerald-100 transition-colors duration-150">Logga in</a>
+      <a href="{% url 'account_signup' %}" class="mobile-menu-link block px-4 py-3 rounded-lg bg-emerald-600 text-white font-medium hover:bg-emerald-700 transition-colors duration-150 text-center">Kom igång</a>
     </div>
     {% endif %}
+    
     {% endwith %}
   </nav>
 </header>
