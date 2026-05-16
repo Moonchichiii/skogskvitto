@@ -5,6 +5,7 @@ WORKDIR /app
 COPY package.json bun.lock ./
 RUN bun install --frozen-lockfile
 
+COPY assets ./assets
 COPY static ./static
 COPY templates ./templates
 COPY apps ./apps

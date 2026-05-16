@@ -1,4 +1,5 @@
 from __future__ import annotations
+import dj_database_url
 
 import os
 
@@ -16,19 +17,14 @@ CSRF_TRUSTED_ORIGINS = env_csv("DJANGO_CSRF_TRUSTED_ORIGINS")  # noqa: F405
 if not CSRF_TRUSTED_ORIGINS:
     raise ValueError("DJANGO_CSRF_TRUSTED_ORIGINS must be set in production")
 
+DATABASE_URL = env_required("DATABASE_URL")  # noqa: F405
+
 DATABASES = {
-    "default": {
-        "ENGINE": "django.db.backends.postgresql",
-        "NAME": env_required("POSTGRES_DB"),  # noqa: F405
-        "USER": env_required("POSTGRES_USER"),  # noqa: F405
-        "PASSWORD": env_required("POSTGRES_PASSWORD"),  # noqa: F405
-        "HOST": env_required("POSTGRES_HOST"),  # noqa: F405
-        "PORT": env_int("POSTGRES_PORT", 5432),  # noqa: F405
-        "CONN_MAX_AGE": env_int("POSTGRES_CONN_MAX_AGE", 60),  # noqa: F405
-        "OPTIONS": {
-            "sslmode": env_str("POSTGRES_SSLMODE", "require"),  # noqa: F405
-        },
-    }
+    "default": dj_database_url.parse(
+        DATABASE_URL,
+        conn_max_age=env_int("POSTGRES_CONN_MAX_AGE", 60),  # noqa: F405
+        ssl_require=True,
+    )
 }
 
 CLOUDINARY_URL = env_str("CLOUDINARY_URL", "")  # noqa: F405
