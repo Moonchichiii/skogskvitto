@@ -44,19 +44,14 @@ RUN apt-get update \
 
 COPY --from=builder --chown=1000:1000 /app/.venv /app/.venv
 COPY --chown=1000:1000 . /app
-
 COPY --from=assets --chown=1000:1000 /app/static/css/app.css /app/static/css/app.css
 
 RUN DJANGO_SETTINGS_MODULE=config.settings.production \
     DJANGO_SECRET_KEY=build-only-secret \
     DJANGO_ALLOWED_HOSTS=localhost \
     DJANGO_CSRF_TRUSTED_ORIGINS=https://localhost \
-    POSTGRES_DB=build_only \
-    POSTGRES_USER=build_only \
-    POSTGRES_PASSWORD=build_only \
-    POSTGRES_HOST=localhost \
-    POSTGRES_PORT=5432 \
-    POSTGRES_SSLMODE=require \
+    DATABASE_URL=postgresql://build_only:build_only@localhost:5432/build_only?sslmode=disable \
+    POSTGRES_CONN_MAX_AGE=60 \
     CLOUDINARY_CLOUD_NAME=dakjlrean \
     python manage.py collectstatic --noinput
 
