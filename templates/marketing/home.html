@@ -29,28 +29,34 @@
       </div>
     </div>
 
-    <figure class="hero-visual">
-  <picture>
-    <source
-      type="image/webp"
-      srcset="
-        https://res.cloudinary.com/dakjlrean/image/upload/f_auto,q_auto:eco,c_fill,w_640,h_760/webp/skogskvitto/js7drdp51fxqslknqtif.webp 640w,
-        https://res.cloudinary.com/dakjlrean/image/upload/f_auto,q_auto:eco,c_fill,w_960,h_820/webp/skogskvitto/js7drdp51fxqslknqtif.webp 960w,
-        https://res.cloudinary.com/dakjlrean/image/upload/f_auto,q_auto:eco,c_fill,w_1280,h_920/webp/skogskvitto/js7drdp51fxqslknqtif.webp 1280w
-      "
-      sizes="(max-width: 768px) 100vw, 48vw"
-    >
-    <img
-      src="https://res.cloudinary.com/dakjlrean/image/upload/f_auto,q_auto:eco,c_fill,w_960,h_820/webp/skogskvitto/js7drdp51fxqslknqtif.webp"
-      alt="Svensk skogsstig i morgonljus"
-      class="hero-image"
-      width="960"
-      height="820"
-      loading="eager"
-      decoding="async"
-      fetchpriority="high"
-    >
-  </picture>
+<figure class="hero-visual">
+  {% if marketing_hero_image.medium %}
+    <picture>
+      <source
+        type="image/webp"
+        srcset="
+          {{ marketing_hero_image.small }} 640w,
+          {{ marketing_hero_image.medium }} 960w,
+          {{ marketing_hero_image.large }} 1280w
+        "
+        sizes="(max-width: 768px) 100vw, 48vw"
+      >
+      <img
+        src="{{ marketing_hero_image.medium }}"
+        alt="Svensk skogsstig i morgonljus"
+        class="hero-image"
+        width="960"
+        height="820"
+        loading="eager"
+        decoding="async"
+        fetchpriority="high"
+      >
+    </picture>
+  {% else %}
+    <div class="hero-image-fallback">
+      <span>SkogsKvitto</span>
+    </div>
+  {% endif %}
 </figure>
   </section>
 

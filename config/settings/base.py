@@ -63,8 +63,8 @@ INSTALLED_APPS = [
     "allauth.socialaccount",
     "allauth.socialaccount.providers.google",
     "csp",
-    "cloudinary",          # -- ADDED --
-    "cloudinary_storage",  # -- ADDED --
+    "cloudinary",
+    "cloudinary_storage",
 ]
 
 MIDDLEWARE = [
@@ -189,6 +189,11 @@ CLOUDINARY_API_SECRET = env_str("CLOUDINARY_API_SECRET", "")
 MARKETING_HERO_IMAGE_PUBLIC_ID = env_str(
     "MARKETING_HERO_IMAGE_PUBLIC_ID",
     "webp/skogskvitto/js7drdp51fxqslknqtif.webp",
+)
+
+MARKETING_HERO_IMAGE_PUBLIC_ID = env_str(
+    "MARKETING_HERO_IMAGE_PUBLIC_ID",
+    "skogskvitto/js7drdp51fxqslknqtif",
 )
 
 SECURE_CONTENT_TYPE_NOSNIFF = True
