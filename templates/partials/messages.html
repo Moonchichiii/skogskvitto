@@ -1,9 +1,30 @@
 {% if messages %}
-<section class="mb-5 space-y-2" aria-label="Meddelanden">
+<section class="message-stack" aria-label="Meddelanden">
   {% for message in messages %}
-    <div class="notice">
-      {{ message }}
-    </div>
+    <article
+      class="app-message app-message-{{ message.tags|default:'info' }}"
+      {% if "error" in message.tags %}
+        role="alert"
+      {% else %}
+        role="status"
+      {% endif %}
+    >
+      <div class="app-message-icon" aria-hidden="true">
+        {% if "error" in message.tags %}
+          !
+        {% elif "warning" in message.tags %}
+          !
+        {% elif "success" in message.tags %}
+          ✓
+        {% else %}
+          i
+        {% endif %}
+      </div>
+
+      <div class="app-message-body">
+        <p>{{ message }}</p>
+      </div>
+    </article>
   {% endfor %}
 </section>
 {% endif %}

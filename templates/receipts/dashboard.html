@@ -3,140 +3,250 @@
 {% block title %}Granska kvitton | SkogsKvitto{% endblock %}
 
 {% block content %}
-<section class="page-stack">
-  <header class="hero-card">
-    <div class="section-header">
-      <div>
-        <p class="eyebrow">Underlag</p>
-        <h1 class="hero-title">Granska kvitton</h1>
-        <p class="hero-text">
-          Följ upp årets kvitton, moms och exportstatus.
-        </p>
-      </div>
-      {% if gates.is_pilot %}
-        {% include "partials/pilot_badge.html" %}
-      {% endif %}
+<section class="dashboard-shell" aria-labelledby="dashboard-title">
+  <header class="dashboard-hero">
+    <div>
+      <p class="eyebrow">Underlag</p>
+      <h1 id="dashboard-title">Granska kvitton</h1>
+      <p>
+        Följ årets utlägg, moms och exportstatus på ett tydligt ställe.
+        Här samlas dina sparade kvitton inför bokföring, deklaration eller revisor.
+      </p>
+    </div>
+
+    <div class="dashboard-hero-panel" aria-label="Status">
+      <span>År</span>
+      <strong>{{ year }}</strong>
     </div>
   </header>
 
-  <div class="grid gap-4 sm:grid-cols-2">
-    <article class="card">
-      <p class="metric-label">Totala utlägg {{ year }}</p>
-      <p class="metric-value">{{ total_year|floatformat:2 }} kr</p>
+  <section class="dashboard-metrics" aria-label="Årssammanfattning">
+    <article class="dashboard-metric-card">
+      <p>Totala utlägg {{ year }}</p>
+      <strong>{{ total_year|floatformat:2 }} kr</strong>
+      <span>Summering av sparade kvitton.</span>
     </article>
-    <article class="card">
-      <p class="metric-label">Momsavdrag {{ year }}</p>
-      <p class="metric-value">{{ vat_year|floatformat:2 }} kr</p>
-    </article>
-  </div>
 
-  {% if gates.can_excel_download %}
-    <a id="dashboard-export" href="{% url 'export_excel' %}" class="btn-primary w-full">
-      Exportera till Excel
-    </a>
-  {% else %}
-    <section id="dashboard-export" class="card">
-      <div class="section-header">
+    <article class="dashboard-metric-card">
+      <p>Moms {{ year }}</p>
+      <strong>{{ vat_year|floatformat:2 }} kr</strong>
+      <span>Beräknat momsunderlag från dina kvitton.</span>
+    </article>
+  </section>
+
+  <section id="dashboard-export" class="dashboard-export-card" aria-labelledby="export-title">
+    <div class="dashboard-section-header">
+      <div>
+        <p class="eyebrow">Export</p>
+        <h2 id="export-title">Exportera underlag</h2>
+
+        {% if gates.can_excel_download %}
+          <p>
+            Din export är aktiv. Ladda ner ett Excel-underlag med kvitton, belopp och moms.
+          </p>
+        {% else %}
+          <p>
+            Du kan testa scanning och granskning gratis. Export till Excel ingår i Premium.
+          </p>
+        {% endif %}
+      </div>
+
+      {% if gates.can_excel_download %}
+        <span class="dashboard-status-pill dashboard-status-active">Aktiv</span>
+      {% else %}
+        <span class="dashboard-status-pill">Premium</span>
+      {% endif %}
+    </div>
+
+    {% if gates.can_excel_download %}
+      <a href="{% url 'export_excel' %}" class="btn-primary dashboard-main-action">
+        Exportera till Excel
+      </a>
+    {% else %}
+      <div class="dashboard-premium-panel">
         <div>
-          <h2 class="card-title">Exportera</h2>
-          <div class="mt-3 space-y-1 text-sm text-stone-600">
-            <p>Du kan testa scanningen gratis.</p>
-            <p>Export och nedladdning ingår i betalplanen.</p>
-            <p class="font-semibold text-emerald-800">Uppgradera för att ladda ner Excel/PDF.</p>
-          </div>
+          <strong>Premium låser upp exporten.</strong>
+          <p>
+            49 kr/mån eller 599 kr/år. Allt i en enkel plan.
+          </p>
         </div>
-        {% include "partials/premium_badge.html" %}
-      </div>
-      <div class="mt-4">
-        {% include "partials/premium_cta.html" %}
-      </div>
-    </section>
-  {% endif %}
 
-  <div class="grid gap-4 sm:grid-cols-3">
-    <article class="card">
-      <div class="flex items-center justify-between gap-3">
-        <p class="{% if gates.can_korjournal %}font-bold text-emerald-950{% else %}font-semibold text-stone-400{% endif %}">Körjournal</p>
-        {% if gates.can_korjournal %}
-          <span class="status-pill">Kommer snart</span>
-        {% else %}
-          {% include "partials/premium_badge.html" %}
-        {% endif %}
+        <div class="dashboard-premium-actions">
+          <a href="{% url 'start_checkout' %}?plan=yearly" class="btn-primary">
+            Välj 599 kr/år
+          </a>
+          <a href="{% url 'start_checkout' %}?plan=monthly" class="btn-secondary">
+            Välj 49 kr/mån
+          </a>
+        </div>
       </div>
+    {% endif %}
+  </section>
+
+  <section class="dashboard-feature-grid" aria-label="Kommande funktioner">
+    <article class="dashboard-feature-card">
+      <div>
+        <h2>Körjournal</h2>
+        <p>Samla körrelaterat underlag tydligare när funktionen byggs ut.</p>
+      </div>
+
+      {% if gates.can_korjournal %}
+        <span class="dashboard-status-pill dashboard-status-active">Kommer snart</span>
+      {% else %}
+        <span class="dashboard-status-pill">Premium</span>
+      {% endif %}
     </article>
 
-    <article class="card">
-      <div class="flex items-center justify-between gap-3">
-        <p class="{% if gates.can_skogsinkomster %}font-bold text-emerald-950{% else %}font-semibold text-stone-400{% endif %}">Skogsinkomster</p>
-        {% if gates.can_skogsinkomster %}
-          <span class="status-pill">Kommer snart</span>
-        {% else %}
-          {% include "partials/premium_badge.html" %}
-        {% endif %}
+    <article class="dashboard-feature-card">
+      <div>
+        <h2>Skogsinkomster</h2>
+        <p>Separera och följ upp inkomster kopplade till skogsbruket.</p>
       </div>
+
+      {% if gates.can_skogsinkomster %}
+        <span class="dashboard-status-pill dashboard-status-active">Kommer snart</span>
+      {% else %}
+        <span class="dashboard-status-pill">Premium</span>
+      {% endif %}
     </article>
 
-    <article class="card">
-      <div class="flex items-center justify-between gap-3">
-        <p class="{% if gates.can_arsrapport %}font-bold text-emerald-950{% else %}font-semibold text-stone-400{% endif %}">Årsrapport</p>
-        {% if gates.can_arsrapport %}
-          <span class="status-pill">Kommer snart</span>
-        {% else %}
-          {% include "partials/premium_badge.html" %}
-        {% endif %}
+    <article class="dashboard-feature-card">
+      <div>
+        <h2>Årsrapport</h2>
+        <p>Bygg tydligare årsunderlag för egen överblick och revisor.</p>
       </div>
-    </article>
-  </div>
 
-  <section class="table-card">
-    <table class="data-table">
-      <thead>
-        <tr>
-          <th>Datum</th>
-          <th>Butik</th>
-          <th class="text-right">Total</th>
-          <th class="text-right">Moms</th>
-        </tr>
-      </thead>
-      <tbody class="divide-y divide-stone-100">
-        {% for receipt in receipts %}
-        <tr>
-          <td>{{ receipt.date|date:"Y-m-d"|default:"–" }}</td>
-          <td class="font-semibold text-stone-950">{{ receipt.vendor|default:"Okänd" }}</td>
-          <td class="text-right font-semibold text-emerald-800">
-            {% if receipt.total_amount %}{{ receipt.total_amount|floatformat:2 }} kr{% else %}–{% endif %}
-          </td>
-          <td class="text-right">
-            {% if receipt.vat_amount %}{{ receipt.vat_amount|floatformat:2 }} kr{% else %}–{% endif %}
-          </td>
-        </tr>
-        {% empty %}
-        <tr>
-          <td colspan="4" class="py-10 text-center text-stone-400">
-            Inga kvitton ännu. Börja scanna!
-          </td>
-        </tr>
-        {% endfor %}
-      </tbody>
-    </table>
+      {% if gates.can_arsrapport %}
+        <span class="dashboard-status-pill dashboard-status-active">Kommer snart</span>
+      {% else %}
+        <span class="dashboard-status-pill">Premium</span>
+      {% endif %}
+    </article>
+  </section>
+
+  <section class="dashboard-receipts-card" aria-labelledby="receipts-title">
+    <div class="dashboard-section-header">
+      <div>
+        <p class="eyebrow">Kvitton</p>
+        <h2 id="receipts-title">Sparade kvitton</h2>
+        <p>Senaste sparade kvitton visas först.</p>
+      </div>
+
+      <a href="{% url 'scan' %}" class="btn-secondary dashboard-small-action">
+        Scanna nytt kvitto
+      </a>
+    </div>
+
+    <div class="dashboard-receipt-list" aria-label="Kvitton på mobil">
+      {% for receipt in receipts %}
+        <article class="dashboard-receipt-item">
+          <div>
+            <p class="dashboard-receipt-date">
+              {{ receipt.date|date:"Y-m-d"|default:"Datum saknas" }}
+            </p>
+            <h3>{{ receipt.vendor|default:"Okänd leverantör" }}</h3>
+          </div>
+
+          <dl>
+            <div>
+              <dt>Total</dt>
+              <dd>
+                {% if receipt.total_amount %}
+                  {{ receipt.total_amount|floatformat:2 }} kr
+                {% else %}
+                  –
+                {% endif %}
+              </dd>
+            </div>
+            <div>
+              <dt>Moms</dt>
+              <dd>
+                {% if receipt.vat_amount %}
+                  {{ receipt.vat_amount|floatformat:2 }} kr
+                {% else %}
+                  –
+                {% endif %}
+              </dd>
+            </div>
+          </dl>
+        </article>
+      {% empty %}
+        <div class="dashboard-empty-state">
+          <h3>Inga kvitton ännu.</h3>
+          <p>Börja med att scanna ditt första kvitto.</p>
+          <a href="{% url 'scan' %}" class="btn-primary">Scanna kvitto</a>
+        </div>
+      {% endfor %}
+    </div>
+
+    <div class="dashboard-table-wrap" aria-label="Kvitton i tabell">
+      <table class="dashboard-table">
+        <thead>
+          <tr>
+            <th>Datum</th>
+            <th>Leverantör</th>
+            <th class="text-right">Total</th>
+            <th class="text-right">Moms</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for receipt in receipts %}
+            <tr>
+              <td>{{ receipt.date|date:"Y-m-d"|default:"–" }}</td>
+              <td>{{ receipt.vendor|default:"Okänd leverantör" }}</td>
+              <td class="text-right">
+                {% if receipt.total_amount %}
+                  {{ receipt.total_amount|floatformat:2 }} kr
+                {% else %}
+                  –
+                {% endif %}
+              </td>
+              <td class="text-right">
+                {% if receipt.vat_amount %}
+                  {{ receipt.vat_amount|floatformat:2 }} kr
+                {% else %}
+                  –
+                {% endif %}
+              </td>
+            </tr>
+          {% empty %}
+            <tr>
+              <td colspan="4">
+                <div class="dashboard-empty-state">
+                  <h3>Inga kvitton ännu.</h3>
+                  <p>Börja med att scanna ditt första kvitto.</p>
+                  <a href="{% url 'scan' %}" class="btn-primary">Scanna kvitto</a>
+                </div>
+              </td>
+            </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
   </section>
 
   {% if page_obj.has_other_pages %}
-  <nav class="flex items-center justify-between rounded-3xl border border-stone-200 bg-white p-3 text-sm">
-    {% if page_obj.has_previous %}
-      <a href="?page={{ page_obj.previous_page_number }}" class="btn-secondary px-3 py-2">Föregående</a>
-    {% else %}
-      <span class="rounded-2xl bg-stone-50 px-3 py-2 text-stone-400">Föregående</span>
-    {% endif %}
+    <nav class="dashboard-pagination" aria-label="Sidnavigering">
+      {% if page_obj.has_previous %}
+        <a href="?page={{ page_obj.previous_page_number }}" class="btn-secondary">
+          Föregående
+        </a>
+      {% else %}
+        <span class="dashboard-pagination-disabled">Föregående</span>
+      {% endif %}
 
-    <span class="text-stone-600">Sida {{ page_obj.number }} av {{ page_obj.paginator.num_pages }}</span>
+      <span class="dashboard-page-count">
+        Sida {{ page_obj.number }} av {{ page_obj.paginator.num_pages }}
+      </span>
 
-    {% if page_obj.has_next %}
-      <a href="?page={{ page_obj.next_page_number }}" class="btn-secondary px-3 py-2">Nästa</a>
-    {% else %}
-      <span class="rounded-2xl bg-stone-50 px-3 py-2 text-stone-400">Nästa</span>
-    {% endif %}
-  </nav>
+      {% if page_obj.has_next %}
+        <a href="?page={{ page_obj.next_page_number }}" class="btn-secondary">
+          Nästa
+        </a>
+      {% else %}
+        <span class="dashboard-pagination-disabled">Nästa</span>
+      {% endif %}
+    </nav>
   {% endif %}
 </section>
 {% endblock %}

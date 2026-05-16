@@ -1,3 +1,8 @@
-<div role="alert" class="rounded-3xl border border-red-200 bg-red-50 p-4">
-  <p class="text-sm font-semibold text-red-700">{{ error }}</p>
-</div>
+<section role="alert" class="scan-alert scan-alert-error">
+  <div class="scan-alert-icon" aria-hidden="true">!</div>
+
+  <div>
+    <p class="scan-alert-title">Något gick fel</p>
+    <p class="scan-alert-text">{{ error }}</p>
+  </div>
+</section>

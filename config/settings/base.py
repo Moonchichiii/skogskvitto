@@ -63,6 +63,8 @@ INSTALLED_APPS = [
     "allauth.socialaccount",
     "allauth.socialaccount.providers.google",
     "csp",
+    "cloudinary",          # -- ADDED --
+    "cloudinary_storage",  # -- ADDED --
 ]
 
 MIDDLEWARE = [
@@ -90,6 +92,7 @@ TEMPLATES = [
                 "django.contrib.auth.context_processors.auth",
                 "django.contrib.messages.context_processors.messages",
                 "apps.core.context_processors.legal_contact",
+                "apps.core.context_processors.public_assets",
             ],
         },
     }
@@ -178,10 +181,21 @@ FILE_UPLOAD_DIRECTORY_PERMISSIONS = 0o750
 
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 
+# -- UPDATED Cloudinary Config --
+CLOUDINARY_CLOUD_NAME = env_str("CLOUDINARY_CLOUD_NAME", "")
+CLOUDINARY_API_KEY = env_str("CLOUDINARY_API_KEY", "")
+CLOUDINARY_API_SECRET = env_str("CLOUDINARY_API_SECRET", "")
+
+MARKETING_HERO_IMAGE_PUBLIC_ID = env_str(
+    "MARKETING_HERO_IMAGE_PUBLIC_ID",
+    "webp/skogskvitto/js7drdp51fxqslknqtif.webp",
+)
+
 SECURE_CONTENT_TYPE_NOSNIFF = True
 X_FRAME_OPTIONS = "DENY"
 SECURE_REFERRER_POLICY = "strict-origin-when-cross-origin"
 
+# -- UPDATED CSP to allow Cloudinary --
 CONTENT_SECURITY_POLICY = {
     "DIRECTIVES": {
         "default-src": ("'self'",),
@@ -190,8 +204,12 @@ CONTENT_SECURITY_POLICY = {
         "frame-ancestors": ("'none'",),
         "object-src": ("'none'",),
         "script-src": ("'self'", "https://cdn.jsdelivr.net"),
-        "style-src": ("'self'",),
-        "img-src": ("'self'", "data:"),
+        "style-src": ("'self'", "'unsafe-inline'"),
+        "img-src": (
+            "'self'", 
+            "data:", 
+            "https://res.cloudinary.com"
+        ),
         "connect-src": ("'self'",),
         "font-src": ("'self'",),
     }

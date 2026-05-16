@@ -1,69 +1,136 @@
-<div class="card">
-  <h2 class="card-title">Granska kvittot</h2>
-  <p class="section-text">Kontrollera uppgifterna innan du sparar kvittot.</p>
+<section class="scan-result-card" aria-labelledby="scan-result-title">
+  <header class="scan-result-header">
+    <div>
+      <p class="eyebrow">Steg 2</p>
+      <h2 id="scan-result-title" class="section-title">Granska kvittot</h2>
+      <p class="section-text">
+        Kontrollera uppgifterna innan du sparar. AI-tolkningen är bara ett stöd.
+      </p>
+    </div>
 
-  <form hx-post="/api/receipts/save" hx-target="this" hx-swap="outerHTML" class="mt-5 space-y-4">
+    <span class="scan-status-pill">Redo att granskas</span>
+  </header>
+
+  <form
+    hx-post="/api/receipts/save"
+    hx-target="this"
+    hx-swap="outerHTML"
+    class="scan-review-form"
+  >
     <input type="hidden" name="signed_scan_job" value="{{ signed_scan_job }}">
 
-    <label class="form-label">
+    <label class="form-label" for="vendor">
       Leverantör
-      <input id="vendor" name="vendor" type="text" value="{{ preview.vendor }}" class="form-input">
+      <input
+        id="vendor"
+        name="vendor"
+        type="text"
+        value="{{ preview.vendor }}"
+        class="form-input"
+        autocomplete="organization"
+      >
     </label>
 
     <div class="grid gap-4 sm:grid-cols-2">
-      <label class="form-label">
+      <label class="form-label" for="total_amount">
         Belopp
-        <input id="total_amount" name="total_amount" type="text" value="{{ preview.total_amount }}" class="form-input">
+        <input
+          id="total_amount"
+          name="total_amount"
+          type="text"
+          inputmode="decimal"
+          value="{{ preview.total_amount }}"
+          class="form-input"
+          placeholder="Exempel: 1249.00"
+        >
       </label>
 
-      <label class="form-label">
+      <label class="form-label" for="vat_amount">
         Moms
-        <input id="vat_amount" name="vat_amount" type="text" value="{{ preview.vat_amount }}" class="form-input">
+        <input
+          id="vat_amount"
+          name="vat_amount"
+          type="text"
+          inputmode="decimal"
+          value="{{ preview.vat_amount }}"
+          class="form-input"
+          placeholder="Exempel: 249.80"
+        >
       </label>
     </div>
 
     <div class="grid gap-4 sm:grid-cols-2">
-      <label class="form-label">
+      <label class="form-label" for="date">
         Datum
-        <input id="date" name="date" type="date" value="{{ preview.date }}" class="form-input">
+        <input
+          id="date"
+          name="date"
+          type="date"
+          value="{{ preview.date }}"
+          class="form-input"
+        >
       </label>
 
-      <label class="form-label">
+      <label class="form-label" for="category">
         Kategori
-        <input id="category" name="category" type="text" value="{{ preview.category }}" class="form-input">
+        <input
+          id="category"
+          name="category"
+          type="text"
+          value="{{ preview.category }}"
+          class="form-input"
+          placeholder="Exempel: Drivmedel"
+        >
       </label>
     </div>
 
-    <label class="form-label">
+    <label class="form-label" for="note">
       Anteckning
-      <textarea id="note" name="note" rows="3" class="form-input">{{ preview.note }}</textarea>
+      <textarea
+        id="note"
+        name="note"
+        rows="4"
+        class="form-input resize-y"
+        placeholder="Valfri anteckning till kvittot"
+      >{{ preview.note }}</textarea>
     </label>
 
-    <button type="submit" class="btn-primary w-full">Spara kvitto</button>
+    <button type="submit" class="btn-primary w-full">
+      Spara kvitto
+    </button>
   </form>
 
-  <div class="mt-6 rounded-3xl border border-stone-200 bg-stone-50 p-4">
-    <h3 class="font-bold text-emerald-950">Behöver något rättas?</h3>
-    <p class="mt-1 text-sm text-stone-600">
-      Skriv vad som inte stämmer, så försöker SkogsKvitto föreslå en korrigering.
-    </p>
+  <aside class="correction-panel" aria-labelledby="correction-title">
+    <div>
+      <p class="eyebrow">Behöver något rättas?</p>
+      <h3 id="correction-title">Beskriv vad som inte stämmer.</h3>
+      <p>
+        Skriv en kort korrigering, till exempel att beloppet eller kategorin är fel.
+      </p>
+    </div>
 
     <form
       hx-post="/api/receipts/correction-suggestion"
       hx-target="#correction-result"
       hx-swap="innerHTML"
-      class="mt-4 space-y-3"
+      class="correction-form"
     >
       <input type="hidden" name="signed_scan_job" value="{{ signed_scan_job }}">
+
+      <label class="sr-only" for="correction_text">Beskriv korrigering</label>
       <textarea
+        id="correction_text"
         name="correction_text"
-        rows="2"
+        rows="3"
         class="form-input bg-white"
-        placeholder="Exempel: Beloppet ska vara 1 249 kr"
+        placeholder="Exempel: Beloppet ska vara 1 249 kr och kategorin är material."
       ></textarea>
-      <button type="submit" class="btn-secondary w-full">Föreslå korrigering</button>
+
+      <button type="submit" class="btn-secondary w-full">
+        Föreslå korrigering
+      </button>
     </form>
 
-    <div id="correction-result" class="mt-3"></div>
-  </div>
-</div>
+    <div id="correction-result" class="mt-4"></div>
+  </aside>
+</section>

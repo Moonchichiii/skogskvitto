@@ -1,66 +1,43 @@
 {% extends "layouts/base.html" %}
 
-{% block title %}Cookies | SkogsKvitto{% endblock %}
+{% block title %}Användarvillkor | SkogsKvitto{% endblock %}
 
 {% block content %}
 <section class="legal-page">
   <header class="hero-card">
     <p class="eyebrow">Juridik</p>
-    <h1 class="hero-title">Cookies</h1>
-    <p class="hero-text">Hur SkogsKvitto använder cookies och lokal lagring.</p>
+    <h1 class="hero-title">Användarvillkor</h1>
+    <p class="hero-text">SkogsKvitto hjälper skogsägare att samla kvitton och skapa tydliga underlag.</p>
   </header>
 
   <article class="legal-section">
-    <h2>Vad är cookies?</h2>
+    <h2>Tjänstens syfte</h2>
     <p>
-      Cookies är små textfiler som sparas i din webbläsare. De används för att hålla dig inloggad
-      och skydda din session mot angrepp.
+      SkogsKvitto är ett hjälpmedel för dokumentation av kvitton, fakturor, körjournal,
+      skogsinkomster och export av underlag till bokföring eller revisor.
     </p>
   </article>
 
   <article class="legal-section">
-    <h2>Cookies vi använder</h2>
+    <h2>Ditt ansvar</h2>
     <p>
-      SkogsKvitto använder enbart nödvändiga cookies. Vi använder inga spårnings-,
-      analys- eller marknadsföringscookies.
-    </p>
-    <div class="mt-4 overflow-x-auto">
-      <table class="data-table">
-        <thead>
-          <tr>
-            <th>Cookie</th>
-            <th>Syfte</th>
-            <th>Varaktighet</th>
-          </tr>
-        </thead>
-        <tbody>
-          <tr>
-            <td class="font-mono text-xs">sessionid</td>
-            <td>Håller dig inloggad</td>
-            <td>Webbläsarsession eller upp till två veckor</td>
-          </tr>
-          <tr>
-            <td class="font-mono text-xs">csrftoken</td>
-            <td>Skyddar mot CSRF-attacker</td>
-            <td>Upp till ett år</td>
-          </tr>
-        </tbody>
-      </table>
-    </div>
-  </article>
-
-  <article class="legal-section">
-    <h2>Lokal lagring</h2>
-    <p>
-      Vi sparar ditt cookie-meddelande i webbläsarens localStorage med nyckeln
-      <code class="font-mono text-xs">cookie_consent</code>. Det skickas inte till servern och används
-      bara för att inte visa samma meddelande igen.
+      Du ansvarar för att uppgifter du laddar upp är korrekta, fullständiga och lagliga att använda.
+      SkogsKvitto ersätter inte revisor, bokföringskonsult eller Skatteverket.
     </p>
   </article>
 
   <article class="legal-section">
-    <h2>Frågor</h2>
-    <p>Kontakta oss via <strong>{{ privacy_contact }}</strong> om du har frågor.</p>
+    <h2>AI-stöd</h2>
+    <p>
+      AI-tips och automatiska tolkningar är vägledande och måste alltid kontrolleras innan användning.
+    </p>
+  </article>
+
+  <article class="legal-section">
+    <h2>Beta- och pilotperiod</h2>
+    <p>
+      Under beta eller pilot kan funktioner, gränssnitt och villkor ändras för att förbättra tjänsten.
+    </p>
   </article>
 </section>
 {% endblock %}

@@ -3,33 +3,53 @@
 {% block title %}Scanna kvitto | SkogsKvitto{% endblock %}
 
 {% block content %}
-<section class="page-stack">
-  <header class="hero-grid">
-    <div>
+<section class="scan-page">
+  <header class="scan-hero" aria-labelledby="scan-title">
+    <div class="scan-hero-copy">
       <p class="eyebrow">SkogsKvitto</p>
-      <h1 class="hero-title">Scanna, granska och exportera skogskvitton.</h1>
+
+      <h1 id="scan-title" class="hero-title">
+        Scanna, granska och exportera skogskvitton.
+      </h1>
+
       <p class="hero-text">
         Ta en bild på kvittot, kontrollera tolkningen och bygg ett tydligt underlag
-        för bokföring och revisor.
+        för bokföring, deklaration och revisor.
       </p>
-      <div class="mt-6 flex flex-col gap-3 sm:flex-row">
+
+      <div class="scan-hero-actions">
         <a href="#scan-upload" class="btn-primary">Scanna kvitto</a>
         <a href="{% url 'dashboard' %}" class="btn-secondary">Visa underlag</a>
       </div>
     </div>
 
-    <div class="hero-panel" aria-hidden="true">
-      <div class="mini-receipt">
-        <div class="mini-receipt-mark">SK</div>
-        <div class="mini-line w-3/4"></div>
-        <div class="mini-line w-1/2"></div>
-        <div class="mini-line w-2/3"></div>
+    <aside class="scan-hero-panel" aria-label="Arbetsflöde">
+      <div class="scan-flow-card">
+        <div class="scan-flow-step">
+          <span aria-hidden="true">1</span>
+          <p>Scanna kvitto</p>
+        </div>
+
+        <div class="scan-flow-line" aria-hidden="true"></div>
+
+        <div class="scan-flow-step">
+          <span aria-hidden="true">2</span>
+          <p>Granska uppgifter</p>
+        </div>
+
+        <div class="scan-flow-line" aria-hidden="true"></div>
+
+        <div class="scan-flow-step">
+          <span aria-hidden="true">3</span>
+          <p>Exportera underlag</p>
+        </div>
       </div>
-      <div class="hero-stat-card">
+
+      <div class="scan-export-card">
         <p>Redo för export</p>
-        <strong>Excel</strong>
+        <strong>Excel-underlag</strong>
       </div>
-    </div>
+    </aside>
   </header>
 
   {% include "receipts/partials/upload_form.html" %}

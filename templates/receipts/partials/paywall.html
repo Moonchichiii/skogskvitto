@@ -1,9 +1,43 @@
-<div class="premium-box">
-  <p class="text-sm font-semibold text-emerald-950">
-    {{ message|default:"Export och nedladdning ingår i betalplanen." }}
-  </p>
-  <div class="mt-4 grid gap-3 sm:grid-cols-2">
-    <a href="{% url 'start_checkout' %}?plan=monthly" class="btn-secondary">Starta 49 kr/mån</a>
-    <a href="{% url 'start_checkout' %}?plan=yearly" class="btn-primary">Starta 499 kr/år</a>
+<section class="premium-lock" aria-labelledby="premium-lock-title">
+  <div class="premium-lock-icon" aria-hidden="true">
+    <svg viewBox="0 0 24 24" fill="none" class="h-7 w-7">
+      <path
+        d="M7 11V8a5 5 0 0 1 10 0v3"
+        stroke="currentColor"
+        stroke-width="2.4"
+        stroke-linecap="round"
+      />
+      <path
+        d="M6 11h12v9H6v-9Z"
+        stroke="currentColor"
+        stroke-width="2.4"
+        stroke-linejoin="round"
+      />
+      <path
+        d="M12 15v2"
+        stroke="currentColor"
+        stroke-width="2.4"
+        stroke-linecap="round"
+      />
+    </svg>
   </div>
-</div>
+
+  <div>
+    <p class="eyebrow">Premium krävs</p>
+    <h2 id="premium-lock-title" class="premium-lock-title">
+      Export och nedladdning ingår i Premium.
+    </h2>
+    <p class="premium-lock-text">
+      {{ message|default:"Uppgradera för att spara kvitton, exportera Excel-underlag och få tillgång till hela arbetsflödet." }}
+    </p>
+  </div>
+
+  <div class="premium-lock-actions">
+    <a href="{% url 'start_checkout' %}?plan=yearly" class="btn-primary w-full">
+      Välj 599 kr/år
+    </a>
+    <a href="{% url 'start_checkout' %}?plan=monthly" class="btn-secondary w-full">
+      Välj 49 kr/mån
+    </a>
+  </div>
+</section>
