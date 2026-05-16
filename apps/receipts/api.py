@@ -3,6 +3,7 @@ from datetime import date as date_cls
 from decimal import Decimal, InvalidOperation
 from pathlib import Path
 from tempfile import NamedTemporaryFile
+from typing import cast
 
 import magic
 from asgiref.sync import sync_to_async
@@ -14,12 +15,12 @@ from django.template.loader import render_to_string
 from ninja import File, Form, Router
 from ninja.files import UploadedFile
 
-from apps.core.models import User
 from apps.billing.services import (
     FEATURE_RECEIPT_CONFIRM_SAVE,
     FEATURE_RECEIPT_SCAN_PREVIEW,
     can_use_feature,
 )
+from apps.core.models import User
 from apps.receipts.models import Receipt, ReceiptScanJob
 from apps.receipts.services import (
     SUPPORTED_IMAGE_MIME_TYPES,

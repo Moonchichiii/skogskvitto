@@ -25,6 +25,9 @@ DATABASES = {
         "HOST": env_required("POSTGRES_HOST"),  # noqa: F405
         "PORT": env_int("POSTGRES_PORT", 5432),  # noqa: F405
         "CONN_MAX_AGE": env_int("POSTGRES_CONN_MAX_AGE", 60),  # noqa: F405
+        "OPTIONS": {
+            "sslmode": env_str("POSTGRES_SSLMODE", "require"),  # noqa: F405
+        },
     }
 }
 
@@ -35,8 +38,6 @@ CLOUDINARY_API_SECRET = env_str("CLOUDINARY_API_SECRET", "")  # noqa: F405
 
 if not (CLOUDINARY_URL or CLOUDINARY_CLOUD_NAME):
     raise ValueError("Cloudinary must be configured in production")
-
-INSTALLED_APPS += ["cloudinary_storage", "cloudinary"]  # noqa: F405
 
 if CLOUDINARY_URL:
     os.environ.setdefault("CLOUDINARY_URL", CLOUDINARY_URL)
@@ -50,7 +51,9 @@ CLOUDINARY_STORAGE = {
 
 STORAGES = {
     "default": {"BACKEND": "cloudinary_storage.storage.MediaCloudinaryStorage"},
-    "staticfiles": {"BACKEND": "django.contrib.staticfiles.storage.StaticFilesStorage"},
+    "staticfiles": {
+        "BACKEND": "whitenoise.storage.CompressedManifestStaticFilesStorage",
+    },
 }
 
 SECURE_SSL_REDIRECT = config("DJANGO_SECURE_SSL_REDIRECT", default=True, cast=bool)  # noqa: F405

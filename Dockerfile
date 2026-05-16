@@ -27,5 +27,5 @@ COPY --from=builder --chown=1000:1000 /app/.venv /app/.venv
 COPY --from=tailwind --chown=1000:1000 /build/static /app/static
 COPY --chown=1000:1000 . /app
 USER 1000:1000
-EXPOSE 8000
-CMD ["gunicorn", "config.asgi:application", "-k", "uvicorn.workers.UvicornWorker", "--bind", "0.0.0.0:8000", "--workers", "2"]
+EXPOSE 8080
+CMD ["gunicorn", "config.asgi:application", "-k", "uvicorn.workers.UvicornWorker", "--bind", "0.0.0.0:8080", "--workers", "2"]

@@ -13,7 +13,7 @@ from apps.receipts.models import Receipt
 def export_excel(request: HttpRequest) -> HttpResponseBase:
     decision = can_use_feature_sync(request.user, FEATURE_EXCEL_DOWNLOAD)
     if not decision.allowed:
-        return HttpResponseForbidden("Export och nedladdning ing?r i betalplanen.")
+        return HttpResponseForbidden("Export och nedladdning ingår i betalplanen.")
 
     receipts = list(Receipt.objects.filter(owner=request.user).order_by("-date", "-created_at"))
 

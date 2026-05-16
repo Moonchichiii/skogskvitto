@@ -50,7 +50,7 @@ def _write_kvitton_sheet(wb: Workbook, receipts: list[Receipt]) -> None:
     assert ws is not None
     ws.title = "Kvitton"
 
-    headers = ["ink?p", "netto", "moms", "?resutj?mning"]
+    headers = ["inköp", "netto", "moms", "öresutjämning"]
     _setup_sheet(ws, headers, [16, 16, 16, 18])
 
     total_inkop = ZERO
