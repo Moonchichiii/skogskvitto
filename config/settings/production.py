@@ -1,7 +1,8 @@
 from __future__ import annotations
-import dj_database_url
 
 import os
+
+import dj_database_url
 
 from .base import *  # noqa: F403
 
@@ -48,7 +49,7 @@ CLOUDINARY_STORAGE = {
 STORAGES = {
     "default": {"BACKEND": "cloudinary_storage.storage.MediaCloudinaryStorage"},
     "staticfiles": {
-        "BACKEND": "whitenoise.storage.CompressedManifestStaticFilesStorage"
+        "BACKEND": "whitenoise.storage.CompressedManifestStaticFilesStorage",
     },
 }
 

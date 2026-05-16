@@ -53,7 +53,9 @@ RUN DJANGO_SETTINGS_MODULE=config.settings.production \
     DATABASE_URL=postgresql://build_only:build_only@localhost:5432/build_only?sslmode=disable \
     POSTGRES_CONN_MAX_AGE=60 \
     CLOUDINARY_CLOUD_NAME=dakjlrean \
-    python manage.py collectstatic --noinput
+    python manage.py collectstatic --noinput \
+    && chown -R 1000:1000 /app/staticfiles \
+    && chmod -R u=rwX,go=rX /app/staticfiles
 
 USER 1000:1000
 
