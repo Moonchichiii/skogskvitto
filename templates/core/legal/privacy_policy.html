@@ -1,0 +1,86 @@
+{% extends "core/base.html" %}
+
+{% block title %}Integritetspolicy – SkogsKvitto{% endblock %}
+{% block meta_description %}SkogsKvitto:s integritetspolicy — vilken data vi sparar, dataminimering och dina rättigheter.{% endblock %}
+
+{% block content %}
+<section class="legal-shell" aria-labelledby="privacy-title">
+  <header class="legal-hero">
+    <p class="eyebrow">Juridik</p>
+    <h1 id="privacy-title">Integritetspolicy</h1>
+    <p>
+      SkogsKvitto ska göra det enklare för svenska skogsägare att samla underlag utan att tumma på integriteten.
+    </p>
+  </header>
+
+  <div class="legal-layout">
+    <aside class="legal-aside" aria-label="Innehåll">
+      <p>På denna sida</p>
+      <nav>
+        <a href="#data-vi-sparar">Data vi kan spara</a>
+        <a href="#dataminimering">Dataminimering</a>
+        <a href="#ai">AI och kvittotolkning</a>
+        <a href="#rattigheter">Dina rättigheter</a>
+        <a href="#kontakt">Kontakt</a>
+      </nav>
+    </aside>
+
+    <div class="legal-content">
+      <article id="data-vi-sparar" class="legal-card">
+        <h2>Vilken data kan sparas?</h2>
+        <p>SkogsKvitto sparar bara uppgifter som behövs för konto, kvittohantering, granskning och export.</p>
+        <ul class="legal-list">
+          <li>Konto och e-postadress.</li>
+          <li>Kvittobilder, fakturor och uppladdade underlag.</li>
+          <li>Belopp, moms, datum, leverantör och kategori.</li>
+          <li>Exportunderlag, årsöversikt och relaterade bokföringsuppgifter.</li>
+        </ul>
+      </article>
+
+      <article id="dataminimering" class="legal-card">
+        <h2>Dataminimering</h2>
+        <p>
+          Målet är att bara behandla den information som behövs för att skapa ett tydligt
+          underlag. Onödiga tekniska metadata ska tas bort där det är möjligt, och information
+          som inte behövs för kvittohantering ska undvikas.
+        </p>
+        <p>
+          Du bör inte ladda upp underlag som innehåller mer personuppgifter än nödvändigt.
+          Om ett kvitto eller en faktura innehåller känslig information bör den kontrolleras
+          innan den används i tjänsten.
+        </p>
+      </article>
+
+      <article id="ai" class="legal-card">
+        <h2>AI och kvittotolkning</h2>
+        <p>
+          AI kan användas som stöd för att tolka kvitton och föreslå uppgifter som belopp,
+          moms, datum, leverantör och kategori. Tolkningen är alltid ett förslag och ska
+          kontrolleras innan uppgifterna sparas eller används.
+        </p>
+        <p>
+          SkogsKvitto ska behandla AI-stöd med försiktighet. Fokus är att skicka så lite data
+          som möjligt och att undvika information som inte behövs för själva kvittotolkningen.
+        </p>
+      </article>
+
+      <article id="rattigheter" class="legal-card">
+        <h2>Dina rättigheter</h2>
+        <p>
+          Du kan begära tillgång till dina uppgifter, rättelse av felaktiga uppgifter eller
+          radering av konto och data. Sådana förfrågningar hanteras enligt gällande
+          dataskyddsregler.
+        </p>
+      </article>
+
+      <article id="kontakt" class="legal-card">
+        <h2>Kontakt</h2>
+        <p>
+          Vid frågor om integritet, export eller radering kan du kontakta oss via
+          <strong><a href="mailto:{{ privacy_contact }}" class="text-link">{{ privacy_contact }}</a></strong>.
+        </p>
+      </article>
+    </div>
+  </div>
+</section>
+{% endblock %}

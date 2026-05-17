@@ -1,7 +1,8 @@
-{% extends "layouts/base.html" %}
+{% extends "core/base.html" %}
 {% load socialaccount %}
 
-{% block title %}Logga in | SkogsKvitto{% endblock %}
+{% block title %}Logga in – SkogsKvitto{% endblock %}
+{% block robots %}noindex, follow{% endblock %}
 
 {% block content %}
 <section class="auth-shell" aria-labelledby="login-title">
@@ -48,12 +49,10 @@
       <div class="auth-heading">
         <p class="eyebrow">Välkommen tillbaka</p>
         <h1 id="login-title">Logga in</h1>
-        <p>
-          Fortsätt med Google eller logga in med e-post och lösenord.
-        </p>
+        <p>Fortsätt med Google eller logga in med e-post och lösenord.</p>
       </div>
 
-      <a
+      
         href="{% provider_login_url 'google' process='login' %}"
         class="btn-google"
         aria-label="Fortsätt med Google"
@@ -67,17 +66,13 @@
         <span>Fortsätt med Google</span>
       </a>
 
-      <div class="auth-divider">
-        <span>eller</span>
-      </div>
+      <div class="auth-divider"><span>eller</span></div>
 
       <form method="post" action="{% url 'account_login' %}" class="auth-form">
         {% csrf_token %}
 
         {% if form.non_field_errors %}
-          <div class="notice" role="alert">
-            {{ form.non_field_errors }}
-          </div>
+          <div class="notice" role="alert">{{ form.non_field_errors }}</div>
         {% endif %}
 
         <label class="form-label" for="{{ form.login.id_for_label }}">
@@ -96,9 +91,7 @@
           <input type="hidden" name="{{ redirect_field_name }}" value="{{ redirect_field_value }}">
         {% endif %}
 
-        <button type="submit" class="btn-primary w-full">
-          Logga in
-        </button>
+        <button type="submit" class="btn-primary w-full">Logga in</button>
       </form>
 
       <p class="auth-switch">

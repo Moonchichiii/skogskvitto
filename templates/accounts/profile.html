@@ -1,0 +1,139 @@
+{% extends "core/base.html" %}
+
+{% block title %}Min profil – SkogsKvitto{% endblock %}
+{% block robots %}noindex, nofollow{% endblock %}
+
+{% block content %}
+<section class="profile-shell" aria-labelledby="profile-title">
+
+  <header class="profile-hero">
+    <div class="profile-hero-content">
+      <p class="eyebrow text-emerald-100">Konto</p>
+      <h1 id="profile-title">Min profil</h1>
+      <p>Hantera ditt konto, din plan och åtkomst till exportfunktionerna.</p>
+    </div>
+
+    <aside class="profile-identity-card" aria-label="Inloggat konto">
+      <img
+        src="https://res.cloudinary.com/dakjlrean/image/upload/f_auto,q_auto:eco,w_112/skogskvitto/nqyhmj1zplj7zshg189b.webp"
+        alt=""
+        class="profile-logo"
+        width="56"
+        height="56"
+        loading="lazy"
+        decoding="async"
+      >
+      <div>
+        <p class="profile-user-label">Inloggad som</p>
+        <p class="profile-user-email">{{ email }}</p>
+      </div>
+    </aside>
+  </header>
+
+  <div class="profile-grid">
+    <article class="profile-card">
+      <div class="profile-card-header">
+        <div>
+          <p class="eyebrow">Kontouppgifter</p>
+          <h2>Dina uppgifter</h2>
+        </div>
+        {% if billing_summary.is_pilot %}
+          <span class="profile-status-pill">Särskild åtkomst</span>
+        {% elif billing_summary.is_premium %}
+          <span class="profile-status-pill">Premium</span>
+        {% elif billing_summary.is_trial %}
+          <span class="profile-status-pill">Trial</span>
+        {% else %}
+          <span class="profile-status-pill">Gratis</span>
+        {% endif %}
+      </div>
+
+      <dl class="profile-details">
+        <div class="profile-detail">
+          <dt>E-post</dt>
+          <dd>{{ email }}</dd>
+        </div>
+        {% if full_name %}
+        <div class="profile-detail">
+          <dt>Namn</dt>
+          <dd>{{ full_name }}</dd>
+        </div>
+        {% endif %}
+        <div class="profile-detail">
+          <dt>Skapad</dt>
+          <dd>{{ user.date_joined|date:"Y-m-d" }}</dd>
+        </div>
+        <div class="profile-detail">
+          <dt>Plan</dt>
+          <dd>{{ billing_summary.plan_label }}</dd>
+        </div>
+      </dl>
+    </article>
+
+    <article class="profile-plan-card">
+      <p class="eyebrow">Plan</p>
+      <h2>{{ billing_summary.plan_label }}</h2>
+      <p>{{ billing_summary.plan_description }}</p>
+
+      {% if not billing_summary.is_premium and not billing_summary.is_pilot %}
+        <a href="{% url 'start_checkout' %}?plan=yearly" class="btn-primary">Uppgradera till Premium</a>
+      {% else %}
+        <a href="{% url 'dashboard' %}?nav=export#dashboard-export" class="btn-primary">Gå till export</a>
+      {% endif %}
+    </article>
+  </div>
+
+  <section class="profile-metrics" aria-labelledby="profile-usage-title">
+    <p class="eyebrow">Användning</p>
+    <h2 id="profile-usage-title">Översikt</h2>
+
+    <div class="profile-metric-grid">
+      <article class="profile-metric-card">
+        <p>Sparade kvitton</p>
+        <strong>{{ billing_summary.receipt_count }}</strong>
+        <span>Totalt antal i ditt underlag.</span>
+      </article>
+
+      <article class="profile-metric-card">
+        <p>Gratisgräns</p>
+        <strong>{{ billing_summary.free_receipt_limit }}</strong>
+        <span>Max på gratisplan utan Premium.</span>
+      </article>
+
+      <article class="profile-metric-card">
+        <p>Export</p>
+        <strong>{% if billing_summary.export_enabled %}Aktiv{% else %}Låst{% endif %}</strong>
+        <span>
+          {% if billing_summary.export_enabled %}
+            Excel-export är tillgänglig.
+          {% else %}
+            Kräver Premium-plan.
+          {% endif %}
+        </span>
+      </article>
+    </div>
+  </section>
+
+  <section class="profile-actions" aria-labelledby="profile-actions-title">
+    <div>
+      <p class="eyebrow">Konto­hantering</p>
+      <h2 id="profile-actions-title">Åtgärder</h2>
+      <p>
+        Hantera lösenord, e-postadress eller radera ditt konto. Email- och lösenords­ändring
+        sker via säkra flöden i Allauth.
+      </p>
+    </div>
+
+    <div class="profile-action-grid">
+      <a href="{% url 'account_email' %}" class="btn-secondary">Ändra e-postadress</a>
+      <a href="{% url 'account_change_password' %}" class="btn-secondary">Byt lösenord</a>
+      <a href="{% url 'account_delete' %}" class="btn-secondary">Radera konto</a>
+      <form method="post" action="{% url 'account_logout' %}" class="m-0">
+        {% csrf_token %}
+        <button type="submit" class="btn-primary w-full">Logga ut</button>
+      </form>
+    </div>
+  </section>
+
+</section>
+{% endblock %}

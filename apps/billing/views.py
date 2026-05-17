@@ -1,23 +1,25 @@
+from __future__ import annotations
+
 from datetime import datetime
 
 import httpx
+from django.contrib.auth.decorators import login_required
 from django.http import HttpRequest, HttpResponseBadRequest, HttpResponseRedirect
 from django.http.response import HttpResponseBase
 from django.shortcuts import redirect
 from django.urls import reverse
 from django.utils import timezone
 
+from apps.billing.models import UserSubscription
 from apps.billing.services import (
     is_premium_user_sync,
     plan_to_price_id,
     stripe_is_configured,
     stripe_request_sync,
 )
-from apps.core.decorators import login_required_view
-from apps.receipts.models import UserSubscription
 
 
-@login_required_view
+@login_required
 def start_checkout(request: HttpRequest) -> HttpResponseBase:
     user = request.user
 
@@ -67,7 +69,7 @@ def start_checkout(request: HttpRequest) -> HttpResponseBase:
     return HttpResponseRedirect(checkout_url)
 
 
-@login_required_view
+@login_required
 def billing_success(request: HttpRequest) -> HttpResponseBase:
     user = request.user
 
@@ -94,10 +96,10 @@ def billing_success(request: HttpRequest) -> HttpResponseBase:
         return HttpResponseBadRequest("Ogiltig checkout-session.")
 
     if checkout_session.get("status") != "complete":
-        return HttpResponseBadRequest("Betalningen ?r inte slutförd.")
+        return HttpResponseBadRequest("Betalningen är inte slutförd.")
 
     if str(checkout_session.get("client_reference_id", "")) != str(user.id):
-        return HttpResponseBadRequest("Checkout-session tillh?r inte aktuell användare.")
+        return HttpResponseBadRequest("Checkout-session tillhör inte aktuell användare.")
 
     subscription = checkout_session.get("subscription")
     if not isinstance(subscription, dict):
@@ -120,7 +122,7 @@ def billing_success(request: HttpRequest) -> HttpResponseBase:
             tz=timezone.get_current_timezone(),
         )
 
-    interval = UserSubscription.INTERVAL_MONTH
+    interval = UserSubscription.Interval.MONTH
     items = subscription.get("items")
     if isinstance(items, dict):
         data = items.get("data")
@@ -132,8 +134,8 @@ def billing_success(request: HttpRequest) -> HttpResponseBase:
                     recurring = price.get("recurring")
                     if isinstance(recurring, dict):
                         stripe_interval = recurring.get("interval")
-                        if stripe_interval == UserSubscription.INTERVAL_YEAR:
-                            interval = UserSubscription.INTERVAL_YEAR
+                        if stripe_interval == UserSubscription.Interval.YEAR:
+                            interval = UserSubscription.Interval.YEAR
 
     user_subscription, created = UserSubscription.objects.get_or_create(
         user=user,
@@ -166,6 +168,7 @@ def billing_success(request: HttpRequest) -> HttpResponseBase:
     return redirect("dashboard")
 
 
-@login_required_view
+@login_required
 def billing_cancel(_: HttpRequest) -> HttpResponseBase:
     return redirect("scan")
+

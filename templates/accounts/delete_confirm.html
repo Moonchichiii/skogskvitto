@@ -1,0 +1,77 @@
+{% extends "core/base.html" %}
+
+{% block title %}Radera konto – SkogsKvitto{% endblock %}
+{% block robots %}noindex, nofollow{% endblock %}
+
+{% block content %}
+<section class="auth-shell" aria-labelledby="delete-title" x-data="{ typed: '' }">
+  <aside class="auth-visual" aria-label="SkogsKvitto">
+    <img
+      src="https://res.cloudinary.com/dakjlrean/image/upload/f_auto,q_auto:eco,c_fill,w_1200,h_1400,g_auto/webp/skogskvitto/js7drdp51fxqslknqtif.webp"
+      alt=""
+      class="auth-visual-image"
+      width="1200"
+      height="1400"
+      loading="eager"
+      decoding="async"
+    >
+    <div class="auth-visual-overlay">
+      <p class="auth-visual-kicker">Konto­hantering</p>
+      <h2>Det här går inte att ångra.</h2>
+      <p>
+        När du raderar ditt konto försvinner alla kvitton, ditt underlag och din historik
+        permanent från SkogsKvitto.
+      </p>
+    </div>
+  </aside>
+
+  <div class="auth-panel">
+    <div class="auth-form-card">
+      <div class="auth-heading">
+        <p class="eyebrow">Radering</p>
+        <h1 id="delete-title">Radera konto</h1>
+        <p>
+          För att bekräfta — skriv in din e-postadress nedan. Inget raderas förrän du
+          klickar på den röda knappen.
+        </p>
+      </div>
+
+      {% if error %}
+        <div class="notice" role="alert" style="border-color:#fecaca;background:#fef2f2;color:#7f1d1d;">
+          {{ error }}
+        </div>
+      {% endif %}
+
+      <form method="post" action="{% url 'account_delete' %}" class="auth-form mt-6">
+        {% csrf_token %}
+
+        <label class="form-label" for="confirm_email">
+          Skriv in <strong>{{ user.email }}</strong> för att bekräfta
+          <input
+            id="confirm_email"
+            name="confirm_email"
+            type="email"
+            class="form-input"
+            autocomplete="off"
+            x-model="typed"
+            required
+          >
+        </label>
+
+        <button
+          type="submit"
+          class="btn-primary w-full"
+          :disabled="typed.toLowerCase() !== '{{ user.email|lower }}'"
+          style="background:#991b1b;"
+        >
+          Radera mitt konto permanent
+        </button>
+
+        <p class="mt-4 text-center">
+          <a href="{% url 'profile' %}" class="text-link">Avbryt och gå tillbaka</a>
+        </p>
+      </form>
+    </div>
+  </div>
+</section>
+{% endblock %}

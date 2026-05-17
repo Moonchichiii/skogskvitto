@@ -1,13 +1,13 @@
-# fly.toml app configuration file generated for skogskvitto on 2026-05-16T22:10:04Z
+# fly.toml app configuration file
 #
 # See https://fly.io/docs/reference/configuration/ for information about how to use this file.
-#
 
 app = 'skogskvitto'
 primary_region = 'iad'
 console_command = '/code/manage.py shell'
 
 [build]
+  dockerfile = 'infra/Dockerfile'
 
 [deploy]
   release_command = 'python manage.py migrate --noinput'

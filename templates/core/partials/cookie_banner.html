@@ -1,0 +1,38 @@
+<div
+  x-data="cookieBanner()"
+  x-show="show"
+  x-cloak
+  x-transition.opacity.duration.200ms
+  class="cookie-banner"
+  role="dialog"
+  aria-modal="false"
+  aria-labelledby="cookie-banner-title"
+  aria-describedby="cookie-banner-description"
+>
+  <div>
+    <p id="cookie-banner-title" class="text-sm font-black uppercase tracking-[0.14em] text-emerald-700">
+      Information om cookies
+    </p>
+    <p id="cookie-banner-description" class="mt-2 text-base font-semibold leading-relaxed text-emerald-950">
+      SkogsKvitto använder endast nödvändiga cookies.
+    </p>
+    <p class="mt-2 text-sm leading-relaxed text-stone-700">
+      Tre cookies behövs för att tjänsten ska fungera: inloggningssession,
+      CSRF-skydd och cookie-samtycke. Vi använder inga analys-, spårnings-
+      eller marknadsföringscookies. Cookien för samtycke lagras lokalt i din
+      webbläsare och delas inte med tredje part.
+    </p>
+    <p class="mt-3 text-sm font-semibold">
+      <a href="{% url 'cookies' %}" class="text-link">Läs hela cookie-policyn</a>
+      &nbsp;·&nbsp;
+      <a href="{% url 'privacy_policy' %}" class="text-link">Integritetspolicy</a>
+    </p>
+  </div>
+  <button
+    type="button"
+    class="btn-primary shrink-0"
+    @click="accept()"
+  >
+    Acceptera och fortsätt
+  </button>
+</div>

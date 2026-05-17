@@ -1,3 +1,5 @@
+"""Production settings — strict, secure, fail-fast on misconfiguration."""
+
 from __future__ import annotations
 
 import os
@@ -7,6 +9,11 @@ import dj_database_url
 from .base import *  # noqa: F403
 
 DEBUG = False
+
+
+# -----------------------------------------------------------------------------
+# Required env vars — fail fast if missing
+# -----------------------------------------------------------------------------
 
 SECRET_KEY = env_required("DJANGO_SECRET_KEY")  # noqa: F405
 
@@ -20,6 +27,11 @@ if not CSRF_TRUSTED_ORIGINS:
 
 DATABASE_URL = env_required("DATABASE_URL")  # noqa: F405
 
+
+# -----------------------------------------------------------------------------
+# Database
+# -----------------------------------------------------------------------------
+
 DATABASES = {
     "default": dj_database_url.parse(
         DATABASE_URL,
@@ -27,6 +39,11 @@ DATABASES = {
         ssl_require=True,
     )
 }
+
+
+# -----------------------------------------------------------------------------
+# Cloudinary — required in production
+# -----------------------------------------------------------------------------
 
 CLOUDINARY_URL = env_str("CLOUDINARY_URL", "")  # noqa: F405
 CLOUDINARY_CLOUD_NAME = env_str("CLOUDINARY_CLOUD_NAME", "")  # noqa: F405
@@ -46,17 +63,38 @@ CLOUDINARY_STORAGE = {
     "SECURE": True,
 }
 
+
+# -----------------------------------------------------------------------------
+# Storages — Cloudinary media + WhiteNoise compressed static
+# -----------------------------------------------------------------------------
+
 STORAGES = {
-    "default": {"BACKEND": "cloudinary_storage.storage.MediaCloudinaryStorage"},
+    "default": {
+        "BACKEND": "cloudinary_storage.storage.MediaCloudinaryStorage",
+    },
     "staticfiles": {
         "BACKEND": "whitenoise.storage.CompressedManifestStaticFilesStorage",
     },
 }
 
-SECURE_SSL_REDIRECT = config("DJANGO_SECURE_SSL_REDIRECT", default=True, cast=bool)  # noqa: F405
+
+# -----------------------------------------------------------------------------
+# Security — strict
+# -----------------------------------------------------------------------------
+
+SECURE_SSL_REDIRECT = env_bool("DJANGO_SECURE_SSL_REDIRECT", default=True)  # noqa: F405
 SESSION_COOKIE_SECURE = True
 CSRF_COOKIE_SECURE = True
 SECURE_HSTS_SECONDS = env_int("DJANGO_SECURE_HSTS_SECONDS", 31536000)  # noqa: F405
 SECURE_HSTS_INCLUDE_SUBDOMAINS = True
 SECURE_HSTS_PRELOAD = True
 SECURE_PROXY_SSL_HEADER = ("HTTP_X_FORWARDED_PROTO", "https")
+
+
+# -----------------------------------------------------------------------------
+# Logging — louder default in production
+# -----------------------------------------------------------------------------
+
+# Inherit LOGGING from base but bump root level to INFO with WARNING for Django.
+LOGGING["root"]["level"] = env_str("DJANGO_LOG_LEVEL", "INFO")  # noqa: F405
+LOGGING["loggers"]["django"]["level"] = "WARNING"  # noqa: F405

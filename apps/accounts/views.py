@@ -1,55 +1,64 @@
+from __future__ import annotations
+
+from django.contrib.auth import logout
+from django.contrib.auth.decorators import login_required
 from django.http import HttpRequest, HttpResponse
-from django.shortcuts import render
+from django.shortcuts import redirect, render
+from django.views.decorators.http import require_http_methods
 
-from apps.billing.services import (
-    FREE_RECEIPT_LIMIT,
-    PLAN_FREE,
-    PLAN_PILOT,
-    PLAN_PREMIUM,
-    PLAN_TRIAL,
-    get_feature_gates_sync,
-)
-from apps.core.decorators import login_required_view
-from apps.receipts.models import Receipt
+from apps.billing.services import get_user_billing_summary
 
 
-@login_required_view
+@login_required
 def profile(request: HttpRequest) -> HttpResponse:
+    """User profile hub.
+
+    Owns: display name, email display, links to allauth's email/password
+    pages, link to delete-account flow.
+
+    Consumes (read-only): a single immutable billing summary DTO.
+    """
+
     user = request.user
-    gates = get_feature_gates_sync(user)
-    user_plan = str(gates.get("user_plan", PLAN_FREE))
-    receipt_count = Receipt.objects.filter(owner=user).count()
-
-    plan_labels = {
-        PLAN_FREE: "Gratis",
-        PLAN_TRIAL: "Trial",
-        PLAN_PREMIUM: "Premium",
-        PLAN_PILOT: "Testpilot",
-    }
-    plan_descriptions = {
-        PLAN_FREE: "Du kan testa scanning och förhandsvisning.",
-        PLAN_TRIAL: "Du testar SkogsKvitto. Export och nedladdning kr?ver betalplan.",
-        PLAN_PREMIUM: "Export och nedladdning ?r aktiverat.",
-        PLAN_PILOT: "Testpilotl?ge ?r aktiverat f?r feedback och utveckling.",
-    }
-
-    full_name = user.get_full_name().strip()
-    export_enabled = bool(gates.get("can_excel_download", False))
+    billing_summary = get_user_billing_summary(user)
 
     return render(
         request,
-        "account/profile.html",
+        "accounts/profile.html",
         {
-            "user_plan": user_plan,
-            "plan_label": plan_labels.get(user_plan, "Gratis"),
-            "plan_description": plan_descriptions.get(
-                user_plan,
-                "Du kan testa scanning och förhandsvisning.",
-            ),
-            "full_name": full_name,
-            "receipt_count": receipt_count,
-            "free_receipt_limit": FREE_RECEIPT_LIMIT,
-            "export_enabled": export_enabled,
-            "is_testpilot": bool(gates.get("is_pilot", False)),
+            "billing_summary": billing_summary,
+            "full_name": user.get_full_name().strip(),
+            "email": user.email,
         },
     )
+
+
+@login_required
+@require_http_methods(["GET", "POST"])
+def delete_account(request: HttpRequest) -> HttpResponse:
+    """Self-service account deletion.
+
+    GET: render confirmation form.
+    POST: require user to retype their own email, then delete + logout.
+
+    Cascade deletes Receipts, ReceiptScanJobs and UserSubscription via the
+    FK definitions in each respective app. Stripe-side cancellation is NOT
+    performed here — see note at the end of the response.
+    """
+
+    if request.method == "POST":
+        confirm = request.POST.get("confirm_email", "").strip().lower()
+        if confirm != request.user.email.lower():
+            return render(
+                request,
+                "accounts/delete_confirm.html",
+                {"error": "E-postadressen matchade inte. Kontot raderades inte."},
+                status=400,
+            )
+
+        user = request.user
+        logout(request)
+        user.delete()
+        return redirect("home")
+
+    return render(request, "accounts/delete_confirm.html", {})

@@ -1,0 +1,99 @@
+{% extends "core/base.html" %}
+
+{% block title %}Cookies – SkogsKvitto{% endblock %}
+{% block meta_description %}Cookie-policy för SkogsKvitto — vilka cookies vi använder, varför, och hur länge de lagras.{% endblock %}
+
+{% block content %}
+<section class="legal-shell" aria-labelledby="cookies-title">
+  <header class="legal-hero">
+    <p class="eyebrow">Juridik</p>
+    <h1 id="cookies-title">Cookies</h1>
+    <p>
+      SkogsKvitto använder endast nödvändiga cookies. Inga analys-, spårnings- eller
+      marknadsföringscookies sätts av oss eller tredje part.
+    </p>
+  </header>
+
+  <div class="legal-layout">
+    <aside class="legal-aside" aria-label="Innehåll">
+      <p>På denna sida</p>
+      <nav>
+        <a href="#vad">Vad är cookies?</a>
+        <a href="#anvanda">Cookies vi använder</a>
+        <a href="#tredjepart">Tredjepartscookies</a>
+        <a href="#hantera">Hantera cookies</a>
+        <a href="#kontakt">Kontakt</a>
+      </nav>
+    </aside>
+
+    <div class="legal-content">
+      <article id="vad" class="legal-card">
+        <h2>Vad är cookies?</h2>
+        <p>
+          Cookies är små textfiler som lagras i din webbläsare. SkogsKvitto använder enbart
+          de tekniskt nödvändiga cookies som krävs för att tjänsten ska fungera — inga andra.
+        </p>
+      </article>
+
+      <article id="anvanda" class="legal-card">
+        <h2>Cookies vi använder</h2>
+        <p>Följande tre cookies används för grundläggande funktion:</p>
+
+        <div class="legal-table-wrap">
+          <table class="legal-table">
+            <thead>
+              <tr>
+                <th>Namn</th>
+                <th>Syfte</th>
+                <th>Livslängd</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td><code>sessionid</code></td>
+                <td>Håller dig inloggad mellan sidladdningar.</td>
+                <td>Sessionen (raderas vid utloggning)</td>
+              </tr>
+              <tr>
+                <td><code>csrftoken</code></td>
+                <td>Skyddar formulär mot CSRF-attacker.</td>
+                <td>1 år</td>
+              </tr>
+              <tr>
+                <td><code>cookie_consent</code></td>
+                <td>Sparar att du sett denna information (lokalt i webbläsaren).</td>
+                <td>Tills du rensar webbläsaren</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </article>
+
+      <article id="tredjepart" class="legal-card">
+        <h2>Tredjepartscookies</h2>
+        <p>
+          SkogsKvitto sätter inga tredjepartscookies på egen hand. Om du loggar in via Google
+          kan Google sätta egna cookies som styrs av Googles policy.
+        </p>
+      </article>
+
+      <article id="hantera" class="legal-card">
+        <h2>Hantera cookies</h2>
+        <p>
+          Du kan när som helst radera cookies via din webbläsares inställningar. Om du tar bort
+          <code>sessionid</code> loggas du ut. Om du tar bort <code>csrftoken</code> kan
+          formulär behöva laddas om innan de skickas.
+        </p>
+      </article>
+
+      <article id="kontakt" class="legal-card">
+        <h2>Kontakt</h2>
+        <p>
+          Frågor om cookies eller integritet besvaras på
+          <strong><a href="mailto:{{ privacy_contact }}" class="text-link">{{ privacy_contact }}</a></strong>.
+        </p>
+      </article>
+    </div>
+  </div>
+</section>
+{% endblock %}

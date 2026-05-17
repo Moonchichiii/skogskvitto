@@ -1,0 +1,32 @@
+{% if has_suggestion %}
+<div
+  x-data="{ visible: true }"
+  x-show="visible"
+  x-cloak
+  class="rounded-3xl border border-emerald-200 bg-emerald-50 p-4 text-sm text-emerald-950"
+>
+  <p class="font-black">AI-förslag</p>
+  <p class="mt-1">{{ message }}</p>
+
+  {% if suggestion.total_amount %}
+    <p class="mt-2">Belopp: <strong>{{ suggestion.total_amount }}</strong></p>
+  {% endif %}
+
+  {% if suggestion.category %}
+    <p class="mt-1">Kategori: <strong>{{ suggestion.category }}</strong></p>
+  {% endif %}
+
+  <div class="mt-4 flex flex-col gap-2 sm:flex-row">
+    <button
+      type="button"
+      class="btn-primary"
+      @click="window.applyCorrection({ totalAmount: '{{ suggestion.total_amount|default:'' }}', category: '{{ suggestion.category|default:'' }}' }); visible = false"
+    >
+      Använd förslag
+    </button>
+    <button type="button" class="btn-secondary" @click="visible = false">Ignorera</button>
+  </div>
+</div>
+{% else %}
+<div class="notice">Ingen tydlig korrigering hittades.</div>
+{% endif %}

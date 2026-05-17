@@ -1,23 +1,19 @@
+from __future__ import annotations
+
 from datetime import date
 from decimal import Decimal
 
+from django.contrib.auth.decorators import login_required
 from django.core.paginator import Paginator
 from django.db.models import Sum
 from django.http import HttpRequest, HttpResponse
 from django.shortcuts import render
 
 from apps.billing.services import get_feature_gates_sync
-from apps.core.decorators import login_required_view
 from apps.receipts.models import Receipt
 
 
-@login_required_view
-def scan(request: HttpRequest) -> HttpResponse:
-    gates = get_feature_gates_sync(request.user)
-    return render(request, "receipts/scan.html", {"gates": gates})
-
-
-@login_required_view
+@login_required
 def dashboard(request: HttpRequest) -> HttpResponse:
     user = request.user
     year = date.today().year

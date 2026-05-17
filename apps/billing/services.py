@@ -10,7 +10,8 @@ from django.contrib.auth.models import AbstractBaseUser, AnonymousUser
 from django.db.models import Q
 from django.utils import timezone
 
-from apps.receipts.models import Receipt, UserSubscription
+from apps.billing.models import UserSubscription
+from apps.receipts.models import Receipt
 
 logger = logging.getLogger(__name__)
 
@@ -26,6 +27,21 @@ PLAN_FREE = "free"
 PLAN_TRIAL = "trial"
 PLAN_PREMIUM = "premium"
 PLAN_PILOT = "pilot"
+
+# NEW — labels live where the business logic lives, not duplicated per consumer
+PLAN_LABELS: dict[str, str] = {
+    PLAN_FREE: "Gratis",
+    PLAN_TRIAL: "Trial",
+    PLAN_PREMIUM: "Premium",
+    PLAN_PILOT: "Särskild åtkomst",
+}
+
+PLAN_DESCRIPTIONS: dict[str, str] = {
+    PLAN_FREE: "Du kan testa scanning och förhandsvisning.",
+    PLAN_TRIAL: "Du testar SkogsKvitto. Export och nedladdning kräver betalplan.",
+    PLAN_PREMIUM: "Export och nedladdning är aktiverat.",
+    PLAN_PILOT: "Särskild åtkomst är aktiverad.",
+}
 
 FEATURE_RECEIPT_SCAN_PREVIEW = "receipt_scan_preview"
 FEATURE_RECEIPT_CONFIRM_SAVE = "receipt_confirm_save"
@@ -55,6 +71,21 @@ class AccessDecision:
     reason: str
     plan: str
     is_pilot_bypass: bool
+
+
+# NEW — public read-only DTO for cross-app consumers (e.g. accounts.profile view)
+@dataclass(frozen=True, slots=True)
+class UserBillingSummary:
+    plan: str
+    plan_label: str
+    plan_description: str
+    is_free: bool
+    is_trial: bool
+    is_premium: bool
+    is_pilot: bool
+    receipt_count: int
+    free_receipt_limit: int
+    export_enabled: bool
 
 
 def stripe_is_configured() -> bool:
@@ -132,7 +163,7 @@ def user_has_active_subscription_sync(user: AbstractBaseUser | AnonymousUser) ->
     return (
         UserSubscription.objects.filter(
             user_id=user.pk,
-            status=UserSubscription.STATUS_ACTIVE,
+            status=UserSubscription.Status.ACTIVE,
         )
         .filter(Q(current_period_end__isnull=True) | Q(current_period_end__gt=now))
         .exists()
@@ -203,7 +234,7 @@ def can_use_feature_sync(
     if not user.is_authenticated:
         return AccessDecision(
             allowed=False,
-            reason="Inloggning krävs f?r funktionen.",
+            reason="Inloggning krävs för funktionen.",
             plan=PLAN_FREE,
             is_pilot_bypass=False,
         )
@@ -213,7 +244,7 @@ def can_use_feature_sync(
     if feature in FREE_FEATURES:
         return AccessDecision(
             allowed=True,
-            reason="Funktionen ing?r i gratisnivån.",
+            reason="Funktionen ingår i gratisnivån.",
             plan=plan,
             is_pilot_bypass=False,
         )
@@ -231,21 +262,21 @@ def can_use_feature_sync(
         if plan == PLAN_PREMIUM:
             return AccessDecision(
                 allowed=True,
-                reason="Funktionen ing?r i betalplanen.",
+                reason="Funktionen ingår i betalplanen.",
                 plan=plan,
                 is_pilot_bypass=False,
             )
 
         return AccessDecision(
             allowed=False,
-            reason="Export och nedladdning ing?r i betalplanen.",
+            reason="Export och nedladdning ingår i betalplanen.",
             plan=plan,
             is_pilot_bypass=False,
         )
 
     return AccessDecision(
         allowed=False,
-        reason="Funktionen ?r inte tillgänglig.",
+        reason="Funktionen är inte tillgänglig.",
         plan=plan,
         is_pilot_bypass=False,
     )
@@ -277,6 +308,38 @@ def get_feature_gates_sync(user: AbstractBaseUser | AnonymousUser) -> dict[str, 
     }
 
 
+# NEW — single public function consumed by apps/accounts/views.py
+def get_user_billing_summary(user: AbstractBaseUser | AnonymousUser) -> UserBillingSummary:
+    """Return an immutable summary of the user's billing state.
+
+    This is the ONLY billing API that cross-app consumers (e.g. the profile
+    view in accounts) should use. It pre-computes all labels and flags so
+    callers never need to know about plan constants or feature names.
+    """
+
+    plan = get_user_plan_sync(user)
+
+    if user.is_authenticated and user.pk is not None:
+        receipt_count = Receipt.objects.filter(owner_id=user.pk).count()
+    else:
+        receipt_count = 0
+
+    export_decision = can_use_feature_sync(user, FEATURE_EXCEL_DOWNLOAD)
+
+    return UserBillingSummary(
+        plan=plan,
+        plan_label=PLAN_LABELS.get(plan, PLAN_LABELS[PLAN_FREE]),
+        plan_description=PLAN_DESCRIPTIONS.get(plan, PLAN_DESCRIPTIONS[PLAN_FREE]),
+        is_free=plan == PLAN_FREE,
+        is_trial=plan == PLAN_TRIAL,
+        is_premium=plan in {PLAN_PREMIUM, PLAN_PILOT},
+        is_pilot=plan == PLAN_PILOT,
+        receipt_count=receipt_count,
+        free_receipt_limit=FREE_RECEIPT_LIMIT,
+        export_enabled=export_decision.allowed,
+    )
+
+
 async def is_pilot_user(user: AbstractBaseUser | AnonymousUser) -> bool:
     return await sync_to_async(is_pilot_user_sync, thread_sensitive=True)(user)
 
@@ -306,26 +369,6 @@ async def can_use_feature(
     feature: str,
 ) -> AccessDecision:
     return await sync_to_async(can_use_feature_sync, thread_sensitive=True)(user, feature)
-
-
-async def can_use_ai_scan(user: AbstractBaseUser | AnonymousUser) -> bool:
-    return (await can_use_feature(user, FEATURE_RECEIPT_SCAN_PREVIEW)).allowed
-
-
-async def can_export_excel(user: AbstractBaseUser | AnonymousUser) -> bool:
-    return (await can_use_feature(user, FEATURE_EXCEL_DOWNLOAD)).allowed
-
-
-async def can_use_korjournal(user: AbstractBaseUser | AnonymousUser) -> bool:
-    return (await can_use_feature(user, FEATURE_DRIVING_LOG_EXPORT)).allowed
-
-
-async def can_use_skogsinkomster(user: AbstractBaseUser | AnonymousUser) -> bool:
-    return (await can_use_feature(user, FEATURE_YEARLY_REPORT_DOWNLOAD)).allowed
-
-
-async def can_use_arsrapport(user: AbstractBaseUser | AnonymousUser) -> bool:
-    return (await can_use_feature(user, FEATURE_YEARLY_REPORT_DOWNLOAD)).allowed
 
 
 async def get_feature_gates(user: AbstractBaseUser | AnonymousUser) -> dict[str, bool | str]:

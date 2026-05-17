@@ -1,0 +1,10 @@
+<div class="premium-box">
+  <p class="font-black text-emerald-950">Aktivera Premium</p>
+  <p class="mt-1 text-sm text-stone-700">
+    Lås upp allt: sparade kvitton, export, körjournal och årsunderlag.
+  </p>
+  <div class="mt-4 grid gap-2 sm:grid-cols-2">
+    <a href="{% url 'start_checkout' %}?plan=yearly" class="btn-primary">599 kr/år</a>
+    <a href="{% url 'start_checkout' %}?plan=monthly" class="btn-secondary">49 kr/mån</a>
+  </div>
+</div>
