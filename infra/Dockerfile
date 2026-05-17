@@ -11,7 +11,7 @@ COPY templates ./templates
 COPY apps ./apps
 COPY config ./config
 
-RUN bun run css:build
+RUN bun run vendor:build && bun run css:build
 
 
 FROM python:3.13-slim AS builder
@@ -45,6 +45,7 @@ RUN apt-get update \
 COPY --from=builder --chown=1000:1000 /app/.venv /app/.venv
 COPY --chown=1000:1000 . /app
 COPY --from=assets --chown=1000:1000 /app/static/css/app.css /app/static/css/app.css
+COPY --from=assets --chown=1000:1000 /app/static/vendor /app/static/vendor
 
 RUN DJANGO_SETTINGS_MODULE=config.settings.production \
     DJANGO_SECRET_KEY=build-only-secret \

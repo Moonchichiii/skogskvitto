@@ -8,7 +8,7 @@
 
   <header class="profile-hero">
     <div class="profile-hero-content">
-      <p class="eyebrow text-emerald-100">Konto</p>
+      <p class="eyebrow">Konto</p>
       <h1 id="profile-title">Min profil</h1>
       <p>Hantera ditt konto, din plan och åtkomst till exportfunktionerna.</p>
     </div>
@@ -76,10 +76,10 @@
       <p>{{ billing_summary.plan_description }}</p>
 
       {% if not billing_summary.is_premium and not billing_summary.is_pilot %}
-        <a href="{% url 'start_checkout' %}?plan=yearly" class="btn-primary">Uppgradera till Premium</a>
-      {% else %}
-        <a href="{% url 'dashboard' %}?nav=export#dashboard-export" class="btn-primary">Gå till export</a>
-      {% endif %}
+  <a href="{% url 'start_checkout' %}?plan=yearly" class="btn-primary">Uppgradera till Premium</a>
+{% else %}
+  <a href="{% url 'tax_year_list' %}" class="btn-primary">Mina inkomstår</a>
+{% endif %}
     </article>
   </div>
 

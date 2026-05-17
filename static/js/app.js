@@ -45,28 +45,138 @@
     }));
 
     /**
-     * receiptUpload — handles file selection in the scan upload form.
-     * Reveals an image preview and the captured file name.
+     * receiptUpload — direct-to-Cloudinary upload flow.
+     *
+     * 1. User selects file → preview shown
+     * 2. User clicks "Starta skanning" → upload() runs:
+     *    a. POST to /scanning/sign/ → returns Cloudinary signature
+     *    b. POST file to api.cloudinary.com directly with signature
+     *    c. POST result back to /scanning/job/<id>/intake/
+     *    d. Receive pending HTML → inject into #scan-result → HTMX takes over polling
      */
     Alpine.data("receiptUpload", () => ({
       previewUrl: "",
       fileName: "",
+      file: null,
+      uploading: false,
+      uploadStatusText: "",
+      error: "",
       _objectUrl: null,
 
       onFileChange(event) {
+        this.error = "";
         const target = event.target;
-        if (!(target instanceof HTMLInputElement)) {
-          return;
-        }
+        if (!(target instanceof HTMLInputElement)) return;
         const file = target.files && target.files[0];
-        if (!file) {
+        if (!file) return;
+
+        if (!file.type.startsWith("image/")) {
+          this.error = "Endast bildfiler stöds.";
           return;
         }
+        if (file.size > 10 * 1024 * 1024) {
+          this.error = "Bilden är för stor (max 10 MB).";
+          return;
+        }
+
         this._revokeObjectUrl();
         const url = URL.createObjectURL(file);
         this._objectUrl = url;
         this.previewUrl = url;
         this.fileName = file.name;
+        this.file = file;
+      },
+
+      async upload() {
+        if (!this.file || this.uploading) return;
+        this.uploading = true;
+        this.error = "";
+
+        const csrfToken = this._csrfToken();
+        if (!csrfToken) {
+          this.error = "CSRF-token saknas. Ladda om sidan.";
+          this.uploading = false;
+          return;
+        }
+
+        try {
+          // 1. Get signature
+          this.uploadStatusText = "Förbereder uppladdning...";
+          const signResponse = await fetch("/scanning/sign/", {
+            method: "POST",
+            headers: {
+              "X-CSRFToken": csrfToken,
+              Accept: "application/json",
+            },
+          });
+          if (!signResponse.ok) {
+            const err = await signResponse.json().catch(() => ({}));
+            throw new Error(
+              err.error || "Kunde inte skapa upload-signatur.",
+            );
+          }
+          const sig = await signResponse.json();
+
+          // 2. Direct upload to Cloudinary
+          this.uploadStatusText = "Laddar upp bilden...";
+          const cloudFormData = new FormData();
+          cloudFormData.append("file", this.file);
+          cloudFormData.append("api_key", sig.api_key);
+          cloudFormData.append("timestamp", String(sig.timestamp));
+          cloudFormData.append("signature", sig.signature);
+          cloudFormData.append("folder", sig.folder);
+          cloudFormData.append("public_id", sig.public_id);
+
+          const cloudResponse = await fetch(
+            `https://api.cloudinary.com/v1_1/${sig.cloud_name}/image/upload`,
+            { method: "POST", body: cloudFormData },
+          );
+          if (!cloudResponse.ok) {
+            throw new Error("Cloudinary avvisade uppladdningen.");
+          }
+          const cloudResult = await cloudResponse.json();
+
+          // 3. Notify backend
+          this.uploadStatusText = "Startar analys...";
+          const intakeBody = new FormData();
+          intakeBody.append("public_id", cloudResult.public_id);
+          intakeBody.append("secure_url", cloudResult.secure_url);
+          const intakeResponse = await fetch(
+            `/scanning/job/${sig.job_id}/intake/`,
+            {
+              method: "POST",
+              headers: { "X-CSRFToken": csrfToken },
+              body: intakeBody,
+            },
+          );
+          if (!intakeResponse.ok) {
+            throw new Error("Kunde inte starta analys.");
+          }
+          const html = await intakeResponse.text();
+
+          // 4. Hand off to HTMX (polling embedded in the returned HTML)
+          const resultSlot = document.getElementById("scan-result");
+          if (resultSlot) {
+            resultSlot.innerHTML = html;
+            if (typeof window.htmx !== "undefined") {
+              window.htmx.process(resultSlot);
+            }
+          }
+
+          // Reset upload UI — the HTMX-driven pending fragment owns the view from here
+          this.uploading = false;
+          this.uploadStatusText = "";
+        } catch (err) {
+          this.error =
+            err && err.message ? err.message : "Ett okänt fel inträffade.";
+          this.uploading = false;
+          this.uploadStatusText = "";
+        }
+      },
+
+      _csrfToken() {
+        const input = this.$el.querySelector("[name=csrfmiddlewaretoken]");
+        return input instanceof HTMLInputElement ? input.value : "";
       },
 
       _revokeObjectUrl() {
@@ -78,6 +188,46 @@
 
       destroy() {
         this._revokeObjectUrl();
+      },
+    }));
+
+    /**
+     * thumbnailPreload — primes the browser cache with kassabok thumbnails
+     * when the user hovers/focuses the Kassabok tile on the overview.
+     *
+     * Reads URLs from <span data-url="…"> children inside x-ref="preloadData"
+     * and injects <link rel="preload" as="image"> into the document head.
+     *
+     * Runs at most once per page (the .once modifier on @mouseenter / @focus
+     * is belt-and-suspenders to the internal `done` flag).
+     */
+    Alpine.data("thumbnailPreload", () => ({
+      done: false,
+
+      preload() {
+        if (this.done) return;
+        this.done = true;
+
+        const root = this.$refs.preloadData;
+        if (!(root instanceof HTMLElement)) return;
+
+        const urls = Array.from(root.querySelectorAll("[data-url]"))
+          .map((el) => el.getAttribute("data-url"))
+          .filter((url) => typeof url === "string" && url.length > 0);
+
+        if (urls.length === 0) return;
+
+        const frag = document.createDocumentFragment();
+        for (const url of urls) {
+          const link = document.createElement("link");
+          link.rel = "preload";
+          link.as = "image";
+          link.href = url;
+          // Hint to the browser: don't compete with critical resources
+          link.setAttribute("fetchpriority", "low");
+          frag.appendChild(link);
+        }
+        document.head.appendChild(frag);
       },
     }));
   });

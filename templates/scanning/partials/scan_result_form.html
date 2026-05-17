@@ -1,24 +1,48 @@
 <section class="scan-result-card" aria-labelledby="scan-result-title">
   <header class="scan-result-header">
     <div>
-      <p class="eyebrow">Steg 2</p>
+      <p class="eyebrow">Steg 3</p>
       <h2 id="scan-result-title" class="section-title">Granska kvittot</h2>
       <p class="section-text">
         Kontrollera uppgifterna innan du sparar. AI-tolkningen är bara ett stöd.
       </p>
     </div>
-    <span class="scan-status-pill">Redo att granskas</span>
+    {% if failed %}
+      <span class="scan-status-pill" style="background:#fef2f2;color:#991b1b;border-color:#fecaca;">
+        Manuell ifyllning
+      </span>
+    {% else %}
+      <span class="scan-status-pill">Redo att granskas</span>
+    {% endif %}
   </header>
 
+  {% if failed and error_message %}
+    <div class="scan-alert scan-alert-error mt-4" role="alert">
+      <div class="scan-alert-icon" aria-hidden="true">!</div>
+      <div>
+        <p class="scan-alert-title">AI-tolkningen misslyckades</p>
+        <p class="scan-alert-text">{{ error_message }} Fyll i uppgifterna manuellt nedan.</p>
+      </div>
+    </div>
+  {% endif %}
+
+  {% if errors.__all__ %}
+    <div class="scan-alert scan-alert-error mt-4" role="alert">
+      <div class="scan-alert-icon" aria-hidden="true">!</div>
+      <div>
+        <p class="scan-alert-title">Fel vid sparning</p>
+        <p class="scan-alert-text">{{ errors.__all__ }}</p>
+      </div>
+    </div>
+  {% endif %}
+
   <form
-    hx-post="/scanning/confirm/"
-    hx-target="this"
-    hx-swap="outerHTML"
+    hx-post="{% url 'scanning_confirm' job_id=job.pk %}"
+    hx-target="#scan-result"
+    hx-swap="innerHTML"
     class="scan-review-form"
   >
     {% csrf_token %}
-    <input type="hidden" name="scan_job_id" value="{{ scan_job_id }}">
-    <input type="hidden" name="signature" value="{{ signature }}">
 
     <label class="form-label" for="vendor">
       Leverantör
@@ -26,7 +50,7 @@
         id="vendor"
         name="vendor"
         type="text"
-        value="{{ preview.vendor }}"
+        value="{{ preview.vendor|default:'' }}"
         class="form-input"
         autocomplete="organization"
       >
@@ -34,29 +58,36 @@
 
     <div class="grid gap-4 sm:grid-cols-2">
       <label class="form-label" for="total_amount">
-        Belopp
+        Belopp (kr)
         <input
           id="total_amount"
           name="total_amount"
           type="text"
           inputmode="decimal"
-          value="{{ preview.total_amount }}"
+          value="{{ preview.total_amount|default:'' }}"
           class="form-input"
           placeholder="Exempel: 1249.00"
+          required
         >
+        {% if errors.total_amount %}
+          <span class="text-sm font-semibold text-red-700">{{ errors.total_amount }}</span>
+        {% endif %}
       </label>
 
       <label class="form-label" for="vat_amount">
-        Moms
+        Moms (kr)
         <input
           id="vat_amount"
           name="vat_amount"
           type="text"
           inputmode="decimal"
-          value="{{ preview.vat_amount }}"
+          value="{{ preview.vat_amount|default:'' }}"
           class="form-input"
           placeholder="Exempel: 249.80"
         >
+        {% if errors.vat_amount %}
+          <span class="text-sm font-semibold text-red-700">{{ errors.vat_amount }}</span>
+        {% endif %}
       </label>
     </div>
 
@@ -67,9 +98,13 @@
           id="date"
           name="date"
           type="date"
-          value="{{ preview.date }}"
+          value="{{ preview.date|default:'' }}"
           class="form-input"
+          required
         >
+        {% if errors.date %}
+          <span class="text-sm font-semibold text-red-700">{{ errors.date }}</span>
+        {% endif %}
       </label>
 
       <label class="form-label" for="category">
@@ -78,7 +113,7 @@
           id="category"
           name="category"
           type="text"
-          value="{{ preview.category }}"
+          value="{{ preview.category|default:'' }}"
           class="form-input"
           placeholder="Exempel: Drivmedel"
         >
@@ -93,41 +128,9 @@
         rows="4"
         class="form-input resize-y"
         placeholder="Valfri anteckning till kvittot"
-      >{{ preview.note }}</textarea>
+      >{{ preview.note|default:'' }}</textarea>
     </label>
 
     <button type="submit" class="btn-primary w-full">Spara kvitto</button>
   </form>
-
-  <aside class="correction-panel" aria-labelledby="correction-title">
-    <div>
-      <p class="eyebrow">Behöver något rättas?</p>
-      <h3 id="correction-title">Beskriv vad som inte stämmer.</h3>
-      <p>Skriv en kort korrigering, till exempel att beloppet eller kategorin är fel.</p>
-    </div>
-
-    <form
-      hx-post="/scanning/correction/"
-      hx-target="#correction-result"
-      hx-swap="innerHTML"
-      class="correction-form"
-    >
-      {% csrf_token %}
-      <input type="hidden" name="scan_job_id" value="{{ scan_job_id }}">
-      <input type="hidden" name="signature" value="{{ signature }}">
-
-      <label class="sr-only" for="correction_text">Beskriv korrigering</label>
-      <textarea
-        id="correction_text"
-        name="correction_text"
-        rows="3"
-        class="form-input bg-white"
-        placeholder="Exempel: Beloppet ska vara 1 249 kr och kategorin är material."
-      ></textarea>
-
-      <button type="submit" class="btn-secondary w-full">Föreslå korrigering</button>
-    </form>
-
-    <div id="correction-result" class="mt-4"></div>
-  </aside>
 </section>

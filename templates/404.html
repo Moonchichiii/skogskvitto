@@ -1,0 +1,36 @@
+{% extends "core/base.html" %}
+
+{% block title %}Sidan kunde inte hittas – SkogsKvitto{% endblock %}
+{% block robots %}noindex, nofollow{% endblock %}
+
+{% block content %}
+<section class="auth-shell" aria-labelledby="404-title">
+  <aside class="auth-visual" aria-label="SkogsKvitto">
+    <img src="https://res.cloudinary.com/dakjlrean/image/upload/f_auto,q_auto:eco,c_fill,w_1200,h_1400,g_auto/webp/skogskvitto/js7drdp51fxqslknqtif.webp" alt="" class="auth-visual-image" width="1200" height="1400" loading="lazy" decoding="async">
+    <div class="auth-visual-overlay">
+      <p class="auth-visual-kicker">404</p>
+      <h2>Sidan finns inte.</h2>
+      <p>Länken kanske är trasig eller så har sidan flyttats.</p>
+    </div>
+  </aside>
+
+  <div class="auth-panel">
+    <div class="auth-form-card">
+      <div class="auth-heading">
+        <p class="eyebrow">404</p>
+        <h1 id="404-title">Sidan kunde inte hittas</h1>
+        <p>Den sida du försökte nå finns inte längre eller har aldrig funnits.</p>
+        <div class="mt-6 grid gap-3 sm:grid-cols-2">
+          {% if user.is_authenticated %}
+            <a href="{% url 'dashboard' %}" class="btn-primary">Till översikten</a>
+            <a href="{% url 'receipts_list' %}" class="btn-secondary">Visa kvitton</a>
+          {% else %}
+            <a href="{% url 'home' %}" class="btn-primary">Till startsidan</a>
+            <a href="{% url 'account_login' %}" class="btn-secondary">Logga in</a>
+          {% endif %}
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+{% endblock %}

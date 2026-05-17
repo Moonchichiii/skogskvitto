@@ -1,0 +1,176 @@
+{% extends "core/base.html" %}
+
+{% block title %}Inkomstår {{ tax_year.year }} – SkogsKvitto{% endblock %}
+{% block robots %}noindex, nofollow{% endblock %}
+
+{% block content %}
+<section class="dashboard-shell" aria-labelledby="tax-year-title">
+
+  <header class="dashboard-hero">
+    <div>
+      <p class="eyebrow">Inkomstår</p>
+      <h1 id="tax-year-title">{{ tax_year.year }}</h1>
+      <p>
+        Alla kvitton som hör till inkomstår {{ tax_year.year }}. Härifrån exporterar du
+        underlag till bokföring och låser året när du är klar.
+      </p>
+    </div>
+
+    <div class="dashboard-hero-panel" aria-label="Status">
+      {% if tax_year.is_locked %}
+        <span>Status</span>
+        <strong>Låst</strong>
+      {% else %}
+        <span>Status</span>
+        <strong>Öppen</strong>
+      {% endif %}
+    </div>
+  </header>
+
+  {# ---------- Year summary ---------- #}
+  <section class="dashboard-metrics" aria-label="Årssammanfattning">
+    <article class="dashboard-metric-card">
+      <p>Kvitton</p>
+      <strong>{{ receipt_count }}</strong>
+      <span>Totalt antal i året.</span>
+    </article>
+    <article class="dashboard-metric-card">
+      <p>Total</p>
+      <strong>{{ total_year|floatformat:2 }} kr</strong>
+      <span>Summa utlägg.</span>
+    </article>
+    <article class="dashboard-metric-card">
+      <p>Moms</p>
+      <strong>{{ vat_year|floatformat:2 }} kr</strong>
+      <span>Beräknad ingående moms.</span>
+    </article>
+  </section>
+
+  {# ---------- Lock / unlock + Export ---------- #}
+  <section class="tax-year-actions" aria-labelledby="tax-year-actions-title">
+    <div class="tax-year-actions-text">
+      <p class="eyebrow">Åtgärder</p>
+      <h2 id="tax-year-actions-title">
+        {% if tax_year.is_locked %}
+          Året är låst
+        {% else %}
+          Året är öppet
+        {% endif %}
+      </h2>
+      <p>
+        {% if tax_year.is_locked %}
+          Befintliga kvitton kan inte redigeras eller raderas medan året är låst.
+          Nya kvitton kan fortfarande läggas till — sena papperskvitton stoppas inte.
+          Låst {{ tax_year.locked_at|date:"Y-m-d H:i" }}.
+        {% else %}
+          Kvitton kan redigeras och raderas. Lås året när du är klar med din deklaration
+          för att skydda underlaget mot oavsiktliga ändringar.
+        {% endif %}
+      </p>
+    </div>
+
+    <div class="tax-year-actions-buttons">
+      {% if gates.can_excel_download %}
+        <a href="{% url 'export_excel' %}?year={{ tax_year.year }}" class="btn-primary">
+          Exportera till Excel
+        </a>
+      {% else %}
+        <a href="{% url 'start_checkout' %}?plan=yearly" class="btn-primary">
+          Lås upp export (Premium)
+        </a>
+      {% endif %}
+
+      {% if tax_year.is_locked %}
+        <form
+          method="post"
+          action="{% url 'tax_year_unlock' year=tax_year.year %}"
+          x-data="{ confirming: false }"
+          @submit="if (!confirming) { $event.preventDefault(); confirming = true; }"
+        >
+          {% csrf_token %}
+          <button
+            type="submit"
+            class="btn-secondary"
+            x-text="confirming ? 'Klicka igen för att bekräfta' : 'Lås upp året'"
+          >Lås upp året</button>
+        </form>
+      {% else %}
+        <form
+          method="post"
+          action="{% url 'tax_year_lock' year=tax_year.year %}"
+          x-data="{ confirming: false }"
+          @submit="if (!confirming) { $event.preventDefault(); confirming = true; }"
+        >
+          {% csrf_token %}
+          <button
+            type="submit"
+            class="btn-secondary"
+            x-text="confirming ? 'Klicka igen för att bekräfta' : 'Lås året'"
+          >Lås året</button>
+        </form>
+      {% endif %}
+    </div>
+  </section>
+
+  {# ---------- Receipts grid ---------- #}
+  <section class="dashboard-receipts-card" aria-labelledby="receipts-grid-title">
+    <div class="dashboard-section-header">
+      <div>
+        <p class="eyebrow">Kvitton</p>
+        <h2 id="receipts-grid-title">Kvitton i {{ tax_year.year }}</h2>
+      </div>
+      <a href="{% url 'scan' %}" class="btn-secondary dashboard-small-action">Scanna nytt kvitto</a>
+    </div>
+
+    {% if receipts_with_thumbs %}
+      <div class="receipt-grid">
+        {% for receipt, thumb_url in receipts_with_thumbs %}
+          <article class="receipt-card">
+            <div class="receipt-thumb-wrap">
+              {% if thumb_url %}
+                <img
+                  src="{{ thumb_url }}"
+                  alt="Kvitto från {{ receipt.vendor|default:'okänd leverantör' }}"
+                  loading="lazy"
+                  decoding="async"
+                  class="receipt-thumb"
+                  width="240"
+                  height="240"
+                >
+              {% else %}
+                <div class="receipt-thumb-placeholder" aria-hidden="true">
+                  <svg viewBox="0 0 24 24" fill="none" class="h-8 w-8">
+                    <path d="M5 6h14v14H5z" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/>
+                    <path d="M9 10h6M9 14h4" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+                  </svg>
+                </div>
+              {% endif %}
+            </div>
+            <div class="receipt-card-body">
+              <p class="receipt-date">{{ receipt.date|date:"Y-m-d"|default:"Datum saknas" }}</p>
+              <h3 class="receipt-vendor">{{ receipt.vendor|default:"Okänd leverantör" }}</h3>
+              <dl class="receipt-amounts">
+                <div>
+                  <dt>Total</dt>
+                  <dd>{{ receipt.total_amount|floatformat:2 }} kr</dd>
+                </div>
+                <div>
+                  <dt>Moms</dt>
+                  <dd>{{ receipt.vat_amount|floatformat:2 }} kr</dd>
+                </div>
+              </dl>
+            </div>
+          </article>
+        {% endfor %}
+      </div>
+    {% else %}
+      <div class="dashboard-empty-state">
+        <h3>Inga kvitton i {{ tax_year.year }} ännu.</h3>
+        <p>Scanna ditt första kvitto för det här året.</p>
+        <a href="{% url 'scan' %}" class="btn-primary">Scanna kvitto</a>
+      </div>
+    {% endif %}
+  </section>
+
+</section>
+{% endblock %}

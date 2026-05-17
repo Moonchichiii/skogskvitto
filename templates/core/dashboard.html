@@ -1,0 +1,125 @@
+{% extends "core/base.html" %}
+
+{% block title %}Översikt – SkogsKvitto{% endblock %}
+{% block robots %}noindex, nofollow{% endblock %}
+
+{% block content %}
+<section class="overview-shell" aria-labelledby="overview-title">
+
+  <header class="overview-hero">
+    <p class="eyebrow text-emerald-100">
+      {% if first_name %}Hej {{ first_name }}{% else %}Hej{% endif %}
+    </p>
+    <h1 id="overview-title">Översikt</h1>
+    <p>Din dagliga utgångspunkt. Scanna, granska eller exportera underlag.</p>
+  </header>
+
+  <div class="overview-grid">
+
+    <a href="{% url 'scan' %}" class="overview-tile overview-tile-action">
+      <div class="overview-tile-icon" aria-hidden="true">
+        <svg viewBox="0 0 24 24" fill="none" class="h-8 w-8">
+          <path d="M7 4h10l2 3v13H5V7l2-3Z" stroke="currentColor" stroke-width="2.4" stroke-linejoin="round"/>
+          <path d="M9 9h6M9 13h6M9 17h4" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"/>
+        </svg>
+      </div>
+      <div class="overview-tile-body">
+        <h2>Scanna kvitto</h2>
+        <p>Ta en bild och låt SkogsKvitto extrahera leverantör, belopp och moms.</p>
+      </div>
+      <div class="overview-tile-cta">Starta scanning →</div>
+    </a>
+
+    <a
+      href="{% url 'receipts_list' %}"
+      class="overview-tile overview-tile-receipts"
+      x-data="thumbnailPreload"
+      @mouseenter.once="preload()"
+      @focus.once="preload()"
+    >
+      <div class="overview-tile-body">
+        <p class="overview-tile-kicker">Kvittosamling</p>
+        <h2>
+          {{ receipt_count }}
+          <span class="overview-tile-unit">{% if receipt_count == 1 %}kvitto{% else %}kvitton{% endif %}</span>
+        </h2>
+        <p>Bläddra alla scannade kvitton, filtrera per inkomstår.</p>
+      </div>
+
+      {% if recent_thumbs %}
+        <div class="overview-thumb-row" aria-hidden="true">
+          {% for thumb in recent_thumbs %}
+            <img
+              src="{{ thumb }}"
+              alt=""
+              loading="lazy"
+              decoding="async"
+              class="overview-thumb"
+              width="56"
+              height="56"
+            >
+          {% endfor %}
+          {% if remaining > 0 %}
+            <span class="overview-thumb-more">+{{ remaining }}</span>
+          {% endif %}
+        </div>
+      {% else %}
+        <p class="overview-thumb-empty">Inga kvitton ännu — börja med att scanna ditt första.</p>
+      {% endif %}
+
+      <div class="overview-tile-cta">Öppna kvittosamlingen →</div>
+
+      <div x-ref="preloadData" class="hidden" aria-hidden="true">
+        {% for url in preload_thumbs %}
+          <span data-url="{{ url }}"></span>
+        {% endfor %}
+      </div>
+    </a>
+
+    <a href="{% url 'tax_year_list' %}" class="overview-tile">
+      <div class="overview-tile-icon" aria-hidden="true">
+        <svg viewBox="0 0 24 24" fill="none" class="h-8 w-8">
+          <rect x="4" y="5" width="16" height="15" rx="2" stroke="currentColor" stroke-width="2.4"/>
+          <path d="M4 10h16" stroke="currentColor" stroke-width="2.4"/>
+          <path d="M9 3v4M15 3v4" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"/>
+        </svg>
+      </div>
+      <div class="overview-tile-body">
+        <h2>Inkomstår</h2>
+        <p>
+          {% if tax_year_count %}
+            {{ tax_year_count }} {{ tax_year_count|pluralize:"år,år" }} med kvitton.
+          {% else %}
+            Skapas automatiskt när du sparar ditt första kvitto.
+          {% endif %}
+        </p>
+      </div>
+      <div class="overview-tile-cta">Visa inkomstår →</div>
+    </a>
+
+  </div>
+
+  <section class="overview-summary" aria-labelledby="overview-summary-title">
+    <header class="overview-summary-header">
+      <p class="eyebrow">År {{ year }} hittills</p>
+      <h2 id="overview-summary-title">Sammanfattning</h2>
+    </header>
+
+    <div class="overview-summary-grid">
+      <article class="overview-summary-card">
+        <p>Totala utlägg</p>
+        <strong>{{ total_year|floatformat:2 }} kr</strong>
+      </article>
+      <article class="overview-summary-card">
+        <p>Moms</p>
+        <strong>{{ vat_year|floatformat:2 }} kr</strong>
+      </article>
+      <article class="overview-summary-card">
+        <p>Kvitton {{ year }}</p>
+        <strong>{{ receipt_count_year }}</strong>
+      </article>
+    </div>
+  </section>
+
+</section>
+{% endblock %}

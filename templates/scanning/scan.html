@@ -8,14 +8,14 @@
   <header class="scan-hero" aria-labelledby="scan-title">
     <div class="scan-hero-copy">
       <p class="eyebrow">SkogsKvitto</p>
-      <h1 id="scan-title" class="hero-title">Scanna, granska och exportera skogskvitton.</h1>
+      <h1 id="scan-title" class="hero-title">Scanna, granska och spara kvitton.</h1>
       <p class="hero-text">
-        Ta en bild på kvittot, kontrollera tolkningen och bygg ett tydligt underlag
-        för bokföring, deklaration och revisor.
+        Ta en bild på kvittot, kontrollera tolkningen och bygg ditt underlag
+        inkomstår för inkomstår.
       </p>
       <div class="scan-hero-actions">
         <a href="#scan-upload" class="btn-primary">Scanna kvitto</a>
-        <a href="{% url 'dashboard' %}" class="btn-secondary">Visa underlag</a>
+        <a href="{% url 'receipts_list' %}" class="btn-secondary">Visa kvitton</a>
       </div>
     </div>
 
@@ -33,7 +33,7 @@
         <div class="scan-flow-line" aria-hidden="true"></div>
         <div class="scan-flow-step">
           <span aria-hidden="true">3</span>
-          <p>Exportera underlag</p>
+          <p>Spara till inkomstår</p>
         </div>
       </div>
 

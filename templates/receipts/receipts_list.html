@@ -1,0 +1,114 @@
+{% extends "core/base.html" %}
+
+{% block title %}Kvitton – SkogsKvitto{% endblock %}
+{% block robots %}noindex, nofollow{% endblock %}
+
+{% block content %}
+<section class="dashboard-shell" aria-labelledby="receipts-title">
+  <header class="dashboard-hero">
+    <div>
+      <p class="eyebrow">Underlag</p>
+      <h1 id="receipts-title">Mina kvitton</h1>
+      <p>Alla scannade kvitton, senaste först. Filtrera per inkomstår eller bläddra fritt.</p>
+    </div>
+
+    <div class="dashboard-hero-panel" aria-label="Antal träffar">
+      <span>{% if selected_year %}{{ selected_year }}{% else %}Alla år{% endif %}</span>
+      <strong>{{ page_obj.paginator.count }}</strong>
+    </div>
+  </header>
+
+  {% if available_years %}
+    <nav class="year-filter" aria-label="Filtrera per år">
+      <a href="{% url 'receipts_list' %}" class="year-chip {% if not selected_year %}year-chip-active{% endif %}" {% if not selected_year %}aria-current="true"{% endif %}>Alla</a>
+      {% for y in available_years %}
+        <a href="?year={{ y }}" class="year-chip {% if selected_year == y %}year-chip-active{% endif %}" {% if selected_year == y %}aria-current="true"{% endif %}>{{ y }}</a>
+      {% endfor %}
+    </nav>
+  {% endif %}
+
+  <section class="dashboard-receipts-card" aria-labelledby="receipts-grid-title">
+    <div class="dashboard-section-header">
+      <div>
+        <p class="eyebrow">Kvitton</p>
+        <h2 id="receipts-grid-title">Sparade kvitton</h2>
+      </div>
+      <a href="{% url 'scan' %}" class="btn-secondary dashboard-small-action">Scanna nytt kvitto</a>
+    </div>
+
+    {% if receipts_with_thumbs %}
+      <div class="receipt-grid">
+        {% for receipt, thumb_url in receipts_with_thumbs %}
+          <article class="receipt-card">
+            <div class="receipt-thumb-wrap">
+              {% if thumb_url %}
+                <img
+                  src="{{ thumb_url }}"
+                  alt="Kvitto från {{ receipt.vendor|default:'okänd leverantör' }}"
+                  loading="lazy"
+                  decoding="async"
+                  class="receipt-thumb"
+                  width="240"
+                  height="240"
+                >
+              {% else %}
+                <div class="receipt-thumb-placeholder" aria-hidden="true">
+                  <svg viewBox="0 0 24 24" fill="none" class="h-8 w-8">
+                    <path d="M5 6h14v14H5z" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/>
+                    <path d="M9 10h6M9 14h4" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+                  </svg>
+                </div>
+              {% endif %}
+            </div>
+            <div class="receipt-card-body">
+              <p class="receipt-date">{{ receipt.date|date:"Y-m-d"|default:"Datum saknas" }}</p>
+              <h3 class="receipt-vendor">{{ receipt.vendor|default:"Okänd leverantör" }}</h3>
+              <dl class="receipt-amounts">
+                <div>
+                  <dt>Total</dt>
+                  <dd>{{ receipt.total_amount|floatformat:2 }} kr</dd>
+                </div>
+                <div>
+                  <dt>Moms</dt>
+                  <dd>{{ receipt.vat_amount|floatformat:2 }} kr</dd>
+                </div>
+              </dl>
+            </div>
+          </article>
+        {% endfor %}
+      </div>
+    {% else %}
+      <div class="dashboard-empty-state">
+        <h3>Inga kvitton hittades.</h3>
+        <p>
+          {% if selected_year %}
+            Det finns inga sparade kvitton för {{ selected_year }} ännu.
+          {% else %}
+            Börja med att scanna ditt första kvitto.
+          {% endif %}
+        </p>
+        <a href="{% url 'scan' %}" class="btn-primary">Scanna kvitto</a>
+      </div>
+    {% endif %}
+  </section>
+
+  {% if page_obj.has_other_pages %}
+    <nav class="dashboard-pagination" aria-label="Sidnavigering">
+      {% if page_obj.has_previous %}
+        <a href="?{% if selected_year %}year={{ selected_year }}&{% endif %}page={{ page_obj.previous_page_number }}" class="btn-secondary">Föregående</a>
+      {% else %}
+        <span class="dashboard-pagination-disabled">Föregående</span>
+      {% endif %}
+
+      <span class="dashboard-page-count">Sida {{ page_obj.number }} av {{ page_obj.paginator.num_pages }}</span>
+
+      {% if page_obj.has_next %}
+        <a href="?{% if selected_year %}year={{ selected_year }}&{% endif %}page={{ page_obj.next_page_number }}" class="btn-secondary">Nästa</a>
+      {% else %}
+        <span class="dashboard-pagination-disabled">Nästa</span>
+      {% endif %}
+    </nav>
+  {% endif %}
+
+</section>
+{% endblock %}

@@ -80,6 +80,7 @@ THIRD_PARTY_APPS = [
     "csp",
     "cloudinary",
     "cloudinary_storage",
+    "django_rq",
 ]
 
 LOCAL_APPS = [
@@ -147,8 +148,8 @@ TEMPLATES = [
                 "apps.core.context_processors.legal_contact",
                 "apps.core.context_processors.public_assets",
                 "apps.core.context_processors.site_meta",
-                ],
-            },
+            ],
+        },
     }
 ]
 
@@ -160,7 +161,7 @@ TEMPLATES = [
 AUTH_USER_MODEL = "accounts.User"
 
 LOGIN_URL = "/accounts/login/"
-LOGIN_REDIRECT_URL = "/scan/"
+LOGIN_REDIRECT_URL = "/dashboard/"
 LOGOUT_REDIRECT_URL = "/accounts/login/"
 
 AUTHENTICATION_BACKENDS = [
@@ -169,7 +170,9 @@ AUTHENTICATION_BACKENDS = [
 ]
 
 AUTH_PASSWORD_VALIDATORS = [
-    {"NAME": "django.contrib.auth.password_validation.UserAttributeSimilarityValidator"},
+    {
+        "NAME": "django.contrib.auth.password_validation.UserAttributeSimilarityValidator"
+    },
     {"NAME": "django.contrib.auth.password_validation.MinimumLengthValidator"},
     {"NAME": "django.contrib.auth.password_validation.CommonPasswordValidator"},
     {"NAME": "django.contrib.auth.password_validation.NumericPasswordValidator"},
@@ -184,7 +187,7 @@ ACCOUNT_USER_DISPLAY = "apps.accounts.services.user_display"
 ACCOUNT_EMAIL_VERIFICATION = "mandatory"
 ACCOUNT_EMAIL_UNKNOWN_ACCOUNTS = False
 ACCOUNT_LOGIN_ON_EMAIL_CONFIRMATION = True
-ACCOUNT_EMAIL_CONFIRMATION_AUTHENTICATED_REDIRECT_URL = "/scan/"
+ACCOUNT_EMAIL_CONFIRMATION_AUTHENTICATED_REDIRECT_URL = "/dashboard/"
 ACCOUNT_EMAIL_CONFIRMATION_ANONYMOUS_REDIRECT_URL = "/accounts/login/"
 ACCOUNT_LOGOUT_ON_GET = False
 ACCOUNT_EMAIL_SUBJECT_PREFIX = "[SkogsKvitto] "
@@ -241,18 +244,20 @@ else:
 # Async worker queues (django-rq)
 # -----------------------------------------------------------------------------
 
-# RQ_QUEUES is read by django_rq once it's wired in INSTALLED_APPS in a later
-# pass. Defining it here so env vars are documented and the structure is locked.
+# RQ_QUEUES is read by django_rq once it's wired in INSTALLED_APPS.
+# Defining it here so env vars are documented and the structure is locked.
 _RQ_REDIS_URL = REDIS_URL or "redis://localhost:6379/0"
 
 RQ_QUEUES = {
     "default": {
         "URL": _RQ_REDIS_URL,
         "DEFAULT_TIMEOUT": 360,
+        "ASYNC": bool(REDIS_URL),
     },
     "scanning": {
         "URL": _RQ_REDIS_URL,
         "DEFAULT_TIMEOUT": 120,
+        "ASYNC": bool(REDIS_URL),
     },
 }
 
@@ -277,11 +282,6 @@ SERVER_EMAIL = DEFAULT_FROM_EMAIL
 # -----------------------------------------------------------------------------
 # Product settings
 # -----------------------------------------------------------------------------
-
-PRIVACY_CONTACT = env_str(
-    "PRIVACY_CONTACT",
-    "[ange kontaktadress via miljövariabel i driftmiljön]",
-)
 
 FREEMIUM_RECEIPT_LIMIT = env_int("FREEMIUM_RECEIPT_LIMIT", 5)
 
@@ -370,8 +370,7 @@ CONTENT_SECURITY_POLICY = {
         "object-src": ("'none'",),
         "script-src": (
             "'self'",
-            "'unsafe-eval'",
-            "https://cdn.jsdelivr.net",
+            "'unsafe-eval'",  # Alpine.js inline expression evaluation
         ),
         "style-src": ("'self'",),
         "img-src": (
@@ -438,4 +437,3 @@ LOGGING = {
         },
     },
 }
-

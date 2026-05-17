@@ -1,0 +1,75 @@
+{% extends "core/base.html" %}
+
+{% block title %}Mina inkomstår – SkogsKvitto{% endblock %}
+{% block robots %}noindex, nofollow{% endblock %}
+
+{% block content %}
+<section class="dashboard-shell" aria-labelledby="tax-year-list-title">
+  <header class="dashboard-hero">
+    <div>
+      <p class="eyebrow">Underlag</p>
+      <h1 id="tax-year-list-title">Mina inkomstår</h1>
+      <p>
+        Varje inkomstår samlar alla kvitton för det året. Härifrån kan du exportera
+        underlag och låsa året när du är klar.
+      </p>
+    </div>
+
+    <div class="dashboard-hero-panel" aria-label="Antal år">
+      <span>Antal år</span>
+      <strong>{{ tax_years|length }}</strong>
+    </div>
+  </header>
+
+  {% if tax_years %}
+    <section class="tax-year-list" aria-label="Inkomstår">
+      {% for ty in tax_years %}
+        <article class="tax-year-card">
+          <header class="tax-year-card-header">
+            <div>
+              <p class="eyebrow">Inkomstår</p>
+              <h2>{{ ty.year }}</h2>
+            </div>
+            {% if ty.is_locked %}
+              <span class="tax-year-status tax-year-status-locked" aria-label="Låst">
+                <svg viewBox="0 0 24 24" fill="none" class="h-4 w-4">
+                  <path d="M7 11V8a5 5 0 0 1 10 0v3" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"/>
+                  <path d="M6 11h12v9H6v-9Z" stroke="currentColor" stroke-width="2.4" stroke-linejoin="round"/>
+                </svg>
+                Låst
+              </span>
+            {% else %}
+              <span class="tax-year-status tax-year-status-open">Öppen</span>
+            {% endif %}
+          </header>
+
+          <dl class="tax-year-stats">
+            <div>
+              <dt>Kvitton</dt>
+              <dd>{{ ty.receipt_count }}</dd>
+            </div>
+            <div>
+              <dt>Total</dt>
+              <dd>{{ ty.total_sum|default_if_none:"0.00"|floatformat:2 }} kr</dd>
+            </div>
+            <div>
+              <dt>Moms</dt>
+              <dd>{{ ty.vat_sum|default_if_none:"0.00"|floatformat:2 }} kr</dd>
+            </div>
+          </dl>
+
+          <footer class="tax-year-card-footer">
+            <a href="{% url 'tax_year_detail' year=ty.year %}" class="btn-primary">Öppna {{ ty.year }}</a>
+          </footer>
+        </article>
+      {% endfor %}
+    </section>
+  {% else %}
+    <div class="dashboard-empty-state">
+      <h3>Inga inkomstår ännu.</h3>
+      <p>Ditt första inkomstår skapas automatiskt när du sparar ditt första kvitto.</p>
+      <a href="{% url 'scan' %}" class="btn-primary">Scanna första kvittot</a>
+    </div>
+  {% endif %}
+</section>
+{% endblock %}

@@ -10,15 +10,18 @@
     <h2 id="scan-saved-title" class="scan-saved-title">Klart. Kvittot är sparat.</h2>
     <p class="scan-saved-text">
       {% if receipt.vendor %}
-        Kvittot från <strong>{{ receipt.vendor }}</strong> är nu sparat i ditt underlag.
+        Kvittot från <strong>{{ receipt.vendor }}</strong> är nu sparat i inkomstår
+        <strong>{{ receipt.tax_year.year }}</strong>.
       {% else %}
-        Kvittot är nu sparat i ditt underlag.
+        Kvittot är nu sparat i inkomstår <strong>{{ receipt.tax_year.year }}</strong>.
       {% endif %}
     </p>
   </div>
 
   <div class="scan-saved-actions">
-    <a href="{% url 'dashboard' %}" class="btn-primary w-full">Gå till granskning</a>
+    <a href="{% url 'tax_year_detail' year=receipt.tax_year.year %}" class="btn-primary w-full">
+      Gå till inkomstår {{ receipt.tax_year.year }}
+    </a>
     <a href="{% url 'scan' %}" class="btn-secondary w-full">Scanna ett till kvitto</a>
   </div>
 </section>

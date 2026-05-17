@@ -1,0 +1,83 @@
+{% extends "core/base.html" %}
+{% load allauth %}
+
+{% block title %}E-postadresser – SkogsKvitto{% endblock %}
+{% block robots %}noindex, nofollow{% endblock %}
+
+{% block content %}
+<section class="auth-shell" aria-labelledby="email-title">
+  <aside class="auth-visual" aria-label="SkogsKvitto">
+    <img
+      src="https://res.cloudinary.com/dakjlrean/image/upload/f_auto,q_auto:eco,c_fill,w_1200,h_1400,g_auto/webp/skogskvitto/js7drdp51fxqslknqtif.webp"
+      alt=""
+      class="auth-visual-image"
+      width="1200"
+      height="1400"
+      loading="lazy"
+      decoding="async"
+    >
+    <div class="auth-visual-overlay">
+      <p class="auth-visual-kicker">Kontohantering</p>
+      <h2>Hantera dina e-postadresser.</h2>
+      <p>Lägg till, ta bort eller verifiera adresser kopplade till ditt konto.</p>
+    </div>
+  </aside>
+
+  <div class="auth-panel">
+    <div class="auth-form-card">
+      <div class="auth-heading">
+        <p class="eyebrow">E-post</p>
+        <h1 id="email-title">E-postadresser</h1>
+        <p>Här hanterar du adresser kopplade till ditt SkogsKvitto-konto.</p>
+      </div>
+
+      {% if emailaddresses %}
+        <form method="post" action="{% url 'account_email' %}" class="auth-form mt-6">
+          {% csrf_token %}
+          <fieldset class="grid gap-3">
+            <legend class="form-label">Dina e-postadresser</legend>
+            {% for emailaddress in emailaddresses %}
+              <label class="flex items-start gap-3 rounded-lg border border-stone-200 p-4">
+                <input type="radio" name="email" value="{{ emailaddress.email }}" {% if emailaddress.primary %}checked{% endif %}>
+                <span class="flex-1">
+                  <strong class="block">{{ emailaddress.email }}</strong>
+                  <span class="text-sm text-stone-600">
+                    {% if emailaddress.verified %}Verifierad{% else %}Inte verifierad{% endif %}
+                    {% if emailaddress.primary %}· Primär{% endif %}
+                  </span>
+                </span>
+              </label>
+            {% endfor %}
+          </fieldset>
+
+          <div class="grid gap-2 sm:grid-cols-3">
+            <button type="submit" name="action_primary" class="btn-secondary">Sätt som primär</button>
+            <button type="submit" name="action_send" class="btn-secondary">Skicka verifiering</button>
+            <button type="submit" name="action_remove" class="btn-secondary">Ta bort</button>
+          </div>
+        </form>
+      {% endif %}
+
+      <hr class="my-8 border-stone-200">
+
+      <form method="post" action="{% url 'account_email' %}" class="auth-form">
+        {% csrf_token %}
+        <p class="eyebrow">Lägg till ny adress</p>
+
+        {{ form.non_field_errors }}
+        <label class="form-label" for="{{ form.email.id_for_label }}">
+          Ny e-postadress
+          {{ form.email }}
+          {{ form.email.errors }}
+        </label>
+
+        <button type="submit" name="action_add" class="btn-primary w-full">Lägg till</button>
+      </form>
+
+      <p class="auth-switch">
+        <a href="{% url 'profile' %}" class="text-link">← Tillbaka till profilen</a>
+      </p>
+    </div>
+  </div>
+</section>
+{% endblock %}

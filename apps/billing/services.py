@@ -179,7 +179,7 @@ def user_has_trial_subscription_sync(user: AbstractBaseUser | AnonymousUser) -> 
     return (
         UserSubscription.objects.filter(
             user_id=user.pk,
-            status=UserSubscription.STATUS_TRIALING,
+            status=UserSubscription.Status.TRIALING,
         )
         .filter(Q(current_period_end__isnull=True) | Q(current_period_end__gt=now))
         .exists()

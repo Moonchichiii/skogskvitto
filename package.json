@@ -1,11 +1,15 @@
 {
   "scripts": {
+    "vendor:build": "bun run scripts/vendor-build.ts",
     "css:build": "tailwindcss -i ./assets/css/input.css -o ./static/css/app.css --minify",
-    "css:watch": "tailwindcss -i ./assets/css/input.css -o ./static/css/app.css --watch"
+    "css:watch": "tailwindcss -i ./assets/css/input.css -o ./static/css/app.css --watch",
+    "build": "bun run vendor:build && bun run css:build"
   },
   "dependencies": {},
   "devDependencies": {
     "@tailwindcss/cli": "^4.3.0",
-    "tailwindcss": "^4.3.0"
+    "tailwindcss": "^4.3.0",
+    "alpinejs": "^3.14.1",
+    "htmx.org": "^2.0.4"
   }
 }

@@ -14,7 +14,7 @@ class UserManager(BaseUserManager["User"]):
         email: str,
         password: str | None,
         **extra_fields: Any,
-    ) -> "User":
+    ) -> User:
         if not email:
             raise ValueError("Användare måste ha en e-postadress.")
 
@@ -29,7 +29,7 @@ class UserManager(BaseUserManager["User"]):
         email: str,
         password: str | None = None,
         **extra_fields: Any,
-    ) -> "User":
+    ) -> User:
         extra_fields.setdefault("is_staff", False)
         extra_fields.setdefault("is_superuser", False)
         extra_fields.setdefault("is_active", True)
@@ -40,7 +40,7 @@ class UserManager(BaseUserManager["User"]):
         email: str,
         password: str | None = None,
         **extra_fields: Any,
-    ) -> "User":
+    ) -> User:
         extra_fields.setdefault("is_staff", True)
         extra_fields.setdefault("is_superuser", True)
         extra_fields.setdefault("is_active", True)

@@ -11,10 +11,7 @@
     <a href="{% url 'home' %}" class="brand-link" aria-label="Gå till SkogsKvitto">
       <img
         src="https://res.cloudinary.com/dakjlrean/image/upload/f_auto,q_auto:best,c_fit,w_56,h_56/v1778878511/skogskvitto/nqyhmj1zplj7zshg189b.webp"
-        srcset="
-          https://res.cloudinary.com/dakjlrean/image/upload/f_auto,q_auto:best,c_fit,w_56,h_56/v1778878511/skogskvitto/nqyhmj1zplj7zshg189b.webp   56w,
-          https://res.cloudinary.com/dakjlrean/image/upload/f_auto,q_auto:best,c_fit,w_112,h_112/v1778878511/skogskvitto/nqyhmj1zplj7zshg189b.webp 112w
-        "
+        srcset="https://res.cloudinary.com/dakjlrean/image/upload/f_auto,q_auto:best,c_fit,w_56,h_56/v1778878511/skogskvitto/nqyhmj1zplj7zshg189b.webp 56w, https://res.cloudinary.com/dakjlrean/image/upload/f_auto,q_auto:best,c_fit,w_112,h_112/v1778878511/skogskvitto/nqyhmj1zplj7zshg189b.webp 112w"
         sizes="76px"
         alt=""
         class="brand-logo"
@@ -27,34 +24,11 @@
 
     {% if user.is_authenticated %}
       <div class="desktop-nav">
-        
-          href="{% url 'scan' %}"
-          class="nav-link {% if current_url_name == 'scan' %}nav-link-active{% endif %}"
-          {% if current_url_name == 'scan' %}aria-current="page"{% endif %}
-        >
-          Scanna
-        </a>
-        
-          href="{% url 'dashboard' %}"
-          class="nav-link {% if current_url_name == 'dashboard' and request.GET.nav != 'export' %}nav-link-active{% endif %}"
-          {% if current_url_name == 'dashboard' and request.GET.nav != 'export' %}aria-current="page"{% endif %}
-        >
-          Granska
-        </a>
-        
-          href="{% url 'dashboard' %}?nav=export#dashboard-export"
-          class="nav-link {% if current_url_name == 'dashboard' and request.GET.nav == 'export' %}nav-link-active{% endif %}"
-          {% if current_url_name == 'dashboard' and request.GET.nav == 'export' %}aria-current="page"{% endif %}
-        >
-          Exportera
-        </a>
-        
-          href="{% url 'profile' %}"
-          class="nav-link {% if current_url_name == 'profile' %}nav-link-active{% endif %}"
-          {% if current_url_name == 'profile' %}aria-current="page"{% endif %}
-        >
-          Profil
-        </a>
+        <a href="{% url 'dashboard' %}" class="nav-link {% if current_url_name == 'dashboard' %}nav-link-active{% endif %}" {% if current_url_name == 'dashboard' %}aria-current="page"{% endif %}>Översikt</a>
+        <a href="{% url 'scan' %}" class="nav-link {% if current_url_name == 'scan' %}nav-link-active{% endif %}" {% if current_url_name == 'scan' %}aria-current="page"{% endif %}>Scanna</a>
+        <a href="{% url 'receipts_list' %}" class="nav-link {% if current_url_name == 'receipts_list' %}nav-link-active{% endif %}" {% if current_url_name == 'receipts_list' %}aria-current="page"{% endif %}>Kvitton</a>
+        <a href="{% url 'tax_year_list' %}" class="nav-link {% if current_url_name == 'tax_year_list' or current_url_name == 'tax_year_detail' %}nav-link-active{% endif %}" {% if current_url_name == 'tax_year_list' or current_url_name == 'tax_year_detail' %}aria-current="page"{% endif %}>Inkomstår</a>
+        <a href="{% url 'profile' %}" class="nav-link {% if current_url_name == 'profile' %}nav-link-active{% endif %}" {% if current_url_name == 'profile' %}aria-current="page"{% endif %}>Profil</a>
         <form method="post" action="{% url 'account_logout' %}" class="nav-logout-form">
           {% csrf_token %}
           <button type="submit" class="nav-link nav-link-danger">Logga ut</button>
@@ -74,17 +48,11 @@
         </svg>
       </button>
 
-      <div
-        id="mobile-menu"
-        class="mobile-menu"
-        x-show="open"
-        x-transition
-        @click.outside="open = false"
-        x-cloak
-      >
+      <div id="mobile-menu" class="mobile-menu" x-show="open" x-transition @click.outside="open = false" x-cloak>
+        <a href="{% url 'dashboard' %}" class="mobile-menu-link">Översikt</a>
         <a href="{% url 'scan' %}" class="mobile-menu-link">Scanna</a>
-        <a href="{% url 'dashboard' %}" class="mobile-menu-link">Granska</a>
-        <a href="{% url 'dashboard' %}?nav=export#dashboard-export" class="mobile-menu-link">Exportera</a>
+        <a href="{% url 'receipts_list' %}" class="mobile-menu-link">Kvitton</a>
+        <a href="{% url 'tax_year_list' %}" class="mobile-menu-link">Inkomstår</a>
         <a href="{% url 'profile' %}" class="mobile-menu-link">Profil</a>
         <form method="post" action="{% url 'account_logout' %}" class="mobile-menu-form flex">
           {% csrf_token %}
@@ -117,14 +85,7 @@
         </button>
       </div>
 
-      <div
-        id="mobile-menu"
-        class="mobile-menu"
-        x-show="open"
-        x-transition
-        @click.outside="open = false"
-        x-cloak
-      >
+      <div id="mobile-menu" class="mobile-menu" x-show="open" x-transition @click.outside="open = false" x-cloak>
         <a href="{% url 'home' %}#funktioner" class="mobile-menu-link">Funktioner</a>
         <a href="{% url 'home' %}#priser" class="mobile-menu-link">Priser</a>
         <a href="{% url 'home' %}#om" class="mobile-menu-link">Om</a>

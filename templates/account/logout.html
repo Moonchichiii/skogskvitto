@@ -1,0 +1,36 @@
+{% extends "core/base.html" %}
+
+{% block title %}Logga ut – SkogsKvitto{% endblock %}
+{% block robots %}noindex, nofollow{% endblock %}
+
+{% block content %}
+<section class="auth-shell" aria-labelledby="logout-title">
+  <aside class="auth-visual" aria-label="SkogsKvitto">
+    <img src="https://res.cloudinary.com/dakjlrean/image/upload/f_auto,q_auto:eco,c_fill,w_1200,h_1400,g_auto/webp/skogskvitto/js7drdp51fxqslknqtif.webp" alt="" class="auth-visual-image" width="1200" height="1400" loading="lazy" decoding="async">
+    <div class="auth-visual-overlay">
+      <p class="auth-visual-kicker">Hej då</p>
+      <h2>Vill du logga ut?</h2>
+      <p>Du kan alltid logga in igen när du behöver.</p>
+    </div>
+  </aside>
+
+  <div class="auth-panel">
+    <div class="auth-form-card">
+      <div class="auth-heading">
+        <p class="eyebrow">Konto</p>
+        <h1 id="logout-title">Logga ut</h1>
+        <p>Är du säker på att du vill logga ut?</p>
+      </div>
+
+      <form method="post" action="{% url 'account_logout' %}" class="auth-form mt-6">
+        {% csrf_token %}
+        <button type="submit" class="btn-primary w-full">Logga ut</button>
+      </form>
+
+      <p class="auth-switch">
+        <a href="{% url 'dashboard' %}" class="text-link">← Avbryt och gå tillbaka</a>
+      </p>
+    </div>
+  </div>
+</section>
+{% endblock %}

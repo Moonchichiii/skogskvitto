@@ -1,0 +1,20 @@
+<section
+  class="scan-pending-card"
+  aria-busy="true"
+  aria-live="polite"
+  hx-get="{% url 'scanning_status' job_id=job.pk %}"
+  hx-trigger="load delay:1.5s"
+  hx-target="#scan-result"
+  hx-swap="innerHTML"
+>
+  <div class="scan-pending-icon" aria-hidden="true">
+    <span class="scan-loading-spinner"></span>
+  </div>
+  <div>
+    <p class="eyebrow">Steg 2</p>
+    <h2 class="scan-pending-title">Analyserar kvittot...</h2>
+    <p class="scan-pending-text">
+      Vi läser av leverantör, belopp, moms, datum och kategori. Det här tar oftast några sekunder.
+    </p>
+  </div>
+</section>

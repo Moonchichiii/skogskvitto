@@ -2,76 +2,86 @@
   id="scan-upload"
   class="scan-upload-card"
   aria-labelledby="scan-upload-title"
-  x-data="receiptUpload()"
+  x-data="receiptUpload"
 >
+  {% csrf_token %}
+
   <header class="scan-upload-header">
     <div>
       <p class="eyebrow">Steg 1</p>
       <h2 id="scan-upload-title" class="section-title">Ladda upp kvitto</h2>
       <p class="section-text">
-        Ta en bild direkt med kameran eller välj en bild från mobilen. JPG, PNG och WEBP stöds.
+        Ta en bild direkt med kameran eller välj en bild från mobilen.
+        JPG, PNG och WEBP stöds, max 10 MB.
       </p>
     </div>
   </header>
 
-  <form
-    hx-post="/scanning/intake/"
-    hx-encoding="multipart/form-data"
-    hx-target="#scan-result"
-    hx-swap="innerHTML"
-    hx-indicator="#scan-loading-indicator"
-    class="scan-upload-form"
+  <input
+    id="receipt-image-input"
+    name="image"
+    type="file"
+    accept="image/jpeg,image/png,image/webp"
+    capture="environment"
+    class="sr-only"
+    x-ref="fileInput"
+    @change="onFileChange($event)"
   >
-    {% csrf_token %}
 
-    <input
-      id="receipt-image-input"
-      name="image"
-      type="file"
-      accept="image/jpeg,image/png,image/webp"
-      capture="environment"
-      class="sr-only"
-      x-ref="fileInput"
-      @change="onFileChange($event)"
-      required
-    >
+  <div class="scan-upload-actions">
+    <button type="button" class="btn-primary w-full" @click="$refs.fileInput.click()" :disabled="uploading">
+      <span x-text="previewUrl ? 'Välj ny bild' : 'Scanna med kamera'"></span>
+    </button>
+    <button type="button" class="btn-secondary w-full" @click="$refs.fileInput.click()" :disabled="uploading">
+      Välj bild från mobil
+    </button>
+  </div>
 
-    <div class="scan-upload-actions">
-      <button type="button" class="btn-primary w-full" @click="$refs.fileInput.click()">
-        Scanna med kamera
-      </button>
-      <button type="button" class="btn-secondary w-full" @click="$refs.fileInput.click()">
-        Välj bild
-      </button>
+  <div class="upload-empty-state" x-show="!previewUrl" x-cloak>
+    <div class="upload-empty-icon" aria-hidden="true">
+      <svg viewBox="0 0 24 24" fill="none" class="h-8 w-8">
+        <path d="M4 7h3l2-3h6l2 3h3v13H4V7Z" stroke="currentColor" stroke-width="2.4" stroke-linejoin="round"/>
+        <path d="M12 16a4 4 0 1 0 0-8 4 4 0 0 0 0 8Z" stroke="currentColor" stroke-width="2.4"/>
+      </svg>
     </div>
-
-    <div class="upload-empty-state" x-show="!previewUrl" x-cloak>
-      <div class="upload-empty-icon" aria-hidden="true">
-        <svg viewBox="0 0 24 24" fill="none" class="h-8 w-8">
-          <path d="M4 7h3l2-3h6l2 3h3v13H4V7Z" stroke="currentColor" stroke-width="2.4" stroke-linejoin="round"/>
-          <path d="M12 16a4 4 0 1 0 0-8 4 4 0 0 0 0 8Z" stroke="currentColor" stroke-width="2.4"/>
-        </svg>
-      </div>
-      <div>
-        <p class="upload-empty-title">Ingen bild vald ännu</p>
-        <p class="upload-empty-text">
-          När du väljer en bild visas förhandsvisningen här innan du startar skanningen.
-        </p>
-      </div>
+    <div>
+      <p class="upload-empty-title">Ingen bild vald ännu</p>
+      <p class="upload-empty-text">
+        När du väljer en bild visas en förhandsvisning här innan du startar skanningen.
+      </p>
     </div>
+  </div>
 
-    <figure class="upload-preview-card" x-show="previewUrl" x-cloak>
-      <img :src="previewUrl" alt="Förhandsvisning av valt kvitto" class="upload-preview-image">
-      <figcaption class="upload-preview-caption" x-text="fileName"></figcaption>
-    </figure>
+  <figure class="upload-preview-card" x-show="previewUrl" x-cloak>
+    <img :src="previewUrl" alt="Förhandsvisning av valt kvitto" class="upload-preview-image">
+    <figcaption class="upload-preview-caption px-4 py-2 text-sm text-stone-700" x-text="fileName"></figcaption>
+  </figure>
 
-    <button type="submit" class="btn-primary w-full" :disabled="!previewUrl">Starta skanning</button>
-
-    <div id="scan-loading-indicator" class="scan-loading htmx-indicator" aria-live="polite">
-      <span class="scan-loading-spinner" aria-hidden="true"></span>
-      <span>Analyserar kvittot...</span>
+  <div x-show="error" x-cloak role="alert" class="scan-alert scan-alert-error">
+    <div class="scan-alert-icon" aria-hidden="true">!</div>
+    <div>
+      <p class="scan-alert-title">Något gick fel</p>
+      <p class="scan-alert-text" x-text="error"></p>
     </div>
-  </form>
+  </div>
+
+  <button
+    type="button"
+    class="btn-primary w-full"
+    @click="upload()"
+    :disabled="!previewUrl || uploading"
+    x-text="uploading ? 'Laddar upp...' : 'Starta skanning'"
+  >Starta skanning</button>
+
+  <div
+    x-show="uploading"
+    x-cloak
+    class="scan-loading"
+    aria-live="polite"
+  >
+    <span class="scan-loading-spinner" aria-hidden="true"></span>
+    <span x-text="uploadStatusText"></span>
+  </div>
 
   <section id="scan-result" class="scan-result-slot" aria-live="polite"></section>
 </section>

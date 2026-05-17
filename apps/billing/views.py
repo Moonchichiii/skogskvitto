@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import logging
 from datetime import datetime
 
 import httpx
@@ -18,12 +19,15 @@ from apps.billing.services import (
     stripe_request_sync,
 )
 
+logger = logging.getLogger(__name__)
+
 
 @login_required
 def start_checkout(request: HttpRequest) -> HttpResponseBase:
     user = request.user
 
     if not stripe_is_configured():
+        logger.error("billing.start_checkout.stripe_not_configured", extra={"user_id": user.pk})
         return HttpResponseBadRequest(
             "Stripe-konfiguration saknas. Kontrollera STRIPE_SECRET_KEY, "
             "STRIPE_PRICE_MONTHLY_ID och STRIPE_PRICE_YEARLY_ID."
@@ -34,6 +38,10 @@ def start_checkout(request: HttpRequest) -> HttpResponseBase:
 
     plan = request.GET.get("plan", "yearly")
     if plan not in {"monthly", "yearly"}:
+        logger.warning(
+            "billing.start_checkout.invalid_plan",
+            extra={"user_id": user.pk, "plan": plan},
+        )
         return HttpResponseBadRequest("Ogiltig betalningsplan.")
 
     price_id = plan_to_price_id(plan)
@@ -60,12 +68,24 @@ def start_checkout(request: HttpRequest) -> HttpResponseBase:
             },
         )
     except httpx.HTTPError:
+        logger.exception(
+            "billing.start_checkout.stripe_request_failed",
+            extra={"user_id": user.pk, "plan": plan},
+        )
         return HttpResponseBadRequest("Kunde inte starta betalning just nu.")
 
     checkout_url = checkout_session.get("url")
     if not isinstance(checkout_url, str) or not checkout_url:
+        logger.error(
+            "billing.start_checkout.no_checkout_url",
+            extra={"user_id": user.pk, "session_keys": list(checkout_session.keys())},
+        )
         return HttpResponseBadRequest("Stripe returnerade ingen checkout-länk.")
 
+    logger.info(
+        "billing.start_checkout.success",
+        extra={"user_id": user.pk, "plan": plan},
+    )
     return HttpResponseRedirect(checkout_url)
 
 
@@ -90,6 +110,10 @@ def billing_success(request: HttpRequest) -> HttpResponseBase:
             params=[("expand[]", "subscription")],
         )
     except httpx.HTTPError:
+        logger.exception(
+            "billing.billing_success.stripe_request_failed",
+            extra={"user_id": user.pk, "session_id": session_id},
+        )
         return HttpResponseBadRequest("Kunde inte verifiera betalningen.")
 
     if checkout_session.get("mode") != "subscription":
@@ -99,6 +123,14 @@ def billing_success(request: HttpRequest) -> HttpResponseBase:
         return HttpResponseBadRequest("Betalningen är inte slutförd.")
 
     if str(checkout_session.get("client_reference_id", "")) != str(user.id):
+        logger.warning(
+            "billing.billing_success.client_reference_mismatch",
+            extra={
+                "user_id": user.pk,
+                "session_id": session_id,
+                "session_client_ref": checkout_session.get("client_reference_id"),
+            },
+        )
         return HttpResponseBadRequest("Checkout-session tillhör inte aktuell användare.")
 
     subscription = checkout_session.get("subscription")
@@ -165,10 +197,19 @@ def billing_success(request: HttpRequest) -> HttpResponseBase:
             ]
         )
 
+    logger.info(
+        "billing.billing_success.subscription_recorded",
+        extra={
+            "user_id": user.pk,
+            "subscription_id": subscription_id,
+            "status": status,
+            "created": created,
+        },
+    )
+
     return redirect("dashboard")
 
 
 @login_required
 def billing_cancel(_: HttpRequest) -> HttpResponseBase:
-    return redirect("scan")
-
+    return redirect("dashboard")
