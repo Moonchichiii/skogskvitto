@@ -27,7 +27,9 @@ def _api_key() -> str:
 
 
 def _model() -> str:
-    return str(getattr(settings, "OPENAI_MODEL", "gpt-4.1-mini") or "gpt-4.1-mini")
+    return str(
+        getattr(settings, "OPENAI_MODEL", "gpt-4.1-mini") or "gpt-4.1-mini"
+    )
 
 
 def is_configured() -> bool:
@@ -65,33 +67,75 @@ async def extract_receipt_fields_from_path(file_path: Path) -> dict[str, Any]:
         return {}
 
     image_bytes = file_path.read_bytes()
-    return await extract_receipt_fields_from_bytes(image_bytes, file_path.suffix)
+    return await extract_receipt_fields_from_bytes(
+        image_bytes, file_path.suffix
+    )
 
 
-async def extract_receipt_fields_from_bytes(image_bytes: bytes, suffix: str) -> dict[str, Any]:
+async def extract_receipt_fields_from_bytes(
+    image_bytes: bytes, suffix: str
+) -> dict[str, Any]:
     if not is_configured():
         return {}
 
     data_uri = _encode_image(image_bytes, suffix)
 
-    instruction = (
-        "Extract receipt data and return strict JSON with keys: "
-        "vendor, total_amount, vat_amount, date, category. "
-        "Use ISO date format YYYY-MM-DD and numbers for amounts."
+    system_prompt = (
+        "Du är en svensk bokförings-assistent som läser kvitton. "
+        "Du returnerar ENDAST giltig JSON, ingen markdown, inga kommentarer, ingen prosa. "
+        "Alla textvärden ska vara på svenska."
+    )
+
+    user_instruction = (
+        "Extrahera kvittouppgifter och returnera ett JSON-objekt med exakt dessa nycklar:\n"
+        "  - vendor (string): leverantörens namn som det står på kvittot\n"
+        "  - total_amount (number): totalbelopp inklusive moms i SEK\n"
+        "  - vat_amount (number): momsbelopp i SEK\n"
+        "  - date (string): kvittots datum i formatet YYYY-MM-DD\n"
+        "  - category (string): kategori på SVENSKA, välj den mest passande från listan nedan\n"
+        "  - note (string): kort anteckning på svenska om det är användbart, annars tom sträng\n"
+        "\n"
+        "KATEGORIER (svara med exakt en av dessa, på svenska):\n"
+        "  - Diesel          (för dieselbränsle till maskiner, traktor, motorsåg etc.)\n"
+        "  - Bensin          (för bensin till motorsåg, röjsåg, fyrhjuling etc.)\n"
+        "  - Drivmedel       (om typen av bränsle inte framgår tydligt)\n"
+        "  - Verktyg & material\n"
+        "  - Reservdelar\n"
+        "  - Frakt\n"
+        "  - Försäkring\n"
+        "  - Skogsvård       (gödsling, dikning, vägunderhåll)\n"
+        "  - Avverkning      (entreprenörstjänster för avverkning)\n"
+        "  - Plantering      (plantor, plantering, hjälpplantering)\n"
+        "  - Maskinhyra\n"
+        "  - Bokföring/revisor\n"
+        "  - Resa            (kost, logi, parkering vid skogsbesök)\n"
+        "  - Telefoni\n"
+        "  - Annat           (endast om inget annat passar)\n"
+        "\n"
+        "DRIVMEDELSREGLER:\n"
+        "  - Står det 'Diesel', 'EVO Diesel', 'HVO', 'B7' eller liknande → Diesel\n"
+        "  - Står det 'Bensin', '95', '98', 'E5', 'E10', 'Alkylatbensin' eller liknande → Bensin\n"
+        "  - Bensinstation utan tydlig bränsletyp → Drivmedel\n"
+        "\n"
+        "VIKTIGT:\n"
+        "  - Använd PUNKT som decimaltecken (441.80, inte 441,80)\n"
+        "  - Om ett fält inte kan utläsas, sätt det till null eller tom sträng\n"
+        "  - Returnera ENDAST JSON-objektet, inget annat"
     )
 
     payload: dict[str, Any] = {
         "model": _model(),
         "temperature": 0,
+        "response_format": {"type": "json_object"},
         "messages": [
             {
                 "role": "system",
-                "content": "You only return strict JSON, no markdown, no prose.",
+                "content": system_prompt,
             },
             {
                 "role": "user",
                 "content": [
-                    {"type": "text", "text": instruction},
+                    {"type": "text", "text": user_instruction},
                     {"type": "image_url", "image_url": {"url": data_uri}},
                 ],
             },
@@ -101,7 +145,9 @@ async def extract_receipt_fields_from_bytes(image_bytes: bytes, suffix: str) -> 
     headers = {"Authorization": f"Bearer {_api_key()}"}
 
     async with httpx.AsyncClient(timeout=OPENAI_TIMEOUT_SECONDS) as client:
-        response = await client.post(OPENAI_API_URL, headers=headers, json=payload)
+        response = await client.post(
+            OPENAI_API_URL, headers=headers, json=payload
+        )
 
     response.raise_for_status()
     completion = response.json()

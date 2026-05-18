@@ -16,9 +16,18 @@ class TaxYearAdmin(admin.ModelAdmin):
 
 @admin.register(Receipt)
 class ReceiptAdmin(admin.ModelAdmin):
-    list_display = ("date", "vendor", "owner", "tax_year", "total_amount", "vat_amount")
+    list_display = (
+        "date",
+        "vendor",
+        "owner",
+        "tax_year",
+        "total_amount",
+        "vat_amount",
+        "net_amount",
+    )
     list_filter = ("tax_year__year", "category")
     search_fields = ("vendor", "note", "owner__email")
-    readonly_fields = ("created_at", "updated_at", "tax_year")
+    readonly_fields = ("created_at", "updated_at", "tax_year", "net_amount")
     date_hierarchy = "date"
     ordering = ("-date",)
+

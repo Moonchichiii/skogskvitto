@@ -37,7 +37,7 @@
       </div>
 
       {% if error %}
-        <div class="notice" role="alert" style="border-color:#fecaca;background:#fef2f2;color:#7f1d1d;">
+        <div class="notice-danger" role="alert">
           {{ error }}
         </div>
       {% endif %}
@@ -60,9 +60,8 @@
 
         <button
           type="submit"
-          class="btn-primary w-full"
+          class="btn-danger w-full"
           :disabled="typed.toLowerCase() !== '{{ user.email|lower }}'"
-          style="background:#991b1b;"
         >
           Radera mitt konto permanent
         </button>

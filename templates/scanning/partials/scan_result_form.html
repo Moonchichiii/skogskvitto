@@ -8,9 +8,7 @@
       </p>
     </div>
     {% if failed %}
-      <span class="scan-status-pill" style="background:#fef2f2;color:#991b1b;border-color:#fecaca;">
-        Manuell ifyllning
-      </span>
+      <span class="status-pill-danger"> Manuell ifyllning </span>
     {% else %}
       <span class="scan-status-pill">Redo att granskas</span>
     {% endif %}
@@ -21,22 +19,25 @@
       <div class="scan-alert-icon" aria-hidden="true">!</div>
       <div>
         <p class="scan-alert-title">AI-tolkningen misslyckades</p>
-        <p class="scan-alert-text">{{ error_message }} Fyll i uppgifterna manuellt nedan.</p>
+        <p class="scan-alert-text">
+          {{ error_message }} Fyll i uppgifterna manuellt nedan.
+        </p>
       </div>
     </div>
   {% endif %}
 
-  {% if errors.__all__ %}
+  {% if errors.form %}
     <div class="scan-alert scan-alert-error mt-4" role="alert">
       <div class="scan-alert-icon" aria-hidden="true">!</div>
       <div>
         <p class="scan-alert-title">Fel vid sparning</p>
-        <p class="scan-alert-text">{{ errors.__all__ }}</p>
+        <p class="scan-alert-text">{{ errors.form }}</p>
       </div>
     </div>
   {% endif %}
 
   <form
+    x-data="netRecalc({ initial: '{{ net_preview }}' })"
     hx-post="{% url 'scanning_confirm' job_id=job.pk %}"
     hx-target="#scan-result"
     hx-swap="innerHTML"
@@ -53,10 +54,10 @@
         value="{{ preview.vendor|default:'' }}"
         class="form-input"
         autocomplete="organization"
-      >
+      />
     </label>
 
-    <div class="grid gap-4 sm:grid-cols-2">
+    <div class="grid gap-4 sm:grid-cols-3">
       <label class="form-label" for="total_amount">
         Belopp (kr)
         <input
@@ -68,9 +69,11 @@
           class="form-input"
           placeholder="Exempel: 1249.00"
           required
-        >
+        />
         {% if errors.total_amount %}
-          <span class="text-sm font-semibold text-red-700">{{ errors.total_amount }}</span>
+          <span class="text-sm font-semibold text-red-700"
+            >{{ errors.total_amount }}</span
+          >
         {% endif %}
       </label>
 
@@ -84,10 +87,28 @@
           value="{{ preview.vat_amount|default:'' }}"
           class="form-input"
           placeholder="Exempel: 249.80"
-        >
+        />
         {% if errors.vat_amount %}
-          <span class="text-sm font-semibold text-red-700">{{ errors.vat_amount }}</span>
+          <span class="text-sm font-semibold text-red-700"
+            >{{ errors.vat_amount }}</span
+          >
         {% endif %}
+      </label>
+
+      <label class="form-label" for="net_amount_preview">
+        Netto (kr)
+        <input
+          id="net_amount_preview"
+          type="text"
+          value="{{ net_preview }}"
+          class="form-input cursor-not-allowed bg-stone-50"
+          readonly
+          tabindex="-1"
+          aria-describedby="net-amount-hint"
+        />
+        <span id="net-amount-hint" class="text-xs font-medium text-stone-500">
+          Beräknas: belopp − moms
+        </span>
       </label>
     </div>
 
@@ -101,9 +122,11 @@
           value="{{ preview.date|default:'' }}"
           class="form-input"
           required
-        >
+        />
         {% if errors.date %}
-          <span class="text-sm font-semibold text-red-700">{{ errors.date }}</span>
+          <span class="text-sm font-semibold text-red-700"
+            >{{ errors.date }}</span
+          >
         {% endif %}
       </label>
 
@@ -116,7 +139,7 @@
           value="{{ preview.category|default:'' }}"
           class="form-input"
           placeholder="Exempel: Drivmedel"
-        >
+        />
       </label>
     </div>
 
@@ -128,8 +151,55 @@
         rows="4"
         class="form-input resize-y"
         placeholder="Valfri anteckning till kvittot"
-      >{{ preview.note|default:'' }}</textarea>
+      >
+{{ preview.note|default:'' }}</textarea
+      >
     </label>
+
+    {# Inkomstår-pedagogik — visas före spara-knappen #}
+    <aside
+      class="tax-year-hint"
+      aria-live="polite"
+      x-data="taxYearHint"
+      x-init="updateFromDate('{{ preview.date|default:'' }}')"
+      @input.window="updateFromDate($event.target.id === 'date' ? $event.target.value : null)"
+    >
+      <div class="tax-year-hint-icon" aria-hidden="true">
+        <svg viewBox="0 0 24 24" fill="none" class="h-5 w-5">
+          <rect
+            x="4"
+            y="5"
+            width="16"
+            height="15"
+            rx="2"
+            stroke="currentColor"
+            stroke-width="2"
+          />
+          <path d="M4 10h16" stroke="currentColor" stroke-width="2" />
+          <path
+            d="M9 3v4M15 3v4"
+            stroke="currentColor"
+            stroke-width="2"
+            stroke-linecap="round"
+          />
+        </svg>
+      </div>
+      <div>
+        <p class="tax-year-hint-title">
+          <span
+            x-text="incomeYear ? 'Detta kvitto tillhör inkomstår ' + incomeYear : 'Inkomstår'"
+          ></span>
+        </p>
+        <p class="tax-year-hint-text" x-show="declarationYear" x-cloak>
+          Deklareras våren <span x-text="declarationYear"></span>. Du betalar
+          skatt på dina inkomster det år utgiften eller intäkten faktiskt ägde
+          rum, inte det år du deklarerar.
+        </p>
+        <p class="tax-year-hint-text" x-show="!incomeYear" x-cloak>
+          Välj ett datum så ser du vilket inkomstår kvittot tillhör.
+        </p>
+      </div>
+    </aside>
 
     <button type="submit" class="btn-primary w-full">Spara kvitto</button>
   </form>

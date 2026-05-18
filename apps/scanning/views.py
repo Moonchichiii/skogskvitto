@@ -12,6 +12,7 @@ from django.http import (
     JsonResponse,
 )
 from django.shortcuts import get_object_or_404, render
+from django.views.decorators.csrf import ensure_csrf_cookie
 from django.views.decorators.http import require_POST
 
 from apps.billing.services import get_feature_gates_sync
@@ -22,11 +23,43 @@ from apps.scanning.models import ReceiptScanJob
 logger = logging.getLogger(__name__)
 
 
+def _compute_net_preview(data: dict | object) -> str:
+    """Best-effort net = total - vat preview string for the review form.
+
+    Returns an empty string when either side can't be parsed — the field stays
+    blank rather than showing 0.00 (less misleading).
+    """
+    from decimal import Decimal, InvalidOperation
+
+    def _to_decimal(raw: object) -> Decimal | None:
+        s = str(raw or "").replace(",", ".").strip()
+        if not s:
+            return None
+        try:
+            return Decimal(s)
+        except InvalidOperation:
+            return None
+
+    # Support both QueryDict (.get) and plain dict
+    get = data.get if hasattr(data, "get") else lambda k, d=None: d
+    total = _to_decimal(get("total_amount"))
+    vat = _to_decimal(get("vat_amount"))
+
+    if total is None:
+        return ""
+    if vat is None:
+        vat = Decimal("0.00")
+
+    net = total - vat
+    return f"{net:.2f}"
+
+
 # ---------------------------------------------------------------------------
 # Page view — /scan/
 # ---------------------------------------------------------------------------
 
 
+@ensure_csrf_cookie
 @login_required
 def scan(request: HttpRequest) -> HttpResponse:
     gates = get_feature_gates_sync(request.user)
@@ -75,12 +108,22 @@ def intake(request: HttpRequest, job_id: int) -> HttpResponse:
     except ValidationError as exc:
         logger.warning(
             "scanning.intake.validation_failed",
-            extra={"job_id": job.pk, "user_id": request.user.pk, "error": str(exc)},
+            extra={
+                "job_id": job.pk,
+                "user_id": request.user.pk,
+                "error": str(exc),
+            },
         )
         return render(
             request,
             "scanning/partials/scan_error.html",
-            {"error": exc.messages[0] if exc.messages else "Ogiltig uppladdning."},
+            {
+                "error": (
+                    exc.messages[0]
+                    if exc.messages
+                    else "Ogiltig uppladdning."
+                )
+            },
             status=400,
         )
 
@@ -106,13 +149,24 @@ def status(request: HttpRequest, job_id: int) -> HttpResponse:
         ReceiptScanJob.Status.QUEUED,
         ReceiptScanJob.Status.PROCESSING,
     ):
-        return render(request, "scanning/partials/scan_pending.html", {"job": job})
+        return render(
+            request, "scanning/partials/scan_pending.html", {"job": job}
+        )
 
     if job.status == ReceiptScanJob.Status.REVIEW_READY:
+        preview = dict(job.preview_data or {})
+        # Compute net from preview total/vat so user sees it before save
+        net_preview = _compute_net_preview(preview)
         return render(
             request,
             "scanning/partials/scan_result_form.html",
-            {"job": job, "preview": job.preview_data or {}, "errors": {}, "failed": False},
+            {
+                "job": job,
+                "preview": preview,
+                "net_preview": net_preview,
+                "errors": {},
+                "failed": False,
+            },
         )
 
     if job.status == ReceiptScanJob.Status.FAILED:
@@ -122,9 +176,11 @@ def status(request: HttpRequest, job_id: int) -> HttpResponse:
             {
                 "job": job,
                 "preview": {},
+                "net_preview": "",
                 "errors": {},
                 "failed": True,
-                "error_message": job.error_message or "AI-tolkningen misslyckades.",
+                "error_message": job.error_message
+                or "AI-tolkningen misslyckades.",
             },
         )
 
@@ -157,6 +213,7 @@ def confirm(request: HttpRequest, job_id: int) -> HttpResponse:
             {
                 "job": job,
                 "preview": request.POST,
+                "net_preview": _compute_net_preview(request.POST),
                 "errors": errors,
                 "failed": job.status == ReceiptScanJob.Status.FAILED,
                 "error_message": job.error_message,
@@ -187,7 +244,8 @@ def confirm(request: HttpRequest, job_id: int) -> HttpResponse:
             {
                 "job": job,
                 "preview": request.POST,
-                "errors": {"__all__": flat},
+                "net_preview": _compute_net_preview(request.POST),
+                "errors": {"form": flat},
                 "failed": job.status == ReceiptScanJob.Status.FAILED,
             },
             status=400,

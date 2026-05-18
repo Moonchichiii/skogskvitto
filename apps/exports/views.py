@@ -36,6 +36,15 @@ def export_excel(request: HttpRequest) -> HttpResponseBase:
         year = None
         filename = f"SkogsKvitto_Alla_Kvitton_{date.today().isoformat()}.xlsx"
 
+    if not receipts:
+        logger.info(
+            "exports.export_excel.empty",
+            extra={"user_id": request.user.pk, "year": year},
+        )
+        return HttpResponseBadRequest(
+            "Inga kvitton att exportera. Scanna minst ett kvitto först."
+        )
+
     buf = build_excel(receipts)
     logger.info(
         "exports.export_excel.success",
@@ -51,3 +60,4 @@ def export_excel(request: HttpRequest) -> HttpResponseBase:
         filename=filename,
         content_type="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
     )
+

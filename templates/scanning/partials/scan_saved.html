@@ -1,27 +1,61 @@
 <section class="scan-saved-card" aria-labelledby="scan-saved-title">
   <div class="scan-saved-icon" aria-hidden="true">
     <svg viewBox="0 0 24 24" fill="none" class="h-8 w-8">
-      <path d="M5 12.5l4.2 4.2L19 7" stroke="currentColor" stroke-width="2.8" stroke-linecap="round" stroke-linejoin="round"/>
+      <path
+        d="M5 12.5l4.2 4.2L19 7"
+        stroke="currentColor"
+        stroke-width="2.8"
+        stroke-linecap="round"
+        stroke-linejoin="round"
+      />
     </svg>
   </div>
 
   <div>
     <p class="eyebrow">Kvitto sparat</p>
-    <h2 id="scan-saved-title" class="scan-saved-title">Klart. Kvittot är sparat.</h2>
+    <h2 id="scan-saved-title" class="scan-saved-title">
+      Klart. Kvittot är sparat.
+    </h2>
     <p class="scan-saved-text">
       {% if receipt.vendor %}
-        Kvittot från <strong>{{ receipt.vendor }}</strong> är nu sparat i inkomstår
-        <strong>{{ receipt.tax_year.year }}</strong>.
+        Kvittot från <strong>{{ receipt.vendor }}</strong> ligger nu i ditt
+        underlag.
       {% else %}
-        Kvittot är nu sparat i inkomstår <strong>{{ receipt.tax_year.year }}</strong>.
+        Kvittot ligger nu i ditt underlag.
       {% endif %}
     </p>
   </div>
 
+  <dl class="scan-saved-summary">
+    <div>
+      <dt>Inkomstår</dt>
+      <dd>{{ receipt.tax_year.year }}</dd>
+    </div>
+    <div>
+      <dt>Deklareras</dt>
+      <dd>Våren {{ receipt.declaration_year }}</dd>
+    </div>
+    <div>
+      <dt>Netto</dt>
+      <dd>{{ receipt.net_amount|floatformat:2 }} kr</dd>
+    </div>
+  </dl>
+
+  <p class="scan-saved-hint">
+    Inkomstår är året då utgiften ägde rum. Du deklarerar det följande år — så
+    ett kvitto från {{ receipt.tax_year.year }} hamnar i deklarationen våren
+    {{ receipt.declaration_year }}.
+  </p>
+
   <div class="scan-saved-actions">
-    <a href="{% url 'tax_year_detail' year=receipt.tax_year.year %}" class="btn-primary w-full">
+    <a
+      href="{% url 'tax_year_detail' year=receipt.tax_year.year %}"
+      class="btn-primary w-full"
+    >
       Gå till inkomstår {{ receipt.tax_year.year }}
     </a>
-    <a href="{% url 'scan' %}" class="btn-secondary w-full">Scanna ett till kvitto</a>
+    <a href="{% url 'scan' %}" class="btn-secondary w-full"
+      >Scanna ett till kvitto</a
+    >
   </div>
 </section>

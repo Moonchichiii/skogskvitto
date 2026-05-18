@@ -100,24 +100,21 @@
         }
 
         try {
-          // 1. Get signature
+          // 1. Sign
           this.uploadStatusText = "Förbereder uppladdning...";
           const signResponse = await fetch("/scanning/sign/", {
             method: "POST",
-            headers: {
-              "X-CSRFToken": csrfToken,
-              Accept: "application/json",
-            },
+            headers: { "X-CSRFToken": csrfToken, Accept: "application/json" },
           });
           if (!signResponse.ok) {
             const err = await signResponse.json().catch(() => ({}));
             throw new Error(
-              err.error || "Kunde inte skapa upload-signatur.",
+              err.error || `Sign endpoint returned ${signResponse.status}`
             );
           }
           const sig = await signResponse.json();
 
-          // 2. Direct upload to Cloudinary
+          // 2. Upload to Cloudinary
           this.uploadStatusText = "Laddar upp bilden...";
           const cloudFormData = new FormData();
           cloudFormData.append("file", this.file);
@@ -129,9 +126,15 @@
 
           const cloudResponse = await fetch(
             `https://api.cloudinary.com/v1_1/${sig.cloud_name}/image/upload`,
-            { method: "POST", body: cloudFormData },
+            { method: "POST", body: cloudFormData }
           );
           if (!cloudResponse.ok) {
+            const errText = await cloudResponse.text().catch(() => "");
+            console.error(
+              "Cloudinary upload failed:",
+              cloudResponse.status,
+              errText
+            );
             throw new Error("Cloudinary avvisade uppladdningen.");
           }
           const cloudResult = await cloudResponse.json();
@@ -147,14 +150,16 @@
               method: "POST",
               headers: { "X-CSRFToken": csrfToken },
               body: intakeBody,
-            },
+            }
           );
           if (!intakeResponse.ok) {
-            throw new Error("Kunde inte starta analys.");
+            throw new Error(
+              `Intake endpoint returned ${intakeResponse.status}`
+            );
           }
           const html = await intakeResponse.text();
 
-          // 4. Hand off to HTMX (polling embedded in the returned HTML)
+          // 4. Hand off to HTMX
           const resultSlot = document.getElementById("scan-result");
           if (resultSlot) {
             resultSlot.innerHTML = html;
@@ -162,21 +167,30 @@
               window.htmx.process(resultSlot);
             }
           }
-
-          // Reset upload UI — the HTMX-driven pending fragment owns the view from here
-          this.uploading = false;
-          this.uploadStatusText = "";
         } catch (err) {
           this.error =
             err && err.message ? err.message : "Ett okänt fel inträffade.";
+          console.error("Upload failed:", err);
+        } finally {
           this.uploading = false;
           this.uploadStatusText = "";
         }
       },
 
       _csrfToken() {
+        // First try the form input inside our component (most reliable on page load)
         const input = this.$el.querySelector("[name=csrfmiddlewaretoken]");
-        return input instanceof HTMLInputElement ? input.value : "";
+        if (input instanceof HTMLInputElement && input.value) {
+          return input.value;
+        }
+        // Fallback: any other csrf input on the page (e.g. logout form in header)
+        const anyInput = document.querySelector("[name=csrfmiddlewaretoken]");
+        if (anyInput instanceof HTMLInputElement && anyInput.value) {
+          return anyInput.value;
+        }
+        // Last resort: read the csrftoken cookie directly
+        const match = document.cookie.match(/(?:^|;\s*)csrftoken=([^;]+)/);
+        return match ? decodeURIComponent(match[1]) : "";
       },
 
       _revokeObjectUrl() {
@@ -228,6 +242,73 @@
           frag.appendChild(link);
         }
         document.head.appendChild(frag);
+      },
+    }));
+
+    /**
+     * taxYearHint — derives the inkomstår + declaration year from the date
+     * input and updates the pedagogical hint card.
+     *
+     * Initialised from server-side rendered value (works on page load before
+     * user touches the date) and updates live as user edits the date field.
+     */
+    Alpine.data("taxYearHint", () => ({
+      incomeYear: null,
+      declarationYear: null,
+
+      updateFromDate(rawDate) {
+        if (rawDate === null) return; // event fired from a non-date input
+
+        const match = /^(\d{4})-\d{2}-\d{2}$/.exec(String(rawDate || ""));
+        if (!match) {
+          this.incomeYear = null;
+          this.declarationYear = null;
+          return;
+        }
+        const year = parseInt(match[1], 10);
+        if (!Number.isFinite(year) || year < 1900 || year > 2100) {
+          this.incomeYear = null;
+          this.declarationYear = null;
+          return;
+        }
+        this.incomeYear = year;
+        this.declarationYear = year + 1;
+      },
+    }));
+
+    /**
+     * netRecalc — keeps the read-only "Netto" field in sync with total - vat
+     * as the user edits the amounts in the review form.
+     */
+    Alpine.data("netRecalc", (config) => ({
+      net: config && config.initial ? config.initial : "",
+
+      init() {
+        const root = this.$el;
+        const totalInput = root.querySelector("#total_amount");
+        const vatInput = root.querySelector("#vat_amount");
+        const netDisplay = root.querySelector("#net_amount_preview");
+
+        const recalc = () => {
+          if (!netDisplay) return;
+          const parse = (el) => {
+            if (!(el instanceof HTMLInputElement)) return null;
+            const s = el.value.replace(",", ".").trim();
+            if (!s) return null;
+            const n = Number(s);
+            return Number.isFinite(n) ? n : null;
+          };
+          const total = parse(totalInput);
+          if (total === null) {
+            netDisplay.value = "";
+            return;
+          }
+          const vat = parse(vatInput) ?? 0;
+          netDisplay.value = (total - vat).toFixed(2);
+        };
+
+        if (totalInput) totalInput.addEventListener("input", recalc);
+        if (vatInput) vatInput.addEventListener("input", recalc);
       },
     }));
   });

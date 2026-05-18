@@ -77,6 +77,10 @@ class Receipt(models.Model):
 
     Each receipt belongs to exactly one TaxYear, derived from `date`. The TaxYear is
     auto-created in Receipt.save() via the service layer.
+
+    `net_amount` is auto-computed from `total_amount - vat_amount` on every save. It's
+    stored (not just a property) so SQL aggregates can use it directly — exports group
+    by category and sum nets without arithmetic in Python.
     """
 
     owner = models.ForeignKey(
@@ -107,6 +111,11 @@ class Receipt(models.Model):
         decimal_places=2,
         default=Decimal("0.00"),
     )
+    net_amount = models.GeneratedField(
+        expression=models.F("total_amount") - models.F("vat_amount"),
+        output_field=models.DecimalField(max_digits=12, decimal_places=2),
+        db_persist=True,
+    )
     date = models.DateField(
         help_text="The receipt date — used to derive the TaxYear.",
     )
@@ -135,6 +144,13 @@ class Receipt(models.Model):
     def __str__(self) -> str:
         return self.vendor or f"Receipt #{self.pk}"
 
+    @property
+    def declaration_year(self) -> int | None:
+        """The year this receipt is declared (filed) — always inkomstår + 1."""
+        if self.tax_year_id is None:
+            return None
+        return self.tax_year.year + 1
+
     def clean(self) -> None:
         super().clean()
         errors: dict[str, str] = {}
@@ -157,14 +173,13 @@ class Receipt(models.Model):
 
     @transaction.atomic
     def save(self, *args: Any, **kwargs: Any) -> None:
-        """Ensure tax_year is auto-resolved from date before persisting.
-
-        Imported here (not at module level) to avoid circular imports —
-        services depends on models.
-        """
         from apps.receipts.services import get_or_create_tax_year
 
-        if self.date and (self.tax_year_id is None or self.tax_year.year != self.date.year):
-            self.tax_year = get_or_create_tax_year(owner=self.owner, year=self.date.year)
+        if self.date and (
+            self.tax_year_id is None or self.tax_year.year != self.date.year
+        ):
+            self.tax_year = get_or_create_tax_year(
+                owner=self.owner, year=self.date.year
+            )
 
         super().save(*args, **kwargs)

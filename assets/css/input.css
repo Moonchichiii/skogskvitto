@@ -1209,6 +1209,50 @@
   .scan-pending-text {
     @apply mt-2 text-sm text-stone-600;
   }
+
+  /* =========================================================================
+     DANGER STATES (red alerts, destructive actions)
+     ========================================================================= */
+  .notice-danger {
+    @apply rounded-lg border border-red-200 bg-red-50 p-4 text-sm font-semibold text-red-900;
+  }
+  .btn-danger {
+    @apply inline-flex min-h-12 w-full items-center justify-center rounded-lg bg-red-800 px-6 text-center text-base font-bold text-white shadow-sm transition-colors hover:bg-red-900 active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-60 sm:w-auto;
+  }
+  .status-pill-danger {
+    @apply inline-flex min-h-8 items-center justify-center rounded-full border border-red-200 bg-red-50 px-3 text-xs font-bold text-red-900;
+  }
+  /* =========================================================================
+     TAX YEAR HINT (pedagogical card in review form)
+     ========================================================================= */
+  .tax-year-hint {
+    @apply grid grid-cols-[auto_1fr] items-start gap-3 rounded-lg border border-emerald-200 bg-emerald-50 p-4;
+  }
+  .tax-year-hint-icon {
+    @apply flex h-9 w-9 items-center justify-center rounded-lg bg-white text-forest-deep;
+  }
+  .tax-year-hint-title {
+    @apply text-sm font-bold text-forest-deep;
+  }
+  .tax-year-hint-text {
+    @apply mt-1 text-sm leading-relaxed text-stone-700;
+  }
+
+  /* =========================================================================
+     SCAN SAVED SUMMARY (inkomstår, deklarationsår, netto)
+     ========================================================================= */
+  .scan-saved-summary {
+    @apply mt-2 grid gap-3 rounded-lg border border-stone-200 bg-stone-50 p-4 sm:grid-cols-3;
+  }
+  .scan-saved-summary dt {
+    @apply text-xs font-bold uppercase tracking-wider text-stone-500;
+  }
+  .scan-saved-summary dd {
+    @apply mt-1 text-base font-bold tabular-nums text-forest-deep;
+  }
+  .scan-saved-hint {
+    @apply text-sm leading-relaxed text-stone-600;
+  }
 }
 
  [x-cloak] {

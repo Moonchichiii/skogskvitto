@@ -76,8 +76,11 @@ class UploadSignature(BaseModel):
 def issue_upload_signature(*, user: AbstractBaseUser) -> UploadSignature:
     """Create a PENDING ReceiptScanJob and return a signed upload payload.
 
-    The signature commits the client to uploading with exactly the public_id
-    and folder we specify, so users can't pollute each other's spaces.
+    Cloudinary upload convention:
+      - We sign `folder` + bare `public_id` (just a UUID hex, no slashes).
+      - Cloudinary stores the file at `{folder}/{public_id}`.
+      - Cloudinary's upload response returns `public_id` as the FULL path
+        `{folder}/{public_id}` — that's what we compare against in record_intake.
 
     Raises:
         ValueError: if Cloudinary isn't configured or the user has too many
@@ -101,26 +104,32 @@ def issue_upload_signature(*, user: AbstractBaseUser) -> UploadSignature:
         )
 
     folder = f"skogskvitto/scans/user_{user.pk}"
-    public_id = f"{folder}/{uuid.uuid4().hex}"
+    unique_id = uuid.uuid4().hex
+    expected_full_path = f"{folder}/{unique_id}"
     timestamp = int(time.time())
 
+    # IMPORTANT: sign with the BARE public_id (no slashes). Cloudinary will
+    # combine it with `folder` server-side.
     sign_params: dict[str, str | int] = {
         "folder": folder,
-        "public_id": public_id,
+        "public_id": unique_id,
         "timestamp": timestamp,
     }
     signature = cloudinary_client.sign_upload_params(sign_params)
 
     job = ReceiptScanJob.objects.create(
         user=user,
-        cloudinary_public_id=public_id,
+        # Store the FULL path we expect Cloudinary to return in the response.
+        cloudinary_public_id=expected_full_path,
         cloudinary_secure_url="",
         status=ReceiptScanJob.Status.PENDING,
     )
 
     logger.info(
-        "scanning.issue_upload_signature",
-        extra={"user_id": user.pk, "job_id": job.pk, "public_id": public_id},
+        "scanning.issue_upload_signature job_id=%s expected_public_id=%s",
+        job.pk,
+        expected_full_path,
+        extra={"user_id": user.pk, "job_id": job.pk},
     )
 
     return UploadSignature(
@@ -129,7 +138,7 @@ def issue_upload_signature(*, user: AbstractBaseUser) -> UploadSignature:
         api_key=cloudinary_client.api_key(),
         timestamp=timestamp,
         signature=signature,
-        public_id=public_id,
+        public_id=unique_id,  # client sends THIS to Cloudinary (bare uuid)
         folder=folder,
     )
 
@@ -157,12 +166,10 @@ def record_intake(
 
     if reported_public_id != job.cloudinary_public_id:
         logger.warning(
-            "scanning.record_intake.public_id_mismatch",
-            extra={
-                "job_id": job.pk,
-                "expected": job.cloudinary_public_id,
-                "got": reported_public_id,
-            },
+            "scanning.record_intake.public_id_mismatch job_id=%s expected=%r got=%r",
+            job.pk,
+            job.cloudinary_public_id,
+            reported_public_id,
         )
         raise ValidationError("Uppladdningens identifierare matchar inte signaturen.")
 
@@ -329,4 +336,3 @@ def confirm_scan(
         },
     )
     return job, receipt
-
