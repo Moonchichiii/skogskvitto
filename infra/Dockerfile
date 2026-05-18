@@ -10,6 +10,7 @@ COPY static ./static
 COPY templates ./templates
 COPY apps ./apps
 COPY config ./config
+COPY scripts ./scripts
 
 RUN bun run vendor:build && bun run css:build
 
