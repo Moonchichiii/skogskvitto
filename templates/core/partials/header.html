@@ -8,7 +8,11 @@
   <nav class="site-header-inner" aria-label="Huvudnavigering">
     {% with current_url_name=request.resolver_match.url_name %}
 
-    <a href="{% url 'home' %}" class="brand-link" aria-label="Gå till SkogsKvitto">
+    <a
+      href="{% url 'home' %}"
+      class="brand-link"
+      aria-label="Gå till SkogsKvitto"
+    >
       <img
         src="https://res.cloudinary.com/dakjlrean/image/upload/f_auto,q_auto:best,c_fit,w_56,h_56/v1778878511/skogskvitto/nqyhmj1zplj7zshg189b.webp"
         srcset="https://res.cloudinary.com/dakjlrean/image/upload/f_auto,q_auto:best,c_fit,w_56,h_56/v1778878511/skogskvitto/nqyhmj1zplj7zshg189b.webp 56w, https://res.cloudinary.com/dakjlrean/image/upload/f_auto,q_auto:best,c_fit,w_112,h_112/v1778878511/skogskvitto/nqyhmj1zplj7zshg189b.webp 112w"
@@ -23,78 +27,164 @@
     </a>
 
     {% if user.is_authenticated %}
-      <div class="desktop-nav">
-        <a href="{% url 'dashboard' %}" class="nav-link {% if current_url_name == 'dashboard' %}nav-link-active{% endif %}" {% if current_url_name == 'dashboard' %}aria-current="page"{% endif %}>Översikt</a>
-        <a href="{% url 'scan' %}" class="nav-link {% if current_url_name == 'scan' %}nav-link-active{% endif %}" {% if current_url_name == 'scan' %}aria-current="page"{% endif %}>Scanna</a>
-        <a href="{% url 'receipts_list' %}" class="nav-link {% if current_url_name == 'receipts_list' %}nav-link-active{% endif %}" {% if current_url_name == 'receipts_list' %}aria-current="page"{% endif %}>Kvitton</a>
-        <a href="{% url 'tax_year_list' %}" class="nav-link {% if current_url_name == 'tax_year_list' or current_url_name == 'tax_year_detail' %}nav-link-active{% endif %}" {% if current_url_name == 'tax_year_list' or current_url_name == 'tax_year_detail' %}aria-current="page"{% endif %}>Inkomstår</a>
-        <a href="{% url 'profile' %}" class="nav-link {% if current_url_name == 'profile' %}nav-link-active{% endif %}" {% if current_url_name == 'profile' %}aria-current="page"{% endif %}>Profil</a>
-        <form method="post" action="{% url 'account_logout' %}" class="nav-logout-form">
-          {% csrf_token %}
-          <button type="submit" class="nav-link nav-link-danger">Logga ut</button>
-        </form>
-      </div>
+    <div class="desktop-nav">
+      <a
+        href="{% url 'dashboard' %}"
+        class="nav-link {% if current_url_name == 'dashboard' %}nav-link-active{% endif %}"
+        {% if current_url_name == 'dashboard' %}aria-current="page"{% endif %}
+        >Översikt</a
+      >
+      <a
+        href="{% url 'scan' %}"
+        class="nav-link {% if current_url_name == 'scan' %}nav-link-active{% endif %}"
+        {% if current_url_name == 'scan' %}aria-current="page"{% endif %}
+        >Scanna</a
+      >
+      <a
+        href="{% url 'receipts_list' %}"
+        class="nav-link {% if current_url_name == 'receipts_list' %}nav-link-active{% endif %}"
+        {% if current_url_name == 'receipts_list' %}aria-current="page"{% endif %}
+        >Kvitton</a
+      >
+      <a
+        href="{% url 'tax_year_list' %}"
+        class="nav-link {% if current_url_name == 'tax_year_list' or current_url_name == 'tax_year_detail' %}nav-link-active{% endif %}"
+        {% if current_url_name == 'tax_year_list' or current_url_name == 'tax_year_detail' %}aria-current="page"{% endif %}
+        >Inkomstår</a
+      >
+      <a
+        href="{% url 'profile' %}"
+        class="nav-link {% if current_url_name == 'profile' %}nav-link-active{% endif %}"
+        {% if current_url_name == 'profile' %}aria-current="page"{% endif %}
+        >Profil</a
+      >
+      <form
+        method="post"
+        action="{% url 'account_logout' %}"
+        class="nav-logout-form"
+      >
+        {% csrf_token %}
+        <button type="submit" class="nav-link nav-link-danger">Logga ut</button>
+      </form>
+    </div>
 
+    <button
+      type="button"
+      class="menu-button hamburger-button"
+      @click="open = !open"
+      :aria-expanded="open.toString()"
+      aria-controls="mobile-menu"
+      :aria-label="open ? 'Stäng meny' : 'Öppna meny'"
+    >
+      <svg
+        class="hamburger-icon"
+        :class="{ 'is-open': open }"
+        viewBox="0 0 32 32"
+        aria-hidden="true"
+        focusable="false"
+      >
+        <path
+          class="hamburger-line hamburger-line-top-bottom"
+          d="M27 10 13 10C10.8 10 9 8.2 9 6 9 3.5 10.8 2 13 2 15.2 2 17 3.8 17 6L17 26C17 28.2 18.8 30 21 30 23.2 30 25 28.2 25 26 25 23.8 23.2 22 21 22L7 22"
+        ></path>
+        <path class="hamburger-line" d="M7 16 27 16"></path>
+      </svg>
+    </button>
+
+    <div
+      id="mobile-menu"
+      class="mobile-menu"
+      x-show="open"
+      x-transition
+      @click.outside="open = false"
+      x-cloak
+    >
+      <a href="{% url 'dashboard' %}" class="mobile-menu-link">Översikt</a>
+      <a href="{% url 'scan' %}" class="mobile-menu-link">Scanna</a>
+      <a href="{% url 'receipts_list' %}" class="mobile-menu-link">Kvitton</a>
+      <a href="{% url 'tax_year_list' %}" class="mobile-menu-link"
+        >Inkomstår</a
+      >
+      <a href="{% url 'profile' %}" class="mobile-menu-link">Profil</a>
+      <form
+        method="post"
+        action="{% url 'account_logout' %}"
+        class="mobile-menu-form flex"
+      >
+        {% csrf_token %}
+        <button
+          type="submit"
+          class="mobile-menu-link mobile-menu-danger w-full text-left"
+        >
+          Logga ut
+        </button>
+      </form>
+    </div>
+
+    {% else %}
+    <div class="desktop-nav">
+      <a href="{% url 'home' %}#funktioner" class="public-nav-link"
+        >Funktioner</a
+      >
+      <a href="{% url 'home' %}#priser" class="public-nav-link">Priser</a>
+      <a href="{% url 'home' %}#om" class="public-nav-link">Om</a>
+      <a href="{% url 'home' %}#kontakt" class="public-nav-link">Kontakt</a>
+    </div>
+
+    <div class="flex items-center gap-2">
+      <a href="{% url 'account_login' %}" class="nav-link hidden sm:inline-flex"
+        >Logga in</a
+      >
+      <a
+        href="{% url 'account_signup' %}"
+        class="btn-primary hidden sm:inline-flex"
+        >Kom igång</a
+      >
       <button
         type="button"
-        class="menu-button"
+        class="menu-button hamburger-button"
         @click="open = !open"
         :aria-expanded="open.toString()"
         aria-controls="mobile-menu"
-        aria-label="Öppna meny"
+        :aria-label="open ? 'Stäng meny' : 'Öppna meny'"
       >
-        <svg class="h-6 w-6" aria-hidden="true" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M4 7h16M4 12h16M4 17h16"></path>
+        <svg
+          class="hamburger-icon"
+          :class="{ 'is-open': open }"
+          viewBox="0 0 32 32"
+          aria-hidden="true"
+          focusable="false"
+        >
+          <path
+            class="hamburger-line hamburger-line-top-bottom"
+            d="M27 10 13 10C10.8 10 9 8.2 9 6 9 3.5 10.8 2 13 2 15.2 2 17 3.8 17 6L17 26C17 28.2 18.8 30 21 30 23.2 30 25 28.2 25 26 25 23.8 23.2 22 21 22L7 22"
+          ></path>
+          <path class="hamburger-line" d="M7 16 27 16"></path>
         </svg>
       </button>
+    </div>
 
-      <div id="mobile-menu" class="mobile-menu" x-show="open" x-transition @click.outside="open = false" x-cloak>
-        <a href="{% url 'dashboard' %}" class="mobile-menu-link">Översikt</a>
-        <a href="{% url 'scan' %}" class="mobile-menu-link">Scanna</a>
-        <a href="{% url 'receipts_list' %}" class="mobile-menu-link">Kvitton</a>
-        <a href="{% url 'tax_year_list' %}" class="mobile-menu-link">Inkomstår</a>
-        <a href="{% url 'profile' %}" class="mobile-menu-link">Profil</a>
-        <form method="post" action="{% url 'account_logout' %}" class="mobile-menu-form flex">
-          {% csrf_token %}
-          <button type="submit" class="mobile-menu-link mobile-menu-danger w-full text-left">Logga ut</button>
-        </form>
-      </div>
-
-    {% else %}
-      <div class="desktop-nav">
-        <a href="{% url 'home' %}#funktioner" class="public-nav-link">Funktioner</a>
-        <a href="{% url 'home' %}#priser" class="public-nav-link">Priser</a>
-        <a href="{% url 'home' %}#om" class="public-nav-link">Om</a>
-        <a href="{% url 'home' %}#kontakt" class="public-nav-link">Kontakt</a>
-      </div>
-
-      <div class="flex items-center gap-2">
-        <a href="{% url 'account_login' %}" class="nav-link hidden sm:inline-flex">Logga in</a>
-        <a href="{% url 'account_signup' %}" class="btn-primary hidden sm:inline-flex">Kom igång</a>
-        <button
-          type="button"
-          class="menu-button"
-          @click="open = !open"
-          :aria-expanded="open.toString()"
-          aria-controls="mobile-menu"
-          aria-label="Öppna meny"
-        >
-          <svg class="h-6 w-6" aria-hidden="true" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M4 7h16M4 12h16M4 17h16"></path>
-          </svg>
-        </button>
-      </div>
-
-      <div id="mobile-menu" class="mobile-menu" x-show="open" x-transition @click.outside="open = false" x-cloak>
-        <a href="{% url 'home' %}#funktioner" class="mobile-menu-link">Funktioner</a>
-        <a href="{% url 'home' %}#priser" class="mobile-menu-link">Priser</a>
-        <a href="{% url 'home' %}#om" class="mobile-menu-link">Om</a>
-        <a href="{% url 'home' %}#kontakt" class="mobile-menu-link">Kontakt</a>
-        <a href="{% url 'account_login' %}" class="mobile-menu-link">Logga in</a>
-        <a href="{% url 'account_signup' %}" class="mobile-menu-link nav-link-active">Kom igång</a>
-      </div>
-    {% endif %}
-
-    {% endwith %}
+    <div
+      id="mobile-menu"
+      class="mobile-menu"
+      x-show="open"
+      x-transition
+      @click.outside="open = false"
+      x-cloak
+    >
+      <a href="{% url 'home' %}#funktioner" class="mobile-menu-link"
+        >Funktioner</a
+      >
+      <a href="{% url 'home' %}#priser" class="mobile-menu-link">Priser</a>
+      <a href="{% url 'home' %}#om" class="mobile-menu-link">Om</a>
+      <a href="{% url 'home' %}#kontakt" class="mobile-menu-link">Kontakt</a>
+      <a href="{% url 'account_login' %}" class="mobile-menu-link">Logga in</a>
+      <a
+        href="{% url 'account_signup' %}"
+        class="mobile-menu-link nav-link-active"
+        >Kom igång</a
+      >
+    </div>
+    {% endif %} {% endwith %}
   </nav>
 </header>
