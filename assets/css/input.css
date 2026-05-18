@@ -553,7 +553,7 @@
   }
 
   /* =========================================================================
-     KASSABOK GRID (receipt list with thumbnails)
+     Kvitto GRID (receipt list with thumbnails)
      ========================================================================= */
   .receipt-grid {
     @apply mt-6 grid gap-4 sm:grid-cols-2 lg:grid-cols-3;
@@ -588,6 +588,94 @@
   }
   .receipt-amounts dd {
     @apply mt-1 text-base font-black tabular-nums text-[#00291f];
+  }
+/* =========================================================================
+     RECEIPT ORDINAL (löpnummer-pill på kvittokort)
+     ========================================================================= */
+  .receipt-card .receipt-thumb-wrap {
+    @apply relative;
+  }
+  .receipt-ordinal-pill {
+    @apply absolute left-2 top-2 inline-flex items-center rounded-md bg-forest-deep px-2 py-0.5 text-xs font-bold text-white shadow-sm;
+    letter-spacing: 0.02em;
+  }
+  .receipt-ordinal-cell {
+    @apply font-bold tabular-nums text-forest-deep;
+  }
+
+  /* =========================================================================
+     RECEIPT CARD LINK (gör kvittokort klickbara)
+     ========================================================================= */
+  .receipt-card-link {
+    @apply block transition-transform hover:-translate-y-0.5 focus:outline-none focus:ring-2 focus:ring-forest-deep focus:ring-offset-2;
+  }
+  .receipt-card-link:hover .receipt-card {
+    @apply shadow-md;
+  }
+
+  /* =========================================================================
+     RECEIPT DETAIL (enskilt kvitto-vy)
+     ========================================================================= */
+  .receipt-detail-grid {
+    @apply mt-6 grid gap-6 lg:grid-cols-[2fr_1fr];
+  }
+  .receipt-detail-card {
+    @apply rounded-xl border border-stone-200 bg-white p-6 shadow-sm sm:p-8;
+  }
+  .receipt-detail-card-header {
+    @apply mb-6;
+  }
+  .receipt-detail-card-header h2 {
+    @apply mt-1 text-xl font-bold tracking-tight text-forest-deep;
+  }
+  .receipt-detail-fields {
+    @apply grid gap-5 sm:grid-cols-2;
+  }
+  .receipt-detail-fields dt {
+    @apply text-xs font-bold uppercase tracking-wider text-stone-500;
+  }
+  .receipt-detail-fields dd {
+    @apply mt-1 text-base text-forest-deep;
+  }
+  .receipt-detail-actions {
+    @apply mt-8 flex flex-col gap-4 border-t border-stone-200 pt-6 sm:flex-row sm:items-center sm:gap-3;
+  }
+  .receipt-detail-locked-note {
+    @apply text-sm font-semibold text-red-800;
+  }
+  .receipt-detail-delete {
+    @apply w-full sm:w-auto;
+  }
+  .receipt-detail-confirm {
+    @apply rounded-lg border border-red-200 bg-red-50 p-4;
+  }
+  .receipt-detail-confirm-text {
+    @apply mb-3 text-sm font-semibold text-red-900;
+  }
+  .receipt-detail-confirm-actions {
+    @apply flex flex-col gap-2 sm:flex-row;
+  }
+  .receipt-detail-image-card {
+    @apply rounded-xl border border-stone-200 bg-white p-6 shadow-sm;
+  }
+  .receipt-detail-image {
+    @apply mt-4 w-full rounded-lg object-cover;
+  }
+  .receipt-detail-nav {
+    @apply mt-8;
+  }
+
+  /* =========================================================================
+     RECEIPT EDIT FORM
+     ========================================================================= */
+  .receipt-edit-form {
+    @apply mt-6 rounded-xl border border-stone-200 bg-white p-6 shadow-sm sm:p-8;
+  }
+  .receipt-edit-actions {
+    @apply mt-2 flex flex-col gap-3 sm:flex-row sm:items-center;
+  }
+  .receipt-edit-locked-actions {
+    @apply mt-6 flex flex-col gap-3 sm:flex-row;
   }
 
   /* =========================================================================

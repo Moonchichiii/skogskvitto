@@ -6,16 +6,18 @@ from urllib.parse import quote
 from django.conf import settings
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
+from django.core.exceptions import ValidationError
 from django.core.paginator import Paginator
 from django.http import HttpRequest, HttpResponse, HttpResponseRedirect
 from django.http.response import HttpResponseBase
-from django.shortcuts import get_object_or_404, render
+from django.shortcuts import get_object_or_404, redirect, render
 from django.urls import reverse
-from django.views.decorators.http import require_POST
+from django.views.decorators.http import require_POST, require_http_methods
 
 from apps.billing.services import get_feature_gates_sync
 from apps.receipts import selectors, services
-from apps.receipts.models import TaxYear
+from apps.receipts.forms import parse_edit_form
+from apps.receipts.models import Receipt, TaxYear
 
 logger = logging.getLogger(__name__)
 
@@ -152,17 +154,19 @@ def tax_year_detail(request: HttpRequest, year: int) -> HttpResponse:
 def tax_year_lock(request: HttpRequest, year: int) -> HttpResponseBase:
     tax_year = get_object_or_404(TaxYear, owner=request.user, year=year)
     services.lock_tax_year(tax_year=tax_year)
-    
+
     logger.info(
         "receipts.tax_year_lock",
         extra={"user_id": request.user.pk, "year": year},
     )
-    
+
     messages.success(
         request,
         f"Inkomstår {year} är nu låst. Befintliga kvitton kan inte ändras.",
     )
-    return HttpResponseRedirect(reverse("tax_year_detail", kwargs={"year": year}))
+    return HttpResponseRedirect(
+        reverse("tax_year_detail", kwargs={"year": year})
+    )
 
 
 @login_required
@@ -170,14 +174,156 @@ def tax_year_lock(request: HttpRequest, year: int) -> HttpResponseBase:
 def tax_year_unlock(request: HttpRequest, year: int) -> HttpResponseBase:
     tax_year = get_object_or_404(TaxYear, owner=request.user, year=year)
     services.unlock_tax_year(tax_year=tax_year)
-    
+
     logger.info(
         "receipts.tax_year_unlock",
         extra={"user_id": request.user.pk, "year": year},
     )
-    
+
     messages.info(
         request,
         f"Inkomstår {year} är upplåst. Kvitton kan nu redigeras igen.",
     )
-    return HttpResponseRedirect(reverse("tax_year_detail", kwargs={"year": year}))
+    return HttpResponseRedirect(
+        reverse("tax_year_detail", kwargs={"year": year})
+    )
+
+
+# -----------------------------------------------------------------------------
+# Receipt CRUD — /kvitton/<id>/...
+# -----------------------------------------------------------------------------
+
+
+@login_required
+def receipt_detail(request: HttpRequest, receipt_id: int) -> HttpResponse:
+    """Read-only detail view for a single receipt."""
+    receipt = get_object_or_404(
+        Receipt.objects.select_related("tax_year", "property"),
+        pk=receipt_id,
+        owner=request.user,
+    )
+    return render(
+        request,
+        "receipts/receipt_detail.html",
+        {
+            "receipt": receipt,
+            "is_locked": (
+                receipt.tax_year.is_locked if receipt.tax_year_id else False
+            ),
+        },
+    )
+
+
+@login_required
+@require_http_methods(["GET", "POST"])
+def receipt_edit(request: HttpRequest, receipt_id: int) -> HttpResponse:
+    """Edit view for a single receipt. Blocked when tax_year is locked."""
+    receipt = get_object_or_404(
+        Receipt.objects.select_related("tax_year", "property"),
+        pk=receipt_id,
+        owner=request.user,
+    )
+
+    if receipt.tax_year_id and receipt.tax_year.is_locked:
+        return render(
+            request,
+            "receipts/receipt_edit_locked.html",
+            {"receipt": receipt},
+            status=403,
+        )
+
+    if request.method == "POST":
+        cleaned, errors = parse_edit_form(request.POST)
+        if errors or cleaned is None:
+            return render(
+                request,
+                "receipts/receipt_edit.html",
+                {
+                    "receipt": receipt,
+                    "form_values": request.POST,
+                    "errors": errors,
+                },
+                status=400,
+            )
+
+        try:
+            services.update_receipt(
+                receipt=receipt,
+                vendor=cleaned.vendor,
+                total_amount=cleaned.total_amount,
+                vat_amount=cleaned.vat_amount,
+                date=cleaned.date,
+                category=cleaned.category,
+                note=cleaned.note,
+            )
+        except ValidationError as exc:
+            err_messages = (
+                list(exc.message_dict.values())
+                if hasattr(exc, "message_dict")
+                else exc.messages
+            )
+            flat = "; ".join(str(m) for m in err_messages) or "Ogiltig data."
+            return render(
+                request,
+                "receipts/receipt_edit.html",
+                {
+                    "receipt": receipt,
+                    "form_values": request.POST,
+                    "errors": {"form": flat},
+                },
+                status=400,
+            )
+
+        return redirect("receipt_detail", receipt_id=receipt.pk)
+
+    # GET — show form pre-filled with current values
+    return render(
+        request,
+        "receipts/receipt_edit.html",
+        {
+            "receipt": receipt,
+            "form_values": {
+                "vendor": receipt.vendor,
+                "total_amount": f"{receipt.total_amount:.2f}",
+                "vat_amount": f"{receipt.vat_amount:.2f}",
+                "date": receipt.date.isoformat() if receipt.date else "",
+                "category": receipt.category,
+                "note": receipt.note,
+            },
+            "errors": {},
+        },
+    )
+
+
+@login_required
+@require_POST
+def receipt_delete(request: HttpRequest, receipt_id: int) -> HttpResponse:
+    """Hard-delete a receipt. Requires POST."""
+    receipt = get_object_or_404(
+        Receipt.objects.select_related("tax_year"),
+        pk=receipt_id,
+        owner=request.user,
+    )
+
+    try:
+        metadata = services.delete_receipt(receipt=receipt)
+    except ValidationError as exc:
+        return render(
+            request,
+            "receipts/receipt_detail.html",
+            {
+                "receipt": receipt,
+                "is_locked": True,
+                "error": (
+                    str(exc.messages[0])
+                    if exc.messages
+                    else "Kunde inte radera."
+                ),
+            },
+            status=403,
+        )
+
+    tax_year = metadata.get("tax_year")
+    if tax_year:
+        return redirect("tax_year_detail", year=tax_year)
+    return redirect("receipts_list")

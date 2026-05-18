@@ -75,8 +75,17 @@ def _write_kvitton_sheet(wb: Workbook, receipts: list[Receipt]) -> None:
     assert ws is not None
     ws.title = "Kvitton"
 
-    headers = ["Datum", "Leverantör", "Kategori", "Netto", "Moms", "Totalt", "Anteckning"]
-    _set_column_widths(ws, [12, 28, 22, 14, 14, 14, 36])
+    headers = [
+        "Nr",
+        "Datum",
+        "Leverantör",
+        "Kategori",
+        "Netto",
+        "Moms",
+        "Totalt",
+        "Anteckning",
+    ]
+    _set_column_widths(ws, [8, 12, 28, 22, 14, 14, 14, 36])
     _write_header_row(ws, row=1, headers=headers)
 
     total_net = ZERO
@@ -90,18 +99,28 @@ def _write_kvitton_sheet(wb: Workbook, receipts: list[Receipt]) -> None:
         vat = receipt.vat_amount or ZERO
         gross = receipt.total_amount or ZERO
 
-        ws.cell(row=row, column=1, value=date_str).alignment = BODY_ALIGN_LEFT
-        ws.cell(row=row, column=2, value=receipt.vendor or "").alignment = BODY_ALIGN_LEFT
-        ws.cell(row=row, column=3, value=_category_label(receipt)).alignment = BODY_ALIGN_LEFT
+        ordinal_str = (
+            f"Nr:{receipt.ordinal_number}" if receipt.ordinal_number else ""
+        )
+        ws.cell(row=row, column=1, value=ordinal_str).alignment = BODY_ALIGN_LEFT
+        ws.cell(row=row, column=2, value=date_str).alignment = BODY_ALIGN_LEFT
+        ws.cell(
+            row=row, column=3, value=receipt.vendor or ""
+        ).alignment = BODY_ALIGN_LEFT
+        ws.cell(
+            row=row, column=4, value=_category_label(receipt)
+        ).alignment = BODY_ALIGN_LEFT
 
-        for col, value in [(4, net), (5, vat), (6, gross)]:
+        for col, value in [(5, net), (6, vat), (7, gross)]:
             cell = ws.cell(row=row, column=col, value=value)
             cell.number_format = CURRENCY_FORMAT
             cell.alignment = BODY_ALIGN_RIGHT
 
-        ws.cell(row=row, column=7, value=receipt.note or "").alignment = BODY_ALIGN_LEFT
+        ws.cell(
+            row=row, column=8, value=receipt.note or ""
+        ).alignment = BODY_ALIGN_LEFT
 
-        for col in range(1, 8):
+        for col in range(1, 9):
             ws.cell(row=row, column=col).font = BODY_FONT
             ws.cell(row=row, column=col).border = BORDER
 
@@ -113,11 +132,11 @@ def _write_kvitton_sheet(wb: Workbook, receipts: list[Receipt]) -> None:
     # Total row at the bottom
     total_row = row
     ws.cell(row=total_row, column=1, value="Summa")
-    for col in range(1, 8):
+    for col in range(1, 9):
         cell = ws.cell(row=total_row, column=col)
         cell.font = TOTAL_FONT
         cell.fill = TOTAL_FILL
-    for col, value in [(4, total_net), (5, total_vat), (6, total_gross)]:
+    for col, value in [(5, total_net), (6, total_vat), (7, total_gross)]:
         cell = ws.cell(row=total_row, column=col, value=value)
         cell.number_format = CURRENCY_FORMAT
         cell.alignment = BODY_ALIGN_RIGHT

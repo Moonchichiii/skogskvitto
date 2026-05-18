@@ -39,16 +39,27 @@ def tax_years_with_totals(
 def receipts_for_year(
     user: AbstractBaseUser | AnonymousUser, year: int
 ) -> QuerySet[Receipt]:
-    return user_receipts(user).filter(date__year=year).order_by("-date", "-created_at")
+    """All receipts within a specific tax year, ordered by ordinal_number."""
+    if not user.is_authenticated or user.pk is None:
+        return Receipt.objects.none()
+    return (
+        Receipt.objects.filter(owner=user, tax_year__year=year)
+        .select_related("tax_year", "property")
+        .order_by("ordinal_number")
+    )
 
 
 def year_totals(
     user: AbstractBaseUser | AnonymousUser, year: int
 ) -> dict[str, Decimal | int]:
-    aggregates = user_receipts(user).filter(date__year=year).aggregate(
-        total=Sum("total_amount"),
-        vat=Sum("vat_amount"),
-        count=Count("id"),
+    aggregates = (
+        user_receipts(user)
+        .filter(date__year=year)
+        .aggregate(
+            total=Sum("total_amount"),
+            vat=Sum("vat_amount"),
+            count=Count("id"),
+        )
     )
     return {
         "total": aggregates.get("total") or Decimal("0.00"),
@@ -65,3 +76,4 @@ def latest_receipts(
 
 def current_year() -> int:
     return date_type.today().year
+

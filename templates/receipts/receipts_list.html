@@ -39,42 +39,47 @@
     {% if receipts_with_thumbs %}
       <div class="receipt-grid">
         {% for receipt, thumb_url in receipts_with_thumbs %}
-          <article class="receipt-card">
-            <div class="receipt-thumb-wrap">
-              {% if thumb_url %}
-                <img
-                  src="{{ thumb_url }}"
-                  alt="Kvitto från {{ receipt.vendor|default:'okänd leverantör' }}"
-                  loading="lazy"
-                  decoding="async"
-                  class="receipt-thumb"
-                  width="240"
-                  height="240"
-                >
-              {% else %}
-                <div class="receipt-thumb-placeholder" aria-hidden="true">
-                  <svg viewBox="0 0 24 24" fill="none" class="h-8 w-8">
-                    <path d="M5 6h14v14H5z" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/>
-                    <path d="M9 10h6M9 14h4" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
-                  </svg>
-                </div>
-              {% endif %}
-            </div>
-            <div class="receipt-card-body">
-              <p class="receipt-date">{{ receipt.date|date:"Y-m-d"|default:"Datum saknas" }}</p>
-              <h3 class="receipt-vendor">{{ receipt.vendor|default:"Okänd leverantör" }}</h3>
-              <dl class="receipt-amounts">
-                <div>
-                  <dt>Total</dt>
-                  <dd>{{ receipt.total_amount|floatformat:2 }} kr</dd>
-                </div>
-                <div>
-                  <dt>Moms</dt>
-                  <dd>{{ receipt.vat_amount|floatformat:2 }} kr</dd>
-                </div>
-              </dl>
-            </div>
-          </article>
+          <a href="{% url 'receipt_detail' receipt_id=receipt.pk %}" class="receipt-card-link">
+            <article class="receipt-card">
+              <div class="receipt-thumb-wrap">
+                {% if thumb_url %}
+                  <img
+                    src="{{ thumb_url }}"
+                    alt="Kvitto från {{ receipt.vendor|default:'okänd leverantör' }}"
+                    loading="lazy"
+                    decoding="async"
+                    class="receipt-thumb"
+                    width="240"
+                    height="240"
+                  >
+                {% else %}
+                  <div class="receipt-thumb-placeholder" aria-hidden="true">
+                    <svg viewBox="0 0 24 24" fill="none" class="h-8 w-8">
+                      <path d="M5 6h14v14H5z" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/>
+                      <path d="M9 10h6M9 14h4" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+                    </svg>
+                  </div>
+                {% endif %}
+                {% if receipt.ordinal_number %}
+                  <span class="receipt-ordinal-pill">Nr:{{ receipt.ordinal_number }}</span>
+                {% endif %}
+              </div>
+              <div class="receipt-card-body">
+                <p class="receipt-date">{{ receipt.date|date:"Y-m-d"|default:"Datum saknas" }}</p>
+                <h3 class="receipt-vendor">{{ receipt.vendor|default:"Okänd leverantör" }}</h3>
+                <dl class="receipt-amounts">
+                  <div>
+                    <dt>Total</dt>
+                    <dd>{{ receipt.total_amount|floatformat:2 }} kr</dd>
+                  </div>
+                  <div>
+                    <dt>Moms</dt>
+                    <dd>{{ receipt.vat_amount|floatformat:2 }} kr</dd>
+                  </div>
+                </dl>
+              </div>
+            </article>
+          </a>
         {% endfor %}
       </div>
     {% else %}

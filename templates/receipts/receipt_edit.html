@@ -1,0 +1,125 @@
+{% extends "core/base.html" %}
+
+{% block title %}Redigera Nr:{{ receipt.ordinal_number }} – SkogsKvitto{% endblock %}
+{% block robots %}noindex, nofollow{% endblock %}
+
+{% block content %}
+<section class="dashboard-shell" aria-labelledby="edit-title">
+  <header class="dashboard-hero">
+    <div>
+      <p class="eyebrow">Redigera kvitto</p>
+      <h1 id="edit-title">Nr:{{ receipt.ordinal_number }} — {{ receipt.vendor|default:"Okänd leverantör" }}</h1>
+      <p>Korrigera uppgifter och spara. Beräknat netto uppdateras automatiskt.</p>
+    </div>
+  </header>
+
+  {% if errors.form %}
+    <div class="notice-danger mt-4" role="alert">{{ errors.form }}</div>
+  {% endif %}
+
+  <form method="post" class="scan-review-form receipt-edit-form" x-data="netRecalc({ initial: '' })">
+    {% csrf_token %}
+
+    <label class="form-label" for="vendor">
+      Leverantör
+      <input
+        id="vendor"
+        name="vendor"
+        type="text"
+        value="{{ form_values.vendor|default:'' }}"
+        class="form-input"
+        autocomplete="organization"
+      >
+    </label>
+
+    <div class="grid gap-4 sm:grid-cols-3">
+      <label class="form-label" for="total_amount">
+        Belopp (kr)
+        <input
+          id="total_amount"
+          name="total_amount"
+          type="text"
+          inputmode="decimal"
+          value="{{ form_values.total_amount|default:'' }}"
+          class="form-input"
+          required
+        >
+        {% if errors.total_amount %}
+          <span class="text-sm font-semibold text-red-700">{{ errors.total_amount }}</span>
+        {% endif %}
+      </label>
+
+      <label class="form-label" for="vat_amount">
+        Moms (kr)
+        <input
+          id="vat_amount"
+          name="vat_amount"
+          type="text"
+          inputmode="decimal"
+          value="{{ form_values.vat_amount|default:'' }}"
+          class="form-input"
+        >
+        {% if errors.vat_amount %}
+          <span class="text-sm font-semibold text-red-700">{{ errors.vat_amount }}</span>
+        {% endif %}
+      </label>
+
+      <label class="form-label" for="net_amount_preview">
+        Netto (kr)
+        <input
+          id="net_amount_preview"
+          type="text"
+          value=""
+          class="form-input bg-stone-50 cursor-not-allowed"
+          readonly
+          tabindex="-1"
+        >
+        <span class="text-xs font-medium text-stone-500">Beräknas: belopp − moms</span>
+      </label>
+    </div>
+
+    <div class="grid gap-4 sm:grid-cols-2">
+      <label class="form-label" for="date">
+        Datum
+        <input
+          id="date"
+          name="date"
+          type="date"
+          value="{{ form_values.date|default:'' }}"
+          class="form-input"
+          required
+        >
+        {% if errors.date %}
+          <span class="text-sm font-semibold text-red-700">{{ errors.date }}</span>
+        {% endif %}
+      </label>
+
+      <label class="form-label" for="category">
+        Kategori
+        <input
+          id="category"
+          name="category"
+          type="text"
+          value="{{ form_values.category|default:'' }}"
+          class="form-input"
+        >
+      </label>
+    </div>
+
+    <label class="form-label" for="note">
+      Anteckning
+      <textarea
+        id="note"
+        name="note"
+        rows="4"
+        class="form-input resize-y"
+      >{{ form_values.note|default:'' }}</textarea>
+    </label>
+
+    <div class="receipt-edit-actions">
+      <button type="submit" class="btn-primary">Spara ändringar</button>
+      <a href="{% url 'receipt_detail' receipt_id=receipt.pk %}" class="btn-secondary">Avbryt</a>
+    </div>
+  </form>
+</section>
+{% endblock %}

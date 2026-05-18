@@ -1,0 +1,28 @@
+{% extends "core/base.html" %}
+
+{% block title %}Inkomstår låst – SkogsKvitto{% endblock %}
+{% block robots %}noindex, nofollow{% endblock %}
+
+{% block content %}
+<section class="dashboard-shell" aria-labelledby="locked-title">
+  <header class="dashboard-hero">
+    <div>
+      <p class="eyebrow">Låst</p>
+      <h1 id="locked-title">Inkomstår {{ receipt.tax_year.year }} är låst</h1>
+      <p>
+        Kvittot Nr:{{ receipt.ordinal_number }} kan inte redigeras medan
+        året är låst. Lås upp inkomståret först om du behöver göra ändringar.
+      </p>
+    </div>
+  </header>
+
+  <div class="receipt-edit-locked-actions">
+    <a href="{% url 'tax_year_detail' year=receipt.tax_year.year %}" class="btn-primary">
+      Gå till inkomstår {{ receipt.tax_year.year }}
+    </a>
+    <a href="{% url 'receipt_detail' receipt_id=receipt.pk %}" class="btn-secondary">
+      Visa kvitto (skrivskyddat)
+    </a>
+  </div>
+</section>
+{% endblock %}

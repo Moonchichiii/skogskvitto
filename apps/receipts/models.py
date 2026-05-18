@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import builtins
 from decimal import Decimal
 from pathlib import Path
 from typing import Any
@@ -16,22 +17,28 @@ def receipt_image_upload_path(_: "Receipt", filename: str) -> str:
 
 
 class TaxYear(models.Model):
-    """A user's tax year — a container for receipts dated within that calendar year.
+    """A property's tax year — a container for receipts dated within that calendar year.
 
-    Auto-created when a Receipt is saved for a year that doesn't yet have one.
-    When locked, existing receipts in this year cannot be edited or deleted,
-    but new receipts (e.g. late-arriving paper receipts being scanned) can
-    still be added.
+    Tax years are auto-created when a Receipt is saved with a date in that year.
+    Locking a year prevents edits to its receipts but allows new ones to be added.
     """
 
     class Status(models.TextChoices):
         OPEN = "open", "Öppen"
         LOCKED = "locked", "Låst"
 
+    property = models.ForeignKey(
+        "properties.Property",
+        on_delete=models.CASCADE,
+        related_name="tax_years",
+        null=True,  # temporary nullable for migration; tightened in next step
+        blank=True,
+    )
     owner = models.ForeignKey(
         settings.AUTH_USER_MODEL,
         on_delete=models.CASCADE,
         related_name="tax_years",
+        help_text="Denormalized convenience — always == property.owner.",
     )
     year = models.PositiveSmallIntegerField()
     status = models.CharField(
@@ -47,23 +54,24 @@ class TaxYear(models.Model):
     class Meta:
         constraints = [
             models.UniqueConstraint(
-                fields=["owner", "year"],
-                name="unique_owner_year",
+                fields=["property", "year"],
+                name="unique_property_year",
             ),
         ]
         indexes = [
+            models.Index(fields=["property", "-year"]),
             models.Index(fields=["owner", "-year"]),
         ]
         ordering = ["-year"]
 
     def __str__(self) -> str:
-        return f"Inkomstår {self.year}"
+        return f"{self.property.name if self.property_id else self.owner.email} — Inkomstår {self.year}"
 
-    @property
+    @builtins.property
     def is_locked(self) -> bool:
         return self.status == self.Status.LOCKED
 
-    @property
+    @builtins.property
     def is_open(self) -> bool:
         return self.status == self.Status.OPEN
 
@@ -88,6 +96,14 @@ class Receipt(models.Model):
         on_delete=models.CASCADE,
         related_name="receipts",
     )
+    property = models.ForeignKey(
+        "properties.Property",
+        on_delete=models.PROTECT,
+        related_name="receipts",
+        null=True,  # temporary for migration
+        blank=True,
+        help_text="Denormalized convenience — always == tax_year.property.",
+    )
     tax_year = models.ForeignKey(
         TaxYear,
         on_delete=models.PROTECT,
@@ -110,6 +126,14 @@ class Receipt(models.Model):
         max_digits=12,
         decimal_places=2,
         default=Decimal("0.00"),
+    )
+    ordinal_number = models.PositiveIntegerField(
+        null=True,
+        blank=True,
+        help_text=(
+            "Löpnummer inom (property, tax_year). Allocated atomically on first save. "
+            "Stable for the receipt's lifetime — gaps appear when receipts are deleted."
+        ),
     )
     net_amount = models.GeneratedField(
         expression=models.F("total_amount") - models.F("vat_amount"),
@@ -134,17 +158,25 @@ class Receipt(models.Model):
     updated_at = models.DateTimeField(auto_now=True)
 
     class Meta:
+        constraints = [
+            models.UniqueConstraint(
+                fields=["property", "tax_year", "ordinal_number"],
+                condition=models.Q(ordinal_number__isnull=False),
+                name="unique_property_year_ordinal",
+            ),
+        ]
         indexes = [
             models.Index(fields=["owner", "-date"]),
             models.Index(fields=["owner", "-created_at"]),
             models.Index(fields=["tax_year", "-date"]),
+            models.Index(fields=["property", "tax_year", "ordinal_number"]),
         ]
         ordering = ["-date", "-created_at"]
 
     def __str__(self) -> str:
         return self.vendor or f"Receipt #{self.pk}"
 
-    @property
+    @builtins.property
     def declaration_year(self) -> int | None:
         """The year this receipt is declared (filed) — always inkomstår + 1."""
         if self.tax_year_id is None:
@@ -173,13 +205,27 @@ class Receipt(models.Model):
 
     @transaction.atomic
     def save(self, *args: Any, **kwargs: Any) -> None:
+        from apps.properties.services import get_or_create_default_property
         from apps.receipts.services import get_or_create_tax_year
+
+        if self.property_id is None:
+            self.property = get_or_create_default_property(self.owner)
 
         if self.date and (
             self.tax_year_id is None or self.tax_year.year != self.date.year
         ):
             self.tax_year = get_or_create_tax_year(
-                owner=self.owner, year=self.date.year
+                owner=self.owner,
+                year=self.date.year,
+                property_obj=self.property,
+            )
+
+        if self.ordinal_number is None and self.pk is None:
+            from apps.receipts.services import allocate_ordinal_number
+
+            self.ordinal_number = allocate_ordinal_number(
+                property_obj=self.property,
+                tax_year=self.tax_year,
             )
 
         super().save(*args, **kwargs)
